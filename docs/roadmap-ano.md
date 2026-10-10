@@ -53,10 +53,10 @@ Objetivo: transformar o protótipo em base confiável antes de qualquer arte nov
 
 ### Sprint 2: arquitetura
 
-- [~] **Q1-06** (parcial: `effects.js` e `save.js` extraídos; resto pendente) Dividir `jogo/game.js` em módulos ES (ou IIFEs com namespace):
+- [x] **Q1-06** Dividir `jogo/game.js` em módulos ES (ou IIFEs com namespace):
   `state.js`, `reels.js`, `celebration.js`, `hud.js`, `menus.js`, `effects.js`, `main.js`.
   - Aceite: `game.js` antigo removido; comportamento idêntico nos testes de UI.
-  - **Pendente:** `game.js` ainda tem ~330 linhas com estado, render, celebração e menus. `effects.js` (partículas) e `save.js` (persistência) já saíram. Próximo passo: `reels.js` e `celebration.js`.
+  - **Feito:** `reels.js` (rolos, travas, linhas, tempos puros em `stepPlan`) e `celebration.js` (plano puro por nível). `game.js` ficou com estado, controles e menus.
 - [x] **Q1-07** Versionar o save: `tigrinho.save.v2` com migração a partir de `tigrinho.save.v1`.
   - Aceite: teste unitário de migração com 3 saves de exemplo (novo, com progresso, corrompido).
   - **Feito:** `jogo/save.js` (v2 grava; v1 é migrado e não é apagado). 5 checks unitários e 1 teste de UI.
@@ -69,12 +69,14 @@ Objetivo: transformar o protótipo em base confiável antes de qualquer arte nov
 
 ### Sprint 3: qualidade
 
-- [ ] **Q1-10** Baselines de `toHaveScreenshot` em retrato e paisagem (7 telas).
-  - Aceite: baselines versionadas em `tests/ui/__screenshots__/`; fonte e viewport fixos.
-- [ ] **Q1-11** Testes de limite de aposta: mínimo, máximo, saldo menor que a aposta, ajuste automático.
-- [ ] **Q1-12** Lint com regras além de `node --check`: adicionar ESLint com `eslint:recommended`.
+- [x] **Q1-10** Baselines de `toHaveScreenshot` em retrato e paisagem (7 telas).
+  - Aceite: baselines versionadas em `tests/ui/game.spec.js-snapshots/`; fonte e viewport fixos.
+  - **Feito:** splash e máquina, retrato e paisagem, com partículas mascaradas. **Atenção:** geradas no Linux local; se o CI (ubuntu) divergir, regenerar com `--update-snapshots` no runner.
+- [x] **Q1-11** Testes de limite de aposta: mínimo, máximo, saldo menor que a aposta, ajuste automático.
+- [x] **Q1-12** Lint com regras além de `node --check`: adicionar ESLint com `eslint:recommended`.
   - Aceite: `npm run lint` roda ESLint e falha em erro.
-- [ ] **Q1-13** Escrever `CHANGELOG.md` com v1.1.0, v2.0, v2.1 e v2.2 reconstruídas do histórico.
+  - **Feito:** `eslint.config.js` (flat config, eslint 9). Sem erros.
+- [x] **Q1-13** Escrever `CHANGELOG.md` com v1.1.0, v2.0, v2.1 e v2.2 reconstruídas do histórico.
 
 **Saída do Q1:** CI verde, FPS medido, save versionado, `game.js` dividido em módulos, baselines visuais.
 

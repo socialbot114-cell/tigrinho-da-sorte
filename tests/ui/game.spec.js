@@ -194,3 +194,53 @@ test('save v1 é migrado para v2 ao abrir o jogo', async ({ page }) => {
   expect(v2.bet).toBe(25);
   expect(await page.evaluate(() => localStorage.getItem('tigrinho.save.v1') !== null)).toBe(true);
 });
+
+// --- Q1-11: limites de aposta ---
+test('aposta respeita mínimo e máximo', async ({ page }) => {
+  await startGame(page);
+  await clearOverlays(page);
+  await page.evaluate(() => { window.__tigrinho.S.bet = 500; document.getElementById('betUp').click(); });
+  await expect(page.locator('#bet')).toHaveText('500');
+  await page.evaluate(() => { window.__tigrinho.S.bet = 5; document.getElementById('betDown').click(); });
+  await expect(page.locator('#bet')).toHaveText('5');
+});
+
+test('saldo menor que a aposta ajusta a aposta automaticamente ao girar', async ({ page }) => {
+  await startGame(page);
+  await clearOverlays(page);
+  await page.evaluate(() => { const S = window.__tigrinho.S; S.balance = 30; S.bet = 500; });
+  await page.locator('#spin').click();
+  await waitSpinDone(page);
+  await clearOverlays(page);
+  const bet = await page.evaluate(() => window.__tigrinho.S.bet);
+  expect(bet).toBeLessThanOrEqual(30);
+  expect(bet).toBeGreaterThan(0);
+});
+
+test('saldo zerado abre o presente de fichas (sem girar)', async ({ page }) => {
+  await startGame(page);
+  await clearOverlays(page);
+  await page.evaluate(() => { const S = window.__tigrinho.S; S.balance = 0; S.bet = 5; });
+  await page.locator('#spin').click();
+  await expect(page.locator('#modalCard')).toContainText('O Caramelo te ajuda');
+  await page.locator('#getRefill').click();
+  await expect(page.locator('#modal')).toBeHidden();
+  expect(await page.evaluate(() => window.__tigrinho.S.balance)).toBe(1500);
+});
+
+// --- Q1-10: baselines visuais (fonte e animações fixas; partículas mascaradas) ---
+const VISUAL = { animations: 'disabled', maxDiffPixelRatio: 0.03, mask: [] };
+test('baseline visual: tela inicial', async ({ page }) => {
+  await page.goto('/index.html?test=1');
+  await page.evaluate(() => document.fonts.ready);
+  await expect(page).toHaveScreenshot('splash.png', { ...VISUAL, fullPage: false });
+});
+test('baseline visual: máquina parada', async ({ page }) => {
+  await startGame(page);
+  await clearOverlays(page);
+  await page.evaluate(() => document.fonts.ready);
+  await expect(page).toHaveScreenshot('maquina.png', {
+    ...VISUAL,
+    mask: [page.locator('#fx'), page.locator('#mascot'), page.locator('#bubble'), page.locator('#toast')],
+  });
+});

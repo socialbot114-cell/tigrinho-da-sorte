@@ -30,48 +30,14 @@
   const app = $('app'), reelsEl = $('reels'), frame = document.querySelector('.frame'), mascot = $('mascot'),
         bubble = $('bubble'), spinBtn = $('spin'), balEl = $('balance'), winAmt = $('winamt'), winbar = $('winbar'), winLabel = $('winlabel');
   const sym = (id) => `<svg viewBox="0 0 100 100"><use href="#s-${id}"/></svg>`;
-  let busy = false, turbo = false, autoLeft = 0, shown = S.balance, skipBig = false;
+  let busy = false, turbo = false, autoLeft = 0, shown = S.balance;
   const vib = (p) => { if (S.set.vib && navigator.vibrate) try { navigator.vibrate(p); } catch (e) {} };
 
-  // ---------- rolos ----------
-  let grid = [['lantern', 'orange', 'bag'], ['cracker', 'ingot', 'envelope'], ['orange', 'lantern', 'cracker']];
-  const reels = [0, 1, 2].map((c) => {
-    const el = document.createElement('div'); el.className = 'reel';
-    const strip = document.createElement('div'); strip.className = 'strip'; el.appendChild(strip);
-    reelsEl.appendChild(el); return { el, strip };
-  });
-  const H = () => reels[0].el.clientHeight / 3;
-  function paintStatic(c) { reels[c].strip.style.transition = 'none'; reels[c].strip.style.transform = 'translateY(0)'; reels[c].strip.innerHTML = grid[c].map((s) => `<div class="cell">${sym(s)}</div>`).join(''); }
-  [0, 1, 2].forEach(paintStatic);
-
-  function spinReel(c, finals, dur, filler) {
-    return new Promise((res) => {
-      const { strip } = reels[c], h = H(), cur = grid[c];
-      const mid = Array.from({ length: filler }, () => E.randomSymbol(Math.random));
-      strip.style.transition = 'none';
-      strip.innerHTML = [...finals, ...mid, ...cur].map((s) => `<div class="cell">${sym(s)}</div>`).join('');
-      strip.style.transform = `translateY(${-(filler + 3) * h}px)`;
-      // Blur durante o giro — espelha Reels.animateReel (Pixi BlurFilter) do slot-game.
-      strip.style.filter = `blur(${RC.BLUR_PX}px)`;
-      void strip.offsetHeight;
-      // Curva com leve overshoot (bounce de assentamento, cf. GameSymbol.bounce).
-      strip.style.transition = `transform ${dur}ms cubic-bezier(.22,.8,.28,1.06)`;
-      strip.style.transform = 'translateY(0)';
-      setTimeout(() => {
-        strip.style.filter = '';
-        // Bounce de assentamento: marca as 3 células visíveis com .pop (CSS win-settle).
-        try {
-          const cells = strip.children;
-          for (let i = 0; i < Math.min(3, cells.length); i++) {
-            cells[i].classList.add('pop');
-            setTimeout(() => cells[i] && cells[i].classList.remove('pop'), 450);
-          }
-        } catch (e) {}
-        res();
-      }, dur);
-    });
-  }
-  const motionScale = () => (S.set.reduce ? .25 : 1);
+  // ---------- rolos (módulo reels.js) ----------
+  const RC_ = RC;
+  const R = TigerReels.create(reelsEl, { sym, randomSymbol: () => E.randomSymbol(Math.random),
+    initial: [['lantern', 'orange', 'bag'], ['cracker', 'ingot', 'envelope'], ['orange', 'lantern', 'cracker']] });
+  const reels = R.reels;
 
   // Padrão disableSpin portado de SpinButton.setEnabled do slot-game:
   // desabilita giro/aposta/auto durante o spin (alpha + bloqueio de clique).
@@ -86,22 +52,17 @@
     spinBtn.classList.toggle('busy', disabled);
   }
 
-  async function animateStep(step, spinsMask) {
-    const base = (turbo ? RC.TURBO_SPIN_DURATION : RC.SPIN_DURATION) * motionScale();
-    const gap = (turbo ? RC.TURBO_OFFSET_TIME : RC.REEL_OFFSET_TIME) * motionScale();
-    const wildFirstTwo = step.grid[0].includes('wild') || step.grid[1].includes('wild');
+  async function animateStep(step) {
+    const plan = TigerReels.stepPlan(RC_, { turbo, reduce: S.set.reduce, grid: step.grid });
     const ps = reels.map(async (r, c) => {
-      const antic = c === 2 && wildFirstTwo && !turbo && !S.set.reduce;
-      const dur = base + c * gap + (antic ? RC.ANTICIPATION_EXTRA : 0), filler = Math.max(4, Math.round(dur / RC.FILLER_DIVISOR) + c * 2);
-      if (antic) setTimeout(() => { r.el.classList.add('anticipate'); Sound.anticipation(); }, base + gap);
-      await spinReel(c, step.grid[c], dur, filler);
+      const p = plan.cols[c];
+      if (p.antic) setTimeout(() => { r.el.classList.add('anticipate'); Sound.anticipation(); }, p.anticAt);
+      await R.spinReel(c, step.grid[c], p.dur, p.filler, RC_.BLUR_PX);
       r.el.classList.remove('anticipate');
-      grid[c] = step.grid[c].slice(); paintStatic(c); Sound.stop(c); vib(8);
+      R.setCell(c, step.grid[c]); Sound.stop(c); vib(8);
     });
-    // ticks durante o giro
     const tk = setInterval(() => Sound.tick(), 70); await Promise.all(ps); clearInterval(tk);
-    // hitstop: pausa curta quando um curinga cai, antes de revelar o prêmio
-    if (step.grid.flat().includes('wild') && !S.set.reduce) { impact(1); await sleep(90); }
+    if (plan.hitstop) { impact(1); await sleep(90); }
   }
   // impacto proporcional ao tier: vibração, tremor e faíscas
   function impact(level) {
@@ -157,42 +118,34 @@
   }
 
   // ---------- linhas vencedoras ----------
-  function drawLines(wins) {
-    const fx_ = $('linefx'), fr = fx_.getBoundingClientRect(); fx_.innerHTML = '';
-    if (!wins.length) return;
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('width', fr.width); svg.setAttribute('height', fr.height);
-    wins.forEach((w) => { const pts = w.cells.map(([c, r]) => { const b = reels[c].el.getBoundingClientRect(), h = b.height / 3; return `${b.left - fr.left + b.width / 2},${b.top - fr.top + h * r + h / 2}`; }).join(' ');
-      const p = document.createElementNS('http://www.w3.org/2000/svg', 'polyline'); p.setAttribute('points', pts);
-      p.setAttribute('style', 'fill:none;stroke:#fff7c0;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px #ff9a1a);stroke-dasharray:10 8'); svg.appendChild(p); });
-    fx_.appendChild(svg);
-  }
-  function highlight(wins) {
-    document.querySelectorAll('.cell.win').forEach((e) => e.classList.remove('win'));
-    wins.forEach((w) => w.cells.forEach(([c, r]) => reels[c].strip.children[r] && reels[c].strip.children[r].classList.add('win')));
-    drawLines(wins);
-  }
-  const clearHighlight = () => { highlight([]); };
-  function setLocks(locked) {
-    reels.forEach((r) => r.el.querySelectorAll('.lock').forEach((l) => l.remove()));
-    locked.forEach((k) => { const [c, r] = k.split(',').map(Number), d = document.createElement('div'); d.className = 'lock'; d.style.top = `calc(var(--cell) * ${r})`; d.innerHTML = sym('wild'); reels[c].el.appendChild(d); });
-  }
+  const highlight = (wins) => R.highlight(wins);
+  const clearHighlight = () => R.clearHighlight();
+  const setLocks = (locked) => R.setLocks(locked);
 
   // ---------- vitória grande ----------
   function bigWin(total, tier) {
-    return new Promise(async (res) => {
-      const ov = $('bigwin'); ov.hidden = false; ov.dataset.lvl = tier.level; $('bwTitle').textContent = tier.name; $('bwAmt').textContent = '0';
-      // multiplicador em destaque nos níveis 4 e 5 (total / aposta); vazio nos demais
-      const mult = tier.level >= 4 ? 'x' + Math.floor(total / S.bet) : '';
-      $('bwMult').textContent = mult;
-      const dur = S.set.reduce ? 600 : tier.level >= 5 ? 4200 : tier.level >= 4 ? 3400 : 2600;
-      Sound.big(); Sound.gong(); Sound.boost(dur + 1500); frame.classList.add('glow'); mascot.classList.add('big'); mood('cheer'); mascot.classList.add('big'); shake(); vib([60, 40, 60, 40, 120]); rain(tier.coins); burst(40, W / 2, Hh * .45, 1.3);
-      if (tier.level >= 4) { setTimeout(() => rain(tier.level >= 5 ? 60 : 30), 900); setTimeout(() => burst(tier.level >= 5 ? 50 : 30, W / 2, Hh * .4, 1.5), 1800); }
-      if (tier.level >= 5 && !S.set.reduce) setTimeout(() => { if (!ov.hidden) burst(40, W / 2, Hh * .55, 1.8); }, 2800);
-      let done = false; const close = () => { done = true; ov.hidden = true; ov.removeAttribute('data-lvl'); ov.onclick = null; frame.classList.remove('glow'); mascot.classList.remove('big'); skipNow = false; res(); };
+    return new Promise((res) => { (async () => {
+      const P = TigerCelebration.plan(tier, { reduce: S.set.reduce, turbo, auto: autoLeft > 0 });
+      const ov = $('bigwin'); ov.hidden = false; ov.dataset.lvl = tier.level;
+      $('bwTitle').textContent = tier.name; $('bwAmt').textContent = '0';
+      $('bwMult').textContent = TigerCelebration.multiplierText(tier, total, S.bet);
+      Sound.big(); Sound.gong(); Sound.boost(P.boostMs); frame.classList.add('glow'); mascot.classList.add('big');
+      mood('cheer'); shake(); vib([60, 40, 60, 40, 120]);
+      if (P.rainNow) rain(P.rainNow);
+      burst(40, W / 2, Hh * .45, 1.3);
+      for (const w of P.waves) setTimeout(() => {
+        if (ov.hidden) return;
+        if (w.kind === 'rain') rain(w.n); else burst(w.n, W / 2, Hh * .45, 1.6);
+      }, w.atMs);
+      let done = false;
+      const close = () => {
+        done = true; ov.hidden = true; ov.removeAttribute('data-lvl'); ov.onclick = null;
+        frame.classList.remove('glow'); mascot.classList.remove('big'); skipNow = false; res();
+      };
       ov.onclick = () => { if (!done) { $('bwAmt').textContent = fmt(total); setTimeout(close, 150); } };
-      await countTo($('bwAmt'), 0, total, dur, (v) => { if (!done) $('bwAmt').textContent = fmt(v); }, true);
-      if (!done) { burst(30, W / 2, Hh * .45); await sleep(S.set.reduce || turbo || autoLeft ? 600 : 1500); if (!done) close(); }
-    });
+      await countTo($('bwAmt'), 0, total, P.countMs, (v) => { if (!done) $('bwAmt').textContent = fmt(v); }, true);
+      if (!done) { burst(30, W / 2, Hh * .45); await sleep(P.holdMs); if (!done) close(); }
+    })(); });
   }
 
   // ---------- rodada ----------

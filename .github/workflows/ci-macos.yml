@@ -17,6 +17,7 @@ jobs:
         with:
           node-version: '22'
       - run: node --version && npm --version && sw_vers
+      - run: npm ci
       - run: npm run lint
       - name: Testes completos (1M rodadas RTP)
         run: npm test

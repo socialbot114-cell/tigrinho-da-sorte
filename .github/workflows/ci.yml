@@ -27,7 +27,10 @@ jobs:
         run: node --version && npm --version && sw_vers || lsb_release -a || true
         shell: bash
 
-      - name: Lint (syntax check sem dependências)
+      - name: Instalar dependências (eslint)
+        run: npm ci
+
+      - name: Lint (ESLint + syntax)
         run: |
           npm run lint
           python3 -m py_compile blender/cachorro.py && echo BLENDER_PY_OK

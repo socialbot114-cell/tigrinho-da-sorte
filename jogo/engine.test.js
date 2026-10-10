@@ -145,10 +145,52 @@ ok('game.js expõe o hook de teste só com ?test=1', () => {
   assert(/test=1/.test(src), 'gate ?test=1 ausente');
 });
 
+// --- módulos de rolos e celebração (Q1-06) ---
+const RL = require('./reels.js');
+const CEL = require('./celebration.js');
+ok('stepPlan: anticipação só no 3º rolo com wild nos dois primeiros', () => {
+  const rc = C.reelsConfig;
+  const p = RL.stepPlan(rc, { turbo: false, reduce: false, grid: [['wild', 'a', 'b'], ['c', 'd', 'e'], ['f', 'g', 'h']] });
+  assert.strictEqual(p.cols[2].antic, true);
+  assert.strictEqual(p.cols[0].antic, false);
+  assert.strictEqual(p.hitstop, true);
+  const q = RL.stepPlan(rc, { turbo: false, reduce: false, grid: [['a', 'a', 'a'], ['a', 'a', 'a'], ['a', 'a', 'a']] });
+  assert.strictEqual(q.cols.some((c) => c.antic), false);
+  assert.strictEqual(q.hitstop, false);
+});
+ok('stepPlan: colunas são mais tardias da esquerda para a direita; reduzir movimento encurta', () => {
+  const rc = C.reelsConfig, g = [['a', 'a', 'a'], ['a', 'a', 'a'], ['a', 'a', 'a']];
+  const p = RL.stepPlan(rc, { turbo: false, reduce: false, grid: g });
+  assert(p.cols[0].dur < p.cols[1].dur && p.cols[1].dur < p.cols[2].dur);
+  const r = RL.stepPlan(rc, { turbo: false, reduce: true, grid: g });
+  assert(r.cols[0].dur < p.cols[0].dur);
+  const t = RL.stepPlan(rc, { turbo: true, reduce: false, grid: g });
+  assert(t.cols[0].dur < p.cols[0].dur);
+});
+ok('celebração: nível 1-2 sem overlay; 3 com raios; 4-5 com multiplicador', () => {
+  assert.strictEqual(CEL.plan({ level: 2, coins: 14 }).showOverlay, false);
+  assert.strictEqual(CEL.plan({ level: 3, coins: 50 }).showOverlay, true);
+  assert.strictEqual(CEL.plan({ level: 3, coins: 50 }).showMultiplier, false);
+  assert.strictEqual(CEL.plan({ level: 4, coins: 80 }).showMultiplier, true);
+  assert.strictEqual(CEL.plan({ level: 3, coins: 50 }, { reduce: true }).showRays, false);
+});
+ok('celebração: duração cresce por nível e reduzir movimento encurta a contagem', () => {
+  const d = (l) => CEL.plan({ level: l, coins: 0 }).countMs;
+  assert(d(3) < d(4) && d(4) < d(5));
+  assert.strictEqual(CEL.plan({ level: 5, coins: 0 }, { reduce: true }).countMs, 600);
+  assert(CEL.plan({ level: 4, coins: 0 }).waves.length > 0);
+  assert.strictEqual(CEL.plan({ level: 3, coins: 0 }).waves.length, 0);
+});
+ok('celebração: multiplicador é total/aposta inteiro', () => {
+  assert.strictEqual(CEL.multiplierText({ level: 4 }, 250, 10), 'x25');
+  assert.strictEqual(CEL.multiplierText({ level: 3 }, 250, 10), '');
+  assert.strictEqual(CEL.multiplierText({ level: 4 }, 250, 0), '');
+});
+
 // --- HTML: ids obrigatórios da interface (tela inicial, rolos, HUD, mascote) ---
 ok('index.html contém ids e símbolos obrigatórios', () => {
   const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
-  for (const id of ['splash', 'start', 'reels', 'spin', 'btnSound', 'boot', 'rotateHint', 'modal', 'bigwin', 'mascot', 'id="s-dog"', 'id="s-mascot"', 'id="s-portico"', 'Fichas fictícias', 'save.js', 'effects.js']) {
+  for (const id of ['splash', 'start', 'reels', 'spin', 'btnSound', 'boot', 'rotateHint', 'modal', 'bigwin', 'mascot', 'id="s-dog"', 'id="s-mascot"', 'id="s-portico"', 'Fichas fictícias', 'save.js', 'effects.js', 'reels.js', 'celebration.js']) {
     assert(html.includes(id), 'index.html sem ' + id);
   }
   assert(!/tigre|tiger/i.test(html.replace(/TigerEngine|TigerConfig/g, '')), 'resto de nome antigo no HTML');

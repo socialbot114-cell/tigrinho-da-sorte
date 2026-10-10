@@ -1,12 +1,12 @@
 {
   "name": "tigrinho",
-  "version": "2.0.0",
+  "version": "2.2.0",
   "description": "TIGRINHO — caça-níquel casual com fichas fictícias (vanilla JS + SVG + WebAudio). Mascote: cachorro caramelo. Referência slot-game (MIT) vendorizada.",
   "type": "commonjs",
   "scripts": {
     "test": "node jogo/engine.test.js",
     "test:verbose": "node jogo/engine.test.js --verbose",
-    "lint": "node --check jogo/engine.js && node --check jogo/game.js && node --check jogo/audio.js && node --check jogo/config.js && echo LINT_OK",
+    "lint": "eslint . && node -e \"require('./jogo/config.js')\" && echo LINT_OK",
     "serve": "python3 -m http.server 8000 --directory jogo",
     "test:ui": "playwright test",
     "test:ui:report": "playwright show-report"
@@ -16,6 +16,9 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@playwright/test": "^1.64.0"
+    "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.64.0",
+    "eslint": "^9.39.5",
+    "globals": "^15.15.0"
   }
 }
