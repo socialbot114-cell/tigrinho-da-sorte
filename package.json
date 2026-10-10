@@ -1,0 +1,16 @@
+{
+  "name": "tigrinho-da-sorte",
+  "version": "1.1.0",
+  "description": "Tigrinho da Sorte — caça-níquel casual com fichas fictícias (vanilla JS + SVG + WebAudio). Inclui referência vendorizada groangroan/slot-game (MIT).",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node jogo/engine.test.js",
+    "test:verbose": "node jogo/engine.test.js --verbose",
+    "lint": "node --check jogo/engine.js && node --check jogo/game.js && node --check jogo/audio.js && node --check jogo/config.js && echo LINT_OK",
+    "serve": "python3 -m http.server 8000 --directory jogo"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

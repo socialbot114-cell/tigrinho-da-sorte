@@ -1,0 +1,27 @@
+name: CI macOS — validação completa
+
+# Workflow dedicado a macOS, conforme pedido: prepara tudo e testa no macOS.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  macos-full:
+    name: macos-latest / node 22 (full RTP)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --version && npm --version && sw_vers
+      - run: npm run lint
+      - name: Testes completos (1M rodadas RTP)
+        run: npm test
+        timeout-minutes: 10
+      - name: Checar artefatos web
+        run: |
+          ls -la jogo/
+          node -e "JSON.parse(require('fs').readFileSync('jogo/assets.json','utf8')); console.log('assets OK')"

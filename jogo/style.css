@@ -1,0 +1,112 @@
+:root{--gold:#ffd24a;--red:#c8101e;--cell:min(28vw,112px);--bg1:#7a0c14;--bg2:#2a0408;--jade:#12805a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;background:#1a0206;color:#fff;font-family:"Trebuchet MS",system-ui,sans-serif;overflow:hidden;touch-action:manipulation}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+#app{position:relative;max-width:480px;height:100%;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 20%,var(--bg1),var(--bg2) 75%);padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom)}
+#app[data-theme=jade]{--bg1:#0f6a4a;--bg2:#021a12}
+#app[data-theme=noite]{--bg1:#2b2a7a;--bg2:#07062a}
+#app::before{content:"";position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 50% 38%,rgba(255,210,74,.07) 0 6deg,transparent 6deg 12deg);animation:rays 40s linear infinite;pointer-events:none}
+@keyframes rays{to{transform:rotate(360deg)}}
+.lanterns{position:absolute;top:0;left:0;right:0;height:60px;pointer-events:none}
+.lanterns i{position:absolute;top:-6px;width:26px;height:34px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ff6a5a,#b8101c);box-shadow:0 0 18px #ff3a2a88;animation:sway 3s ease-in-out infinite;transform-origin:50% -10px}
+.lanterns i:nth-child(1){left:14%}.lanterns i:nth-child(2){left:50%;animation-delay:-1s}.lanterns i:nth-child(3){right:14%;animation-delay:-2s}
+@keyframes sway{50%{transform:rotate(9deg)}0%,100%{transform:rotate(-9deg)}}
+
+.top{position:relative;z-index:3;display:flex;align-items:center;gap:8px;padding:8px 0}
+.icon{width:42px;height:42px;border-radius:12px;border:2px solid var(--gold);background:#0006;color:var(--gold);font-size:20px}
+.levelbox{flex:1;font-size:13px}.levelbox b{color:var(--gold)}
+.xp{height:8px;border-radius:5px;background:#0008;margin-top:3px;overflow:hidden;border:1px solid #ffd24a55}
+.xp i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd24a,#ff8a1a);transition:width .5s}
+.chips{display:flex;align-items:center;gap:6px;background:#0007;border:2px solid var(--gold);border-radius:24px;padding:4px 14px 4px 6px;font-weight:bold;font-size:20px;color:#fff3b0;min-width:130px;justify-content:flex-end}
+.chips svg{width:30px;height:30px}
+.chips.pop{animation:pop .3s}
+@keyframes pop{50%{transform:scale(1.15)}}
+
+.stage{position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:0;z-index:2}
+.mrow{position:relative;width:100%;max-width:400px;z-index:5;pointer-events:none;height:min(26vh,150px);margin-bottom:-18px;flex:0 1 auto}
+.mascot{position:absolute;left:-6px;bottom:0;height:100%;width:auto;filter:drop-shadow(0 6px 8px #0008);transform-origin:50% 100%}
+.mouth-open{visibility:var(--mo,hidden)}.mouth-closed{visibility:var(--mc,visible)}.mascot.happy{--mo:visible;--mc:hidden}
+.mascot.idle{animation:bob 2.4s ease-in-out infinite}
+.mascot.spinning{animation:shake .25s linear infinite}
+.mascot.cheer{animation:jump .5s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px) scale(1.02,.98)}}
+@keyframes shake{25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+@keyframes jump{50%{transform:translateY(-22px) rotate(4deg) scale(1.04)}}
+.bubble{position:absolute;left:min(30vw,128px);top:18%;max-width:55%;background:#fff;color:#7a0c14;font-weight:bold;font-size:13px;padding:7px 12px;border-radius:14px;z-index:6;opacity:0;transform:scale(.7);transition:.25s;box-shadow:0 3px 8px #0006}
+.bubble.show{opacity:1;transform:scale(1)}
+.bubble::after{content:"";position:absolute;left:-8px;bottom:10px;border:8px solid transparent;border-right-color:#fff;border-left:0}
+
+.machine{position:relative;width:100%;max-width:400px}
+.frame{position:relative;padding:10px;border-radius:22px;background:linear-gradient(145deg,#ffe27a,#c8860a 50%,#ffd24a);box-shadow:0 0 30px #ffb42055,0 10px 24px #000a,inset 0 0 0 3px #7a4a00}
+.frame.shake{animation:fshake .5s}
+@keyframes fshake{20%{transform:translate(-5px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(4px,2px)}}
+.reels{display:flex;gap:6px;background:#f7e2b0;border-radius:14px;padding:5px;box-shadow:inset 0 4px 12px #0007;justify-content:center}
+.reel{position:relative;width:var(--cell);height:calc(var(--cell)*3);overflow:hidden;border-radius:8px;background:linear-gradient(#fff3d0,#f1d390 50%,#fff3d0);box-shadow:inset 0 0 8px #8a5a0040}
+.strip{position:absolute;left:0;right:0;top:0;will-change:transform}
+.cell{height:var(--cell);display:flex;align-items:center;justify-content:center}
+.cell svg{width:86%;height:86%;filter:drop-shadow(0 3px 2px #0005)}
+/* Vitória: pulse de escala + brilho, espelha GameSymbol.startWinAnimation do slot-game
+   (scale 1±0.1 + frame alpha 0.7±0.3, auto-stop em JS após 2s). */
+.cell.win svg{animation:winpulse .6s ease-in-out infinite}
+.cell.win{background:radial-gradient(circle,#fff6,#ffd24a00 70%);animation:winframe 1.2s ease-in-out infinite}
+@keyframes winpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18) rotate(3deg);filter:drop-shadow(0 0 10px #ffd24a) brightness(1.2)}}
+@keyframes winframe{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
+/* Assentamento do rolo: bounce curto, espelha GameSymbol.bounce (easeOut+easeIn). */
+.cell.pop svg{animation:cellpop .45s cubic-bezier(.3,1.8,.5,1)}
+@keyframes cellpop{0%{transform:scale(.6) translateY(-8px)}60%{transform:scale(1.08) translateY(2px)}100%{transform:scale(1) translateY(0)}}
+.reel.anticipate{box-shadow:0 0 0 3px #ff4a2a,0 0 24px #ff4a2a;animation:antic .25s infinite}
+@keyframes antic{50%{box-shadow:0 0 0 3px #ffd24a,0 0 30px #ffd24a}}
+.lock{position:absolute;left:0;right:0;height:var(--cell);display:flex;align-items:center;justify-content:center;z-index:3;background:radial-gradient(circle,#ffd24acc,#ff8a1a55);animation:lockglow .7s ease-in-out infinite;pointer-events:none}
+.lock svg{width:86%;height:86%}
+@keyframes lockglow{50%{filter:brightness(1.35)}}
+.linefx{position:absolute;inset:0;pointer-events:none}
+.winbar{margin-top:10px;display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-radius:30px;background:#0009;border:2px solid #ffd24a88;font-size:15px}
+.winbar b{font-size:22px;color:var(--gold)}
+.winbar.flash{animation:wflash .4s 3}
+@keyframes wflash{50%{background:#ffd24a;color:#7a0c14}}
+
+.controls{position:relative;z-index:3;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 0 4px}
+.round{border:2px solid var(--gold);background:linear-gradient(#a4101c,#5a0610);color:var(--gold);font-weight:bold;box-shadow:0 3px 0 #2a0408}
+.round.small{width:46px;height:46px;border-radius:50%;font-size:17px;padding:0}
+.round.toggle{font-size:11px}.round.toggle.on{background:linear-gradient(#ffe27a,#ffa81a);color:#5a0610}
+.round:active{transform:translateY(2px);box-shadow:0 1px 0 #2a0408}
+.betbox{min-width:58px;text-align:center}.betbox small{display:block;font-size:10px;color:#ffd24acc;letter-spacing:1px}.betbox b{font-size:22px}
+.spin{width:96px;height:96px;border-radius:50%;border:4px solid #fff3b0;background:radial-gradient(circle at 35% 30%,#7affa8,#12a85a 60%,#0a6a3a);color:#fff;font-weight:900;font-size:17px;letter-spacing:1px;
+  box-shadow:0 6px 0 #064a28,0 0 24px #3aff8a88;text-shadow:0 2px 3px #0008;margin:0 4px;animation:spinpulse 1.6s ease-in-out infinite}
+.spin:active{transform:translateY(4px);box-shadow:0 2px 0 #064a28}
+.spin.busy{animation:none;filter:grayscale(.6) brightness(.8)}
+/* Estado desabilitado — espelha SpinButton.setEnabled(alpha .5 + eventMode none). */
+.spin[aria-disabled="true"]{filter:grayscale(.6) brightness(.8);cursor:not-allowed}
+.round[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
+@keyframes spinpulse{50%{transform:scale(1.06);box-shadow:0 6px 0 #064a28,0 0 38px #3aff8acc}}
+.legal{position:relative;z-index:3;text-align:center;font-size:10px;opacity:.6;padding:2px 6px 6px}
+
+.toast{position:absolute;top:70px;left:50%;transform:translate(-50%,-20px);background:var(--gold);color:#5a0610;font-weight:bold;padding:8px 18px;border-radius:20px;z-index:20;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.overlay{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle,#000a,#000d);animation:fadein .3s}
+.overlay[hidden]{display:none}
+@keyframes fadein{from{opacity:0}}
+.bw-title{font-family:Impact,"Arial Black",sans-serif;font-size:clamp(36px,12vw,60px);text-align:center;background:linear-gradient(#fff6b0,#ffc83a 55%,#c8660a);-webkit-background-clip:text;background-clip:text;color:transparent;
+  -webkit-text-stroke:2px #5a0610;filter:drop-shadow(0 0 20px #ffb420);animation:bwin .8s ease-out,glow 1s ease-in-out infinite alternate}
+@keyframes bwin{from{transform:scale(.1) rotate(-20deg);opacity:0}70%{transform:scale(1.25)}}
+@keyframes glow{to{filter:drop-shadow(0 0 40px #ff8a1a)}}
+.bw-amt{display:flex;align-items:center;gap:10px;font-size:clamp(40px,14vw,70px);color:#fff3b0;margin:14px 0}
+.bw-amt svg{width:1em;height:1em;animation:coinspin 1s linear infinite}
+@keyframes coinspin{50%{transform:scaleX(.15)}}
+.overlay small{opacity:.7}
+.card{width:min(88%,380px);max-height:86%;overflow:auto;background:linear-gradient(#8a1220,#4a0710);border:3px solid var(--gold);border-radius:20px;padding:18px;text-align:center;box-shadow:0 0 40px #ffb42055;animation:bwin .4s}
+.card h2{margin:0 0 10px;color:var(--gold)}
+.card p{margin:6px 0;font-size:14px}
+.btn{display:block;width:100%;margin-top:12px;padding:13px;border-radius:14px;border:2px solid #fff3b0;background:linear-gradient(#7affa8,#12a85a);color:#fff;font-weight:bold;font-size:16px;text-shadow:0 1px 2px #0008}
+.btn.alt{background:linear-gradient(#a4101c,#5a0610);color:var(--gold);border-color:var(--gold)}
+.row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #ffd24a33;font-size:14px;text-align:left}
+.row svg{width:34px;height:34px;margin-right:8px}.row .l{display:flex;align-items:center}
+.mission{padding:8px 0;border-bottom:1px solid #ffd24a33;text-align:left;font-size:14px}
+.mission .bar{height:8px;border-radius:5px;background:#0007;margin:5px 0;overflow:hidden}.mission .bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd24a,#ff8a1a)}
+.mission button{padding:5px 12px;border-radius:10px;border:0;background:#12a85a;color:#fff;font-weight:bold}
+.mission button:disabled{background:#555;opacity:.6}
+.tiger-big{width:120px;height:140px;animation:jump .6s infinite}
+.reduce *{animation-duration:0s!important;animation:none!important}
+.reduce .spin{animation:none!important}

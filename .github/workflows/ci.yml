@@ -1,0 +1,54 @@
+name: CI — Tigrinho (Linux + macOS)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: test (${{ matrix.os }} / node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node: ['18', '20', '22']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: package.json
+
+      - name: Node info
+        run: node --version && npm --version && sw_vers || lsb_release -a || true
+        shell: bash
+
+      - name: Lint (syntax check sem dependências)
+        run: npm run lint
+
+      - name: Testes do motor (RTP + regressão)
+        run: CI_FAST=1 npm test
+        env:
+          CI_FAST: '1'
+
+      - name: Validar manifest e HTML
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('jogo/assets.json','utf8')); console.log('assets.json OK')"
+          node -e "const s=require('fs').readFileSync('jogo/index.html','utf8'); for (const id of ['btnSound','config.js','reels','spin']) { if(!s.includes(id)) throw new Error('index.html sem '+id)}; console.log('index.html OK')"
+          test -f vendor/slot-game/LICENSE && echo "vendor MIT OK"
+        shell: bash
+
+      - name: Smoke test do servidor estático
+        run: |
+          python3 -m http.server 8000 --directory jogo & SRV=$!
+          sleep 2
+          curl -fsS http://localhost:8000/index.html | head -c 200
+          curl -fsS http://localhost:8000/engine.js | head -c 200
+          kill $SRV
+        shell: bash
