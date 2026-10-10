@@ -40,9 +40,10 @@ jobs:
       - name: Validar manifest e HTML
         run: |
           node -e "JSON.parse(require('fs').readFileSync('jogo/assets.json','utf8')); console.log('assets.json OK')"
-          node -e "const s=require('fs').readFileSync('jogo/index.html','utf8'); for (const id of ['btnSound','config.js','reels','spin','rotateHint','boot','data-orient','splash','start','s-dog','s-mascot','fonts/Bangers']) { if(!s.includes(id)) throw new Error('index.html sem '+id)}; console.log('index.html OK')"
+          node -e "const s=require('fs').readFileSync('jogo/index.html','utf8'); for (const id of ['btnSound','config.js','reels','spin','rotateHint','boot','data-orient','splash','start','s-dog','s-mascot']) { if(!s.includes(id)) throw new Error('index.html sem '+id)}; console.log('index.html OK')"
           node -e "const m=JSON.parse(require('fs').readFileSync('jogo/manifest.json','utf8')); if(!String(m.orientation).startsWith('portrait')) throw new Error('manifest sem orientation portrait'); console.log('manifest OK')"
           test -f vendor/slot-game/LICENSE && echo "vendor MIT OK"
+          test -f jogo/fonts/Bangers-Regular.ttf && test -f jogo/fonts/OFL.txt && grep -q 'fonts/Bangers' jogo/style.css && echo "fonte OFL OK"
         shell: bash
 
       - name: Smoke test do servidor estático
