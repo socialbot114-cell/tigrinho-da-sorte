@@ -107,8 +107,22 @@
 
   // ---------- efeitos ----------
   const fx = $('fx'), g = fx.getContext('2d'); let parts = [], petals = [], W = 0, Hh = 0;
-  function resize() { const d = Math.min(devicePixelRatio || 1, 2); fx.width = innerWidth * d; fx.height = innerHeight * d; g.setTransform(d, 0, 0, d, 0, 0); W = innerWidth; Hh = innerHeight; }
-  addEventListener('resize', resize); resize();
+  function resize() { const d = Math.min(devicePixelRatio || 1, 2); fx.width = innerWidth * d; fx.height = innerHeight * d; g.setTransform(d, 0, 0, d, 0, 0); W = innerWidth; Hh = innerHeight; orient(); }
+  // Orientação: retrato é o modo principal; paisagem usa layout adaptativo (CSS)
+  // + dica discreta em ecrãs curtos. Tenta travar em retrato quando instalado (PWA).
+  function orient() {
+    const land = innerWidth > innerHeight;
+    const short = innerHeight < 500 && land;
+    app.dataset.orient = land ? 'landscape' : 'portrait';
+    const hint = $('rotateHint');
+    if (hint) hint.hidden = !short;
+    try {
+      if (!orient._locked && document.fullscreenElement && screen.orientation && screen.orientation.lock) {
+        orient._locked = true; screen.orientation.lock('portrait').catch(() => {});
+      }
+    } catch (e) {}
+  }
+  addEventListener('resize', resize); addEventListener('orientationchange', () => setTimeout(resize, 60)); resize();
   for (let i = 0; i < 16; i++) petals.push({ x: Math.random() * 500, y: Math.random() * 900, v: .3 + Math.random() * .6, s: 4 + Math.random() * 5, p: Math.random() * 6 });
   const coinImg = (() => { const c = document.createElement('canvas'); c.width = c.height = 48; const x = c.getContext('2d');
     const gr = x.createRadialGradient(18, 16, 3, 24, 24, 22); gr.addColorStop(0, '#fff6b0'); gr.addColorStop(.6, '#ffc83a'); gr.addColorStop(1, '#b8740a');
@@ -299,7 +313,9 @@
 
   // ---------- início ----------
   Sound.setMusic(S.set.music); Sound.setSfx(S.set.sfx);
-  setShown(S.balance); updateHud(); updateMissionsDot(); mood('idle'); paintSound();
+  setShown(S.balance); updateHud(); updateMissionsDot(); mood('idle'); paintSound(); orient();
+  const boot = $('boot');
+  requestAnimationFrame(() => requestAnimationFrame(() => { if (boot) { boot.classList.add('hide'); setTimeout(() => boot.remove(), 500); } }));
   setTimeout(() => say('idle', 3000), 600);
   daily();
   // primeiro toque libera o áudio (política dos navegadores)

@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="screen-orientation" content="portrait">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#7a0c14">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Tigrinho da Sorte</title>
@@ -24,13 +26,17 @@
     <circle cx="20" cy="26" r="14" fill="url(#gOr)"/><circle cx="20" cy="26" r="7" fill="#ffb3a0"/>
     <circle cx="80" cy="26" r="14" fill="url(#gOr)"/><circle cx="80" cy="26" r="7" fill="#ffb3a0"/>
     <ellipse cx="50" cy="55" rx="42" ry="38" fill="url(#gOr)" stroke="#a84a05" stroke-width="2"/>
-    <g fill="#5a2a05"><path d="M50 18 L45 36 L50 31 L55 36Z"/><path d="M34 21 L36 35 L41 28Z"/><path d="M66 21 L64 35 L59 28Z"/>
+    <ellipse cx="50" cy="38" rx="26" ry="12" fill="#fff" opacity=".18"/>
+    <g fill="#5a2a05" stroke="#5a2a05" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M50 18 L45 36 L50 31 L55 36Z"/><path d="M34 21 L36 35 L41 28Z"/><path d="M66 21 L64 35 L59 28Z"/>
     <path d="M10 52 L25 56 L11 61Z"/><path d="M12 68 L26 66 L16 76Z"/><path d="M90 52 L75 56 L89 61Z"/><path d="M88 68 L74 66 L84 76Z"/></g>
     <ellipse cx="50" cy="70" rx="23" ry="17" fill="#fff4dc"/>
-    <path d="M30 50 Q36 43 43 50" stroke="#3b1a00" stroke-width="4" fill="none" stroke-linecap="round" class="eye"/>
-    <path d="M57 50 Q64 43 70 50" stroke="#3b1a00" stroke-width="4" fill="none" stroke-linecap="round" class="eye"/>
+    <ellipse cx="36" cy="46" rx="7" ry="4.5" fill="none" stroke="#3b1a00" stroke-width="4" stroke-linecap="round" class="eye"/>
+    <ellipse cx="64" cy="46" rx="7" ry="4.5" fill="none" stroke="#3b1a00" stroke-width="4" stroke-linecap="round" class="eye"/>
+    <circle cx="38.5" cy="44.5" r="1.8" fill="#fff" opacity=".9" class="eye"/>
+    <circle cx="66.5" cy="44.5" r="1.8" fill="#fff" opacity=".9" class="eye"/>
     <circle cx="26" cy="63" r="6" fill="#ff7a7a" opacity=".55"/><circle cx="74" cy="63" r="6" fill="#ff7a7a" opacity=".55"/>
     <path d="M44 61 Q50 58 56 61 Q50 69 44 61Z" fill="#e0475a" stroke="#7a1a2a" stroke-width="1.5"/>
+    <ellipse cx="47.5" cy="60" rx="2.4" ry="1.2" fill="#fff" opacity=".6"/>
     <path d="M50 66 L50 71 M50 71 Q44 77 38 72 M50 71 Q56 77 62 72" stroke="#3b1a00" stroke-width="2.5" fill="none" stroke-linecap="round" class="mouth-closed"/>
     <path d="M38 72 Q50 92 62 72Z" fill="#8a1220" stroke="#3b1a00" stroke-width="2" class="mouth-open"/>
     <path d="M44 80 Q50 86 56 80 Q50 76 44 80Z" fill="#ff7a8a" class="mouth-open"/>
@@ -114,7 +120,10 @@
 
 <canvas id="fx"></canvas>
 
-<div id="app" data-theme="red">
+<div id="boot" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#s-tiger"/></svg><p>A preparar o tigre…</p></div>
+<div id="rotateHint" hidden>🔄 Vire o telemóvel para <b>retrato</b> para a melhor experiência</div>
+
+<div id="app" data-theme="red" data-orient="portrait">
   <div class="lanterns"><i></i><i></i><i></i></div>
 
   <header class="top">

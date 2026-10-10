@@ -18,7 +18,18 @@ Espaço/Enter também gira.
 ## Regras e retorno
 `engine.js` é puro e testável: `npm test` na raiz (RTP ≈ 95%, hit ≈ 40%). Resultado sempre sorteio honesto, sem manipulação de “quase”.
 
-## Config e assets (novo, inspirado no slot-game MIT)
+## Orientação de tela
+Retrato é o modo principal (`manifest: portrait-primary`, `data-orient` atualizado em JS).
+Paisagem ≥700px usa layout adaptativo (mascote + rolos lado a lado, controlos compactos);
+paisagem curta (<500px altura) mostra dica discreta de rodar. `#boot` cobre o arranque.
+
+## Tigre no Blender
+Modelo procedural em `../blender/tigre.py` — rode `./blender/render.sh` no Mac
+com Blender instalado; saídas em `renders/` (PNG transparente + GLB).
+O SVG inline atual (`#s-tiger`, olhos com brilho, focinho com highlight)
+é o fallback até o render final entrar em `jogo/assets/`.
+
+## Config e assets (inspirado no slot-game MIT)
 - `config.js` — `reelsConfig/betConfig/designConfig/bigWinConfig + calculateScale` (portado de `slot-game/src/utils/config.ts` + `helpers.ts`).
 - `assets.json` — manifest dos 9 símbolos SVG inline + UI + som (inspirado em `asset-manifest.ts`).
 - Padrões portados: `REEL_OFFSET_TIME`, blur no giro, bounce `.cell.pop`, pulse `.cell.win` com auto-stop 2s, `disableSpin(bool)`, botão `#btnSound` (`SoundToggleButton`).

@@ -1,8 +1,16 @@
-:root{--gold:#ffd24a;--red:#c8101e;--cell:min(28vw,112px);--bg1:#7a0c14;--bg2:#2a0408;--jade:#12805a}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
-html,body{margin:0;height:100%;background:#1a0206;color:#fff;font-family:"Trebuchet MS",system-ui,sans-serif;overflow:hidden;touch-action:manipulation}
+:root{--gold:#ffd24a;--red:#c8101e;--cell:min(28vw,18vh,112px);--bg1:#7a0c14;--bg2:#2a0408;--jade:#12805a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;min-height:100dvh;background:#1a0206;color:#fff;font-family:"Trebuchet MS",system-ui,sans-serif;overflow:hidden;touch-action:manipulation;overscroll-behavior:none}
+button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
+#boot{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 35%,#7a1020,#1a0206 75%);transition:opacity .4s}
+#boot svg{width:110px;height:110px;animation:bootbob 1.2s ease-in-out infinite}
+#boot p{color:#ffd24a;font-weight:bold}
+#boot.hide{opacity:0;pointer-events:none}
+@keyframes bootbob{50%{transform:translateY(-8px) scale(1.04)}}
+#rotateHint{position:fixed;left:50%;bottom:calc(10px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:90;background:#000c;border:2px solid var(--gold);color:#ffe9a0;font-size:13px;font-weight:bold;padding:8px 16px;border-radius:20px;white-space:nowrap}
+#rotateHint[hidden]{display:none}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
-#app{position:relative;max-width:480px;height:100%;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;
+#app{position:relative;max-width:480px;height:100%;min-height:100dvh;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;
   background:radial-gradient(ellipse at 50% 20%,var(--bg1),var(--bg2) 75%);padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom)}
 #app[data-theme=jade]{--bg1:#0f6a4a;--bg2:#021a12}
 #app[data-theme=noite]{--bg1:#2b2a7a;--bg2:#07062a}
@@ -67,10 +75,11 @@ html,body{margin:0;height:100%;background:#1a0206;color:#fff;font-family:"Trebuc
 @keyframes wflash{50%{background:#ffd24a;color:#7a0c14}}
 
 .controls{position:relative;z-index:3;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 0 4px}
-.round{border:2px solid var(--gold);background:linear-gradient(#a4101c,#5a0610);color:var(--gold);font-weight:bold;box-shadow:0 3px 0 #2a0408}
+.round{border:2px solid var(--gold);background:linear-gradient(#a4101c,#5a0610);color:var(--gold);font-weight:bold;box-shadow:0 3px 0 #2a0408;transition:transform .08s,filter .15s}
 .round.small{width:46px;height:46px;border-radius:50%;font-size:17px;padding:0}
 .round.toggle{font-size:11px}.round.toggle.on{background:linear-gradient(#ffe27a,#ffa81a);color:#5a0610}
 .round:active{transform:translateY(2px);box-shadow:0 1px 0 #2a0408}
+.icon{transition:transform .08s,filter .15s}.icon:active{transform:scale(.92)}
 .betbox{min-width:58px;text-align:center}.betbox small{display:block;font-size:10px;color:#ffd24acc;letter-spacing:1px}.betbox b{font-size:22px}
 .spin{width:96px;height:96px;border-radius:50%;border:4px solid #fff3b0;background:radial-gradient(circle at 35% 30%,#7affa8,#12a85a 60%,#0a6a3a);color:#fff;font-weight:900;font-size:17px;letter-spacing:1px;
   box-shadow:0 6px 0 #064a28,0 0 24px #3aff8a88;text-shadow:0 2px 3px #0008;margin:0 4px;animation:spinpulse 1.6s ease-in-out infinite}
@@ -82,7 +91,7 @@ html,body{margin:0;height:100%;background:#1a0206;color:#fff;font-family:"Trebuc
 @keyframes spinpulse{50%{transform:scale(1.06);box-shadow:0 6px 0 #064a28,0 0 38px #3aff8acc}}
 .legal{position:relative;z-index:3;text-align:center;font-size:10px;opacity:.6;padding:2px 6px 6px}
 
-.toast{position:absolute;top:70px;left:50%;transform:translate(-50%,-20px);background:var(--gold);color:#5a0610;font-weight:bold;padding:8px 18px;border-radius:20px;z-index:20;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}
+.toast{position:absolute;top:70px;left:50%;transform:translate(-50%,-20px);background:var(--gold);color:#5a0610;font-weight:bold;padding:8px 18px;border-radius:20px;z-index:20;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
 .overlay{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle,#000a,#000d);animation:fadein .3s}
@@ -110,3 +119,27 @@ html,body{margin:0;height:100%;background:#1a0206;color:#fff;font-family:"Trebuc
 .tiger-big{width:120px;height:140px;animation:jump .6s infinite}
 .reduce *{animation-duration:0s!important;animation:none!important}
 .reduce .spin{animation:none!important}
+
+/* ---------- orientação: retrato é o modo principal ---------- */
+/* Paisagem larga: layout em 2 colunas (palco à esquerda, controlos à direita). */
+@media (orientation:landscape) and (min-width:700px){
+  #app{max-width:920px}
+  .stage{flex-direction:row;gap:14px;align-items:center;justify-content:center}
+  .mrow{width:auto;flex:0 0 200px;max-width:220px;height:min(52vh,220px);margin-bottom:0}
+  .machine{width:auto;flex:0 1 430px;max-width:430px}
+  /* controlos em linha compacta por baixo (são irmãos do .stage) */
+  .controls{flex-direction:row;gap:10px;align-items:center}
+  .spin{width:76px;height:76px;font-size:14px}
+  .legal{display:none}
+}
+/* Paisagem curta (telemóvel deitado): compacta mascote e dica de rodar. */
+@media (orientation:landscape) and (max-height:500px){
+  :root{--cell:min(20vh,96px)}
+  .mrow{height:96px;margin-bottom:-10px}
+  .spin{width:76px;height:76px;font-size:14px}
+  .round.small{width:40px;height:40px}
+  .legal{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
