@@ -1,34 +1,31 @@
-# Tigre no Blender
+# Cachorro caramelo no Blender
 
-O mascote final do jogo será modelado no **Blender** (este repo ainda não tem Blender instalado no Linux — rode no Mac).
+Mascote do TIGRINHO, modelado proceduralmente em `cachorro.py`.
 
-## Como gerar
+## Como gerar (Mac com Blender 3.6+ ou 4.x)
 
 ```bash
 ./blender/render.sh
 # ou direto:
-blender --background --python blender/tigre.py -- --out renders
+blender --background --python blender/cachorro.py -- --out renders
 ```
 
-Saídas em `renders/`: `tigre-idle.png`, `tigre-rosto.png`, `tigre.glb`.
+Saídas em `renders/`:
 
-## Direção de arte (resumo)
+- `cachorro-idle.png`, `cachorro-girando.png`, `cachorro-vitoria.png`, `cachorro-grande-vitoria.png` (PNG transparente, 1024px)
+- `cachorro.glb` (referência)
 
-- Tigre cartoon, pelo `#F28A16`, focinho/barriga creme, colete vermelho festival + medalhão dourado.
-- Listras poucas e simétricas (3 na testa, 2 em cada bochecha).
-- Olhos grandes com brilho branco, blush rosa, nariz rosa.
-- Silhueta legível em 96px (ícone) e 1024px (splash).
-- Poses a modelar depois do idle: `giro` (balanço), `cheer` (pulo + braço erguido), `big` (rugido).
+> O script não foi executado no ambiente Linux de desenvolvimento, pois o Blender não estava instalado. O jogo usa o SVG `#s-mascot` como arte definitiva até os PNGs serem gerados e validados.
 
 ## Pipeline até o jogo
 
-1. Modelar/ajustar no Blender com o script como base (`blender/tigre.py`).
-2. Renderizar PNG com fundo transparente.
-3. Otimizar (`pngquant`/`oxipng`) e colocar em `jogo/assets/` com entrada em `jogo/assets.json`.
-4. Manter o SVG atual como fallback offline até o PNG final entrar.
+1. Ajustar o modelo em `cachorro.py` (proporções, cores, poses).
+2. Renderizar, otimizar (`oxipng` ou WebP) e colocar em `jogo/assets/`.
+3. Registrar em `jogo/assets.json`.
+4. Trocar o SVG pelo PNG só depois de comparar na tela de 390×844.
 
 ## Convenções
 
-- Unidade: metros; tigre ~2.6m de altura total na cena.
-- Origem no chão (patas em z≈0), frente = +Y.
+- Unidade: metros; cachorro ~2.6 m de altura na cena.
+- Origem no chão, frente = -Y (câmera olha de frente).
 - Nomes em PT com `.L/.R` para espelho.

@@ -91,7 +91,7 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 @keyframes spinpulse{50%{transform:scale(1.06);box-shadow:0 6px 0 #064a28,0 0 38px #3aff8acc}}
 .legal{position:relative;z-index:3;text-align:center;font-size:10px;opacity:.6;padding:2px 6px 6px}
 
-.toast{position:absolute;top:70px;left:50%;transform:translate(-50%,-20px);background:var(--gold);color:#5a0610;font-weight:bold;padding:8px 18px;border-radius:20px;z-index:20;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+.toast{position:absolute;bottom:calc(132px + env(safe-area-inset-bottom));left:50%;transform:translate(-50%,-20px);background:var(--gold);color:#5a0610;font-weight:bold;padding:8px 18px;border-radius:20px;z-index:20;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
 .overlay{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle,#000a,#000d);animation:fadein .3s}
@@ -116,7 +116,7 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 .mission .bar{height:8px;border-radius:5px;background:#0007;margin:5px 0;overflow:hidden}.mission .bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd24a,#ff8a1a)}
 .mission button{padding:5px 12px;border-radius:10px;border:0;background:#12a85a;color:#fff;font-weight:bold}
 .mission button:disabled{background:#555;opacity:.6}
-.tiger-big{width:120px;height:140px;animation:jump .6s infinite}
+.dog-big{width:120px;height:140px;animation:jump .6s infinite}
 .reduce *{animation-duration:0s!important;animation:none!important}
 .reduce .spin{animation:none!important}
 
@@ -134,12 +134,143 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 }
 /* Paisagem curta (telemóvel deitado): compacta mascote e dica de rodar. */
 @media (orientation:landscape) and (max-height:500px){
-  :root{--cell:min(20vh,96px)}
-  .mrow{height:96px;margin-bottom:-10px}
-  .spin{width:76px;height:76px;font-size:14px}
-  .round.small{width:40px;height:40px}
+  :root{--cell:min(16vh,80px)}
+  .top{padding:2px 0}
+  .icon{width:34px;height:34px;font-size:16px}
+  .chips{font-size:15px;min-width:100px;padding:2px 10px 2px 4px}.chips svg{width:22px;height:22px}
+  .stage{flex-direction:row;gap:12px;flex:1 1 auto;justify-content:center;align-items:center;min-height:0}
+  .mrow{flex:0 0 auto;width:104px;height:min(52vh,140px);margin:0;max-width:none;align-self:center}
+  .mascot{left:0}
+  .bubble{left:90px;top:-4px;max-width:150px;font-size:11px;padding:5px 9px}
+  .frame{padding:6px}
+  .reels{padding:3px;gap:4px}
+  .machine{flex:0 0 auto;width:auto;max-width:none}
+  .winbar{margin-top:4px;padding:3px 10px;font-size:11px}.winbar b{font-size:15px}
+  .controls{padding:2px 0 4px;gap:6px}
+  .spin{width:58px;height:58px;font-size:12px;margin:0 2px}
+  .round.small{width:36px;height:36px;font-size:14px}
+  .betbox b{font-size:16px}
   .legal{display:none}
+  .portico{height:80px}
+  .toast{top:44px;bottom:auto}
+  #rotateHint{top:44px;bottom:auto;font-size:11px;padding:4px 10px}
 }
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
+
+/* ================= Fase 2: tela inicial, cenário e acabamento ================= */
+@font-face{font-family:"Bangers";src:url("fonts/Bangers-Regular.ttf") format("truetype");font-display:swap}
+
+.portico{position:absolute;top:0;left:0;width:100%;height:150px;opacity:.55;z-index:0;pointer-events:none}
+.frame::after{content:"";position:absolute;inset:4px;border-radius:18px;border:2px dashed #fff3b066;pointer-events:none}
+.frame{z-index:1}
+
+/* Tela inicial (splash) */
+.splash{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:env(safe-area-inset-top) 24px env(safe-area-inset-bottom);text-align:center;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 28%,#b3162a,#4a0710 60%,#1a0206);transition:opacity .35s,transform .35s}
+.splash[hidden]{display:none}
+.splash.out{opacity:0;transform:scale(1.05)}
+.splash::before{content:"";position:absolute;inset:-20%;background:repeating-conic-gradient(from 0deg at 50% 36%,rgba(255,210,74,.09) 0 6deg,transparent 6deg 12deg);animation:rays 40s linear infinite;pointer-events:none}
+.splash-glow{position:absolute;top:18%;left:50%;width:260px;height:260px;margin:-130px 0 0 -130px;border-radius:50%;background:radial-gradient(circle,#ffd24a88,transparent 70%);animation:glowpulse 3s ease-in-out infinite;pointer-events:none}
+@keyframes glowpulse{50%{transform:scale(1.12);opacity:.7}}
+.logo{position:relative;margin:0;font-family:"Bangers",Impact,"Arial Black",sans-serif;font-weight:normal;font-size:clamp(64px,22vw,118px);line-height:1;letter-spacing:3px;
+  background:linear-gradient(#fff6b0,#ffc83a 50%,#e0660a);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:3px #5a0610;
+  filter:drop-shadow(0 6px 0 #5a0610) drop-shadow(0 0 22px #ffb420);animation:bwin .9s ease-out}
+.splash-dog{position:relative;width:min(44vw,180px);height:auto;margin:2px 0 0;filter:drop-shadow(0 10px 12px #000a);animation:bob 2.4s ease-in-out infinite}
+.tag{position:relative;margin:2px 0;color:#ffe9a0;font-weight:bold;font-size:16px;max-width:320px;text-shadow:0 2px 4px #000a}
+.btn.start{position:relative;width:min(70vw,280px);margin:8px 0 0;padding:16px;font-size:22px;letter-spacing:2px;font-family:"Bangers",Impact,sans-serif;animation:spinpulse 1.6s ease-in-out infinite}
+.fine{position:relative;font-size:11px;opacity:.75;max-width:320px;margin:4px 0 0}
+
+/* Brilho extra nos símbolos vencedores e no WILD */
+.cell.win svg{filter:drop-shadow(0 0 8px #ffd24a)}
+.mascot{filter:drop-shadow(0 6px 8px #0008) drop-shadow(0 0 14px #ffb42033)}
+.bubble{font-family:"Bangers",Trebuchet MS,sans-serif;font-size:16px;letter-spacing:1px}
+.winbar span{font-size:14px}
+.chips svg{filter:drop-shadow(0 2px 2px #0008)}
+
+/* Cauda do cachorro abana (mascote) */
+.tail{transform-origin:122px 150px;animation:wag 1.6s ease-in-out infinite}
+@keyframes wag{50%{transform:rotate(14deg)}}
+.mascot.cheer .tail,.mascot.spinning .tail{animation-duration:.4s}
+.arm-r{transform-origin:124px 128px;transform-box:view-box}
+.mascot.cheer .arm-r{animation:wave .5s ease-in-out infinite}
+@keyframes wave{50%{transform:rotate(-14deg)}}
+.reduce .tail,.reduce .arm-r{animation:none!important}
+
+/* Modal: dog-big reaproveita a animação de pulo */
+.dog-big{width:120px;height:140px;animation:jump .6s infinite}
+@media (prefers-reduced-motion:reduce){.splash::before,.splash-glow{animation:none}}
+/* Dica de rotação some sozinha após alguns segundos em paisagem curta (não cobre o jogo). */
+@keyframes hintout{to{opacity:0;visibility:hidden}}
+@media (orientation:landscape) and (max-height:500px){#rotateHint{animation:hintout .6s 6s forwards}}
+
+/* ===== v2.1: coreografia de prêmios e ciclo de recompensa ===== */
+.frame.glow{animation:frameglow .5s ease-in-out infinite alternate}
+@keyframes frameglow{to{box-shadow:0 0 46px #ffd24aee,0 0 0 4px #fff3b0aa,0 10px 24px #000a}}
+.mascot.cheer.big{animation:jump .36s ease-in-out infinite}
+.days{display:flex;justify-content:center;gap:6px;margin:10px 0}
+.days span{width:22px;height:22px;border-radius:50%;background:#0007;border:2px solid #ffd24a66}
+.days span.on{background:radial-gradient(circle at 35% 30%,#fff6b0,#ffb020);border-color:#fff3b0;box-shadow:0 0 10px #ffd24a}
+@media (prefers-reduced-motion:reduce){.frame.glow,.mascot.cheer.big{animation:none}}
+.reduce .frame.glow,.reduce .mascot.cheer.big{animation:none}
+
+/* ===== v2.2: símbolos com bisel/brilho, moldura com profundidade ===== */
+/* Sombra de contato sob cada símbolo (barata: só gradiente radial). */
+.cell{position:relative}
+.cell::before{content:"";position:absolute;left:20%;right:20%;bottom:9%;height:12%;border-radius:50%;background:radial-gradient(closest-side,#3a1a0088,#3a1a0000);z-index:0;pointer-events:none}
+.cell svg{position:relative;z-index:1}
+/* Reflexo especular no topo esquerdo de cada símbolo: dá sensação de material polido. */
+.cell::after{content:"";position:absolute;left:24%;top:12%;width:26%;height:16%;border-radius:50%;background:radial-gradient(closest-side,#fffb,#fff0);transform:rotate(-24deg);z-index:2;pointer-events:none;opacity:.85}
+.cell.win::after{opacity:1}
+
+/* Rolo como vidro: faixa de reflexo vertical e bisel interno. */
+.reel{box-shadow:inset 0 0 0 1px #fff6,inset 0 10px 14px -8px #fff9,inset 0 -16px 18px -10px #6a3a0077,0 2px 6px #0006}
+.reel::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#fff0 0,#fff5 10%,#fff0 26%,#fff0 74%,#fff3 90%,#fff0 100%);pointer-events:none;z-index:4}
+
+/* Moldura: bisel superior claro, base escura e lâmpadas nos cantos. */
+.frame{box-shadow:0 0 30px #ffb42055,0 14px 26px #000c,inset 0 2px 0 #fff9,inset 0 -4px 0 #5a2e00aa,inset 0 0 0 3px #7a4a00}
+.frame::before{content:"";position:absolute;inset:0;border-radius:22px;pointer-events:none;z-index:3;
+  background:
+    radial-gradient(circle at 12px 12px,#fffbe0 0 3px,#ffd24a 4px,#0000 7px),
+    radial-gradient(circle at calc(100% - 12px) 12px,#fffbe0 0 3px,#ffd24a 4px,#0000 7px),
+    radial-gradient(circle at 12px calc(100% - 12px),#fffbe0 0 3px,#ffd24a 4px,#0000 7px),
+    radial-gradient(circle at calc(100% - 12px) calc(100% - 12px),#fffbe0 0 3px,#ffd24a 4px,#0000 7px);
+  animation:bulbs 1.6s ease-in-out infinite alternate}
+@keyframes bulbs{to{filter:brightness(1.35) drop-shadow(0 0 4px #ffd24a)}}
+
+/* Reflexo varrendo a máquina numa vitória (level >= 2), disparado por JS. */
+.machine{overflow:hidden;border-radius:22px}
+.machine::after{content:"";position:absolute;top:-20%;bottom:-20%;left:-60%;width:40%;background:linear-gradient(90deg,#fff0,#fff8,#fff0);transform:skewX(-18deg);pointer-events:none;z-index:6;opacity:0}
+.machine.sweep::after{animation:sweep .9s ease-out 1}
+@keyframes sweep{0%{left:-60%;opacity:1}100%{left:130%;opacity:0}}
+
+/* Brilho do estado "glow" mantém o bisel interno. */
+@keyframes frameglow{to{box-shadow:0 0 46px #ffd24aee,0 0 0 4px #fff3b0aa,0 14px 26px #000c,inset 0 2px 0 #fff9,inset 0 -4px 0 #5a2e00aa}}
+@media (prefers-reduced-motion:reduce){.frame::before,.machine.sweep::after{animation:none}}
+.reduce .frame::before,.reduce .machine.sweep::after{animation:none}
+
+/* ===== v2.2: celebrações por nível e poses do cachorro ===== */
+.bw-rays{position:absolute;left:50%;top:50%;width:170vmax;height:170vmax;margin:-85vmax 0 0 -85vmax;display:none;pointer-events:none;z-index:0;
+  background:repeating-conic-gradient(from 0deg,#ffd24a3d 0 7deg,#0000 7deg 18deg);animation:rays 14s linear infinite;-webkit-mask:radial-gradient(circle,#000 0,#000 25%,#0000 62%);mask:radial-gradient(circle,#000 0,#000 25%,#0000 62%)}
+.overlay[data-lvl="3"] .bw-rays,.overlay[data-lvl="4"] .bw-rays,.overlay[data-lvl="5"] .bw-rays{display:block}
+.overlay[data-lvl="5"] .bw-rays{background:repeating-conic-gradient(from 0deg,#fff3b05c 0 6deg,#0000 6deg 15deg);animation-duration:8s}
+.overlay>*{position:relative;z-index:1}
+.overlay>.bw-rays{position:absolute;z-index:0}
+.bw-mult{font-family:"Bangers",Impact,sans-serif;font-size:clamp(44px,14vw,76px);color:#fff3b0;letter-spacing:2px;-webkit-text-stroke:2px #5a0610;text-shadow:0 4px 0 #7a0c14,0 0 24px #ffb420;margin-top:-6px}
+.bw-mult:empty{display:none}
+.bw-mult:not(:empty){animation:multpop .5s cubic-bezier(.3,1.8,.5,1) both}
+@keyframes multpop{from{transform:scale(.3);opacity:0}}
+.overlay[data-lvl="5"] .bw-title{font-size:clamp(40px,13vw,66px)}
+
+/* Poses do cachorro: cada estado da rodada tem leitura própria */
+.mascot.spinning .arm-l{animation:hold .25s ease-in-out infinite alternate;transform-box:view-box;transform-origin:36px 120px}
+@keyframes hold{to{transform:rotate(-10deg) translateY(-2px)}}
+.mascot.cheer .arm-l{animation:wave2 .5s ease-in-out infinite;transform-box:view-box;transform-origin:36px 120px}
+@keyframes wave2{50%{transform:rotate(-16deg)}}
+.mascot.big{animation:jumpbig .42s ease-in-out infinite}
+.mascot.big .arm-l{animation:wave2 .32s ease-in-out infinite;transform-box:view-box;transform-origin:36px 120px}
+.mascot.big .arm-r{animation:wave .32s ease-in-out infinite alternate}
+@keyframes jumpbig{50%{transform:translateY(-30px) rotate(-3deg) scale(1.06)}}
+.reduce .mascot.big,.reduce .mascot.big .arm-l,.reduce .mascot.big .arm-r,.reduce .mascot.cheer .arm-l,.reduce .mascot.spinning .arm-l{animation:none!important}
+@media (prefers-reduced-motion:reduce){.bw-rays,.bw-mult:not(:empty){animation:none}}

@@ -3,3 +3,8 @@ dist/
 .DS_Store
 *.log
 __pycache__/
+
+refs-locais/
+test-results/
+playwright-report/
+ui-screens/

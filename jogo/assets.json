@@ -1,39 +1,123 @@
 {
-  "nota": "Manifest de assets do Tigrinho, inspirado em src/utils/asset-manifest.ts do groangroan/slot-game (MIT). Aqui os símbolos são SVG inline no index.html (#s-*); este arquivo documenta o inventário e prepara futura migração para bundles Pixi/Vite.",
+  "nota": "Manifest de assets do TIGRINHO, inspirado em src/utils/asset-manifest.ts do groangroan/slot-game (MIT). Aqui os símbolos são SVG inline no index.html (#s-*); este arquivo documenta o inventário e prepara futura migração para bundles Pixi/Vite.",
   "bundles": [
     {
-      "name": "tigre-symbols",
+      "name": "caramelo-symbols",
       "assets": [
-        { "alias": "s-wild", "src": "inline#index.html#s-wild", "kind": "svg-symbol" },
-        { "alias": "s-envelope", "src": "inline#index.html#s-envelope", "kind": "svg-symbol" },
-        { "alias": "s-ingot", "src": "inline#index.html#s-ingot", "kind": "svg-symbol" },
-        { "alias": "s-bag", "src": "inline#index.html#s-bag", "kind": "svg-symbol" },
-        { "alias": "s-orange", "src": "inline#index.html#s-orange", "kind": "svg-symbol" },
-        { "alias": "s-cracker", "src": "inline#index.html#s-cracker", "kind": "svg-symbol" },
-        { "alias": "s-lantern", "src": "inline#index.html#s-lantern", "kind": "svg-symbol" },
-        { "alias": "s-mascot", "src": "inline#index.html#s-mascot", "kind": "svg-symbol" },
-        { "alias": "s-coin", "src": "inline#index.html#s-coin", "kind": "svg-symbol" }
+        {
+          "alias": "s-wild",
+          "src": "inline#index.html#s-wild",
+          "kind": "svg-symbol"
+        },
+        {
+          "alias": "s-envelope",
+          "src": "inline#index.html#s-envelope",
+          "kind": "svg-symbol"
+        },
+        {
+          "alias": "s-ingot",
+          "src": "inline#index.html#s-ingot",
+          "kind": "svg-symbol"
+        },
+        {
+          "alias": "s-bag",
+          "src": "inline#index.html#s-bag",
+          "kind": "svg-symbol"
+        },
+        {
+          "alias": "s-orange",
+          "src": "inline#index.html#s-orange",
+          "kind": "svg-symbol"
+        },
+        {
+          "alias": "s-cracker",
+          "src": "inline#index.html#s-cracker",
+          "kind": "svg-symbol"
+        },
+        {
+          "alias": "s-lantern",
+          "src": "inline#index.html#s-lantern",
+          "kind": "svg-symbol"
+        },
+        {
+          "alias": "s-mascot",
+          "src": "inline#index.html#s-mascot",
+          "kind": "svg-symbol"
+        },
+        {
+          "alias": "s-coin",
+          "src": "inline#index.html#s-coin",
+          "kind": "svg-symbol"
+        },
+        {
+          "alias": "s-dog",
+          "src": "inline#index.html#s-dog",
+          "kind": "svg-symbol"
+        },
+        {
+          "alias": "s-portico",
+          "src": "inline#index.html#s-portico",
+          "kind": "svg-symbol"
+        }
+      ]
+    },
+    {
+      "name": "ui-fonts",
+      "assets": [
+        {
+          "alias": "bangers",
+          "src": "fonts/Bangers-Regular.ttf",
+          "kind": "font",
+          "licenca": "SIL OFL 1.1 (fonts/OFL.txt)"
+        }
       ]
     },
     {
       "name": "game-ui",
       "assets": [
-        { "alias": "spin-button", "src": "css:.spin (botão DOM)", "kind": "css" },
-        { "alias": "logo", "src": "css:.machine/.frame", "kind": "css" }
+        {
+          "alias": "spin-button",
+          "src": "css:.spin (botão DOM)",
+          "kind": "css"
+        },
+        {
+          "alias": "logo",
+          "src": "css:.machine/.frame",
+          "kind": "css"
+        }
       ]
     },
     {
       "name": "sound",
       "assets": [
-        { "alias": "sound-synth", "src": "audio.js (WebAudio sintetizado, sem mp3)", "kind": "webaudio" },
-        { "alias": "referencia-slot-game-spin", "src": "vendor/slot-game/public/assets/sounds/spin.mp3", "kind": "reference-only" },
-        { "alias": "referencia-slot-game-win", "src": "vendor/slot-game/public/assets/sounds/win.mp3", "kind": "reference-only" }
+        {
+          "alias": "sound-synth",
+          "src": "audio.js (WebAudio sintetizado, sem mp3)",
+          "kind": "webaudio"
+        },
+        {
+          "alias": "referencia-slot-game-spin",
+          "src": "vendor/slot-game/public/assets/sounds/spin.mp3",
+          "kind": "reference-only"
+        },
+        {
+          "alias": "referencia-slot-game-win",
+          "src": "vendor/slot-game/public/assets/sounds/win.mp3",
+          "kind": "reference-only"
+        }
       ]
     }
   ],
   "referenciaSlotGame": {
     "origem": "https://github.com/groangroan/slot-game",
-    "bundlesOriginais": ["sym1", "sym2", "sym3", "sym4", "game-ui", "sound"],
-    "observacao": "Bundles sym1-4 do slot-game NÃO substituem os 7 símbolos do Tigrinho; servem de referência para futuro port Pixi em pixi-prototipo/."
+    "bundlesOriginais": [
+      "sym1",
+      "sym2",
+      "sym3",
+      "sym4",
+      "game-ui",
+      "sound"
+    ],
+    "observacao": "Bundles sym1-4 do slot-game NÃO substituem os 7 símbolos do TIGRINHO; servem de referência para futuro port Pixi em pixi-prototipo/."
   }
 }

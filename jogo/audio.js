@@ -85,6 +85,12 @@ const Sound = (() => {
       tone(N(38), t, 1.8, { type: 'sine', vol: .5 }); noise(t, 1.2, .15, 3000);
       for (let i = 0; i < 14; i++) tone(N(90 + (i % 5) * 2), t + .7 + i * .06, .2, { type: 'sine', vol: .08 });
     },
+    // Camada de intensidade: sobe a música por alguns segundos em grandes vitórias.
+    boost(ms = 1500) {
+      if (!ctx || !musicOn) return;
+      const now = ctx.currentTime; musicBus.gain.cancelScheduledValues(now); musicBus.gain.setTargetAtTime(.8, now, .05);
+      clearTimeout(api._boostT); api._boostT = setTimeout(() => { if (ctx && musicOn) musicBus.gain.setTargetAtTime(.5, ctx.currentTime, .4); }, ms);
+    },
     levelup() { if (!ctx) return; const t = ctx.currentTime; [69, 73, 76, 81, 85].forEach((m, i) => tone(N(m), t + i * .09, .6, { type: 'triangle', vol: .2 })); },
     gong() { if (!ctx) return; const t = ctx.currentTime; tone(N(50), t, 2.4, { type: 'sine', vol: .4, slide: .98 }); tone(N(57.2), t, 2, { type: 'sine', vol: .2 }); noise(t, .3, .1, 800); },
   };

@@ -1,4 +1,4 @@
-/* Tigrinho da Sorte — interface, animações, progressão. Fichas fictícias.
+/* TIGRINHO — interface, animações, progressão. Fichas fictícias.
    Enriquecido com padrões do groangroan/slot-game (MIT): timings, blur,
    bounce, disableSpin e auto-stop de vitória. Ver THIRD_PARTY_NOTICES.md. */
 (() => {
@@ -7,7 +7,7 @@
   const RC = CFG ? CFG.reelsConfig : { SPIN_DURATION: 850, REEL_OFFSET_TIME: 300, TURBO_SPIN_DURATION: 380, TURBO_OFFSET_TIME: 110, ANTICIPATION_EXTRA: 900, BLUR_PX: 1.4, FILLER_DIVISOR: 85 };
   const $ = (id) => document.getElementById(id);
   const KEY = 'tigrinho.save.v1';
-  const START_CHIPS = 10000, DAILY = 2000, REFILL = 1500;
+  const START_CHIPS = 10000, REFILL = 1500;
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const fmt = (n) => Math.round(n).toLocaleString('pt-BR');
 
@@ -15,12 +15,12 @@
   const MISSIONS = [
     { id: 'spins', base: 20, stat: 'spins', reward: 500, text: (n) => `Gire ${n} vezes` },
     { id: 'wins', base: 8, stat: 'wins', reward: 600, text: (n) => `Ganhe ${n} rodadas` },
-    { id: 'wilds', base: 3, stat: 'wilds', reward: 800, text: (n) => `Acerte ${n} Tigres Wild` },
+    { id: 'wilds', base: 3, stat: 'wilds', reward: 800, text: (n) => `Acerte ${n} Caramelos WILD` },
     { id: 'bigs', base: 1, stat: 'bigs', reward: 1500, text: (n) => `Consiga ${n} vitória(s) grande(s)` },
   ];
   const THEMES = [{ id: 'red', name: 'Festival Vermelho', lvl: 1 }, { id: 'jade', name: 'Jardim de Jade', lvl: 3 }, { id: 'noite', name: 'Noite de Lanternas', lvl: 6 }];
   const fresh = () => ({
-    balance: START_CHIPS, bet: 10, xp: 0, level: 1, theme: 'red', lastDaily: '',
+    balance: START_CHIPS, bet: 10, xp: 0, level: 1, theme: 'red', lastDaily: '', streak: 0,
     stats: { spins: 0, wins: 0, wilds: 0, bigs: 0, best: 0 },
     m: Object.fromEntries(MISSIONS.map((x) => [x.id, { tier: 0, start: 0 }])),
     set: { music: true, sfx: true, vib: true, reduce: matchMedia('(prefers-reduced-motion: reduce)').matches },
@@ -103,6 +103,14 @@
     });
     // ticks durante o giro
     const tk = setInterval(() => Sound.tick(), 70); await Promise.all(ps); clearInterval(tk);
+    // hitstop: pausa curta quando um curinga cai, antes de revelar o prêmio
+    if (step.grid.flat().includes('wild') && !S.set.reduce) { impact(1); await sleep(90); }
+  }
+  // impacto proporcional ao tier: vibração, tremor e faíscas
+  function impact(level) {
+    if (level >= 2) shake();
+    vib(level >= 3 ? [40, 30, 40] : level === 2 ? 22 : 10);
+    if (level >= 1) burst(6 + level * 4, W / 2, Hh * .45, .5 + level * .15);
   }
 
   // ---------- efeitos ----------
@@ -149,13 +157,14 @@
 
   // ---------- UI helpers ----------
   function setShown(v) { shown = v; balEl.textContent = fmt(v); }
+  let skipNow = false; // toque na barra de vitória pula a contagem
   function countTo(el, from, to, ms, cb, snd) {
     return new Promise((res) => { const t0 = performance.now(); let last = -1;
-      (function f(t) { const k = Math.min(1, (t - t0) / ms), v = from + (to - from) * (1 - Math.pow(1 - k, 3)); cb(v, k);
+      (function f(t) { if (skipNow) { cb(to, 1); res(); return; } const k = Math.min(1, (t - t0) / ms), v = from + (to - from) * (1 - Math.pow(1 - k, 3)); cb(v, k);
         const n = Math.floor(k * 14); if (snd && n !== last) { last = n; Sound.coin(n); } k < 1 ? requestAnimationFrame(f) : res(); })(t0); });
   }
   function toast(msg, ms = 1800) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), ms); }
-  const PHRASES = { idle: ['Vamos girar!', 'Hoje é meu dia de sorte!', 'Bora, campeão(ã)!', 'Toque em GIRAR!'], win: ['Isso aí!', 'Ganhamos!', 'Que giro lindo!', 'Rugiu a sorte!'], big: ['INCRÍVEL!', 'RUUUGIIIU!', 'Eu sabia!!'], lose: ['Quase! De novo!', 'Vai vir!', 'A próxima é nossa!'], wild: ['Tigre em campo!', 'Respin!']};
+  const PHRASES = { idle: ['Vamos girar!', 'Hoje é meu dia de sorte!', 'Bora, campeão(ã)!', 'Toque em GIRAR!'], win: ['Isso aí!', 'Ganhamos!', 'Que giro lindo!', 'Rugiu a sorte!'], big: ['INCRÍVEL!', 'RUUUGIIIU!', 'Eu sabia!!'], lose: ['Quase! De novo!', 'Vai vir!', 'A próxima é nossa!'], wild: ['Caramelo em campo!', 'Respin!']};
   function say(kind, ms = 2200) { const a = PHRASES[kind]; bubble.textContent = a[Math.floor(Math.random() * a.length)]; bubble.classList.add('show'); clearTimeout(say._h); say._h = setTimeout(() => bubble.classList.remove('show'), ms); }
   function mood(m) { mascot.setAttribute('class', 'mascot ' + m); }
   function updateHud() {
@@ -192,14 +201,19 @@
   }
 
   // ---------- vitória grande ----------
-  const TIERS = [{ min: 60, name: 'VITÓRIA SUPREMA!', coins: 120 }, { min: 25, name: 'MEGA VITÓRIA!', coins: 80 }, { min: 10, name: 'GRANDE VITÓRIA!', coins: 50 }];
   function bigWin(total, tier) {
     return new Promise(async (res) => {
-      const ov = $('bigwin'); ov.hidden = false; $('bwTitle').textContent = tier.name; $('bwAmt').textContent = '0';
-      Sound.big(); Sound.gong(); shake(); vib([60, 40, 60, 40, 120]); rain(tier.coins); burst(40, W / 2, Hh * .45, 1.3);
-      let done = false; const close = () => { done = true; ov.hidden = true; ov.onclick = null; res(); };
+      const ov = $('bigwin'); ov.hidden = false; ov.dataset.lvl = tier.level; $('bwTitle').textContent = tier.name; $('bwAmt').textContent = '0';
+      // multiplicador em destaque nos níveis 4 e 5 (total / aposta); vazio nos demais
+      const mult = tier.level >= 4 ? 'x' + Math.floor(total / S.bet) : '';
+      $('bwMult').textContent = mult;
+      const dur = S.set.reduce ? 600 : tier.level >= 5 ? 4200 : tier.level >= 4 ? 3400 : 2600;
+      Sound.big(); Sound.gong(); Sound.boost(dur + 1500); frame.classList.add('glow'); mascot.classList.add('big'); mood('cheer'); mascot.classList.add('big'); shake(); vib([60, 40, 60, 40, 120]); rain(tier.coins); burst(40, W / 2, Hh * .45, 1.3);
+      if (tier.level >= 4) { setTimeout(() => rain(tier.level >= 5 ? 60 : 30), 900); setTimeout(() => burst(tier.level >= 5 ? 50 : 30, W / 2, Hh * .4, 1.5), 1800); }
+      if (tier.level >= 5 && !S.set.reduce) setTimeout(() => { if (!ov.hidden) burst(40, W / 2, Hh * .55, 1.8); }, 2800);
+      let done = false; const close = () => { done = true; ov.hidden = true; ov.removeAttribute('data-lvl'); ov.onclick = null; frame.classList.remove('glow'); mascot.classList.remove('big'); skipNow = false; res(); };
       ov.onclick = () => { if (!done) { $('bwAmt').textContent = fmt(total); setTimeout(close, 150); } };
-      await countTo($('bwAmt'), 0, total, S.set.reduce ? 600 : 2600, (v) => { if (!done) $('bwAmt').textContent = fmt(v); }, true);
+      await countTo($('bwAmt'), 0, total, dur, (v) => { if (!done) $('bwAmt').textContent = fmt(v); }, true);
       if (!done) { burst(30, W / 2, Hh * .45); await sleep(S.set.reduce || turbo || autoLeft ? 600 : 1500); if (!done) close(); }
     });
   }
@@ -220,25 +234,27 @@
     S.stats.best = Math.max(S.stats.best, round.total); const ratio = round.total / bet; if (ratio >= 10) S.stats.bigs++;
     const before = S.balance - round.total; setShown(before); vib(12); Sound.click(); Sound.spin(); say('idle', 800);
 
-    let credited = 0;
+    let credited = 0; skipNow = false;
     for (const [i, st] of round.steps.entries()) {
-      if (st.respin) { toast(`🐯 RESPIN ${i}/${E.MAX_RESPINS}`, 1300); Sound.lock(); say('wild', 1400); mood('cheer'); setLocks(st.locked); await sleep(S.set.reduce ? 100 : 700); mood('spinning'); }
+      if (st.respin) { toast(`🐶 RESPIN ${i}/${E.MAX_RESPINS}`, 1300); Sound.lock(); say('wild', 1400); mood('cheer'); setLocks(st.locked); await sleep(S.set.reduce ? 100 : 700); mood('spinning'); }
       await animateStep(st);
       const wilds = st.grid.flat().filter((s) => s === 'wild').length;
       if (st.payout > 0) {
-        highlight(st.wins); mood('cheer'); mascot.classList.add('happy'); Sound.win(Math.min(3, Math.ceil(st.payout / bet / 4))); vib(25);
-        winLabel.textContent = st.respin ? 'Vitória no respin!' : 'VITÓRIA!'; winbar.classList.add('flash');
+        const stTier = E.prizeTier(st.payout / bet);
+        highlight(st.wins); mood('cheer'); mascot.classList.add('happy'); Sound.win(Math.min(4, stTier.level)); impact(stTier.level);
+        winLabel.textContent = st.respin ? 'Vitória no respin!' : (stTier.level >= 2 ? stTier.name : 'VITÓRIA!'); winbar.classList.add('flash');
         burst(Math.min(40, 8 + st.payout / bet * 3), W / 2, Hh * .45, .8);
+        if (stTier.level >= 2) { coinRain(stTier.coins); sweepMachine(); }
         const a = credited, b = credited + st.payout; credited = b;
         await Promise.all([countTo(winAmt, a, b, S.set.reduce ? 200 : 700, (v) => { winAmt.textContent = fmt(v); }, true), countTo(balEl, shown, before + b, S.set.reduce ? 200 : 700, (v) => { balEl.textContent = fmt(v); })]);
         shown = before + b; $('balance').parentElement.classList.add('pop'); setTimeout(() => $('balance').parentElement.classList.remove('pop'), 300);
         await sleep(S.set.reduce ? 100 : turbo ? 250 : 650);
       } else if (wilds && st.respin === false) { Sound.lock(); }
     }
-    mascot.classList.remove('happy');
-    const tier = TIERS.find((t) => ratio >= t.min);
-    if (tier) { say('big', 3000); await bigWin(round.total, tier); }
-    else if (round.total > 0) { say('win'); }
+    mascot.classList.remove('happy'); skipNow = false;
+    const tier = E.prizeTier(ratio);
+    if (tier.level >= 3) { say('big', 3000); await bigWin(round.total, tier); }
+    else if (tier.level >= 1) { say('win'); }
     else { winLabel.textContent = 'Tente de novo!'; say('lose'); }
     if (round.total > 0) { winLabel.textContent = 'Total ganho'; winAmt.textContent = fmt(round.total); }
     addXp(10 + Math.min(40, Math.round(ratio * 2)));
@@ -246,16 +262,19 @@
     mood('idle'); busy = false; disableSpin(false); updateMissionsDot();
     if (autoLeft > 0) { autoLeft--; setAuto(); if (autoLeft > 0 && S.balance >= S.bet) setTimeout(() => !busy && spin(), turbo ? 250 : 700); else if (S.balance < S.bet) { autoLeft = 0; setAuto(); } }
   }
+  function sweepMachine() { if (S.set.reduce) return; const m = $('machine'); m.classList.remove('sweep'); void m.offsetWidth; m.classList.add('sweep'); setTimeout(() => m.classList.remove('sweep'), 1000); }
+  function coinRain(n) { rain(Math.max(4, Math.min(24, n))); }
   function clearHighlightSoon(had) { if (had) setTimeout(() => { if (!busy) clearHighlight(); }, 2000); }
 
   // ---------- controles ----------
   function setAuto() { const b = $('auto'); b.classList.toggle('on', autoLeft > 0); b.textContent = autoLeft > 0 ? autoLeft : 'AUTO'; }
   spinBtn.onclick = () => spin();
+  winbar.addEventListener('pointerdown', () => { skipNow = true; });
   $('betUp').onclick = () => { if (busy) return; const i = E.BETS.indexOf(S.bet); S.bet = E.BETS[Math.min(E.BETS.length - 1, i + 1)]; Sound.init(); Sound.click(); updateHud(); save(); };
   $('betDown').onclick = () => { if (busy) return; const i = E.BETS.indexOf(S.bet); S.bet = E.BETS[Math.max(0, i - 1)]; Sound.init(); Sound.click(); updateHud(); save(); };
   $('auto').onclick = () => { Sound.init(); if (autoLeft > 0) { autoLeft = 0; setAuto(); return; } autoLeft = 25; setAuto(); if (!busy) spin(); };
   $('turbo').onclick = () => { turbo = !turbo; $('turbo').classList.toggle('on', turbo); Sound.click(); toast(turbo ? '⚡ Turbo ligado' : 'Turbo desligado', 900); };
-  addEventListener('keydown', (e) => { if ((e.code === 'Space' || e.code === 'Enter') && $('modal').hidden && $('bigwin').hidden) { e.preventDefault(); spin(); } });
+  addEventListener('keydown', (e) => { if ((e.code === 'Space' || e.code === 'Enter') && $('modal').hidden && $('bigwin').hidden && (!$('splash') || $('splash').hidden)) { e.preventDefault(); spin(); } });
   document.addEventListener('visibilitychange', () => document.hidden ? Sound.suspend() : Sound.resume());
   mascot.addEventListener('pointerdown', () => { say('idle'); });
 
@@ -264,14 +283,23 @@
   const closeModal = () => { $('modal').hidden = true; };
   function refill() {
     Sound.init(); Sound.levelup(); busy = false; disableSpin(false);
-    modal(`<svg class="tiger-big" viewBox="0 0 160 190"><use href="#s-mascot"/></svg><h2>O Tigre te ajuda!</h2><p>Suas fichas acabaram, mas aqui o jogo nunca para.<br>Ganhe <b>${fmt(REFILL)} fichas</b> de presente!</p><button class="btn" id="getRefill">Pegar fichas grátis</button>`,
+    modal(`<svg class="dog-big" viewBox="0 0 160 190"><use href="#s-mascot"/></svg><h2>O Caramelo te ajuda!</h2><p>Suas fichas acabaram, mas aqui o jogo nunca para.<br>Ganhe <b>${fmt(REFILL)} fichas</b> de presente!</p><button class="btn" id="getRefill">Pegar fichas grátis</button>`,
       (c) => c.querySelector('#getRefill').onclick = () => { S.balance += REFILL; setShown(S.balance); save(); burst(40, W / 2, Hh / 2); closeModal(); toast('🎁 +' + fmt(REFILL) + ' fichas'); });
   }
   function daily() {
     const today = new Date().toDateString(); if (S.lastDaily === today) return;
-    modal(`<svg class="tiger-big" viewBox="0 0 160 190"><use href="#s-mascot"/></svg><h2>Bônus diário!</h2><p>Bem-vindo de volta! Pegue seu presente de hoje:</p><p style="font-size:30px;color:#ffd24a"><b>+${fmt(DAILY)}</b> fichas</p><button class="btn" id="getDaily">Pegar!</button>`,
-      (c) => c.querySelector('#getDaily').onclick = () => { Sound.init(); Sound.big(); S.lastDaily = today; S.balance += DAILY; setShown(S.balance); save(); rain(40); closeModal(); });
+    const yest = new Date(Date.now() - 864e5).toDateString();
+    const streak = E.nextStreak(S.lastDaily, today, yest, S.streak), reward = E.dailyReward(streak);
+    const dots = Array.from({ length: 7 }, (_, i) => `<span class="${i < streak ? 'on' : ''}"></span>`).join('');
+    modal(`<svg class="dog-big" viewBox="0 0 160 190"><use href="#s-mascot"/></svg><h2>Bônus diário!</h2><p>Dia <b>${streak}</b> de sequência${streak >= 7 ? ' — prêmio máximo!' : '. Volte amanhã para subir o prêmio.'}</p><div class="days">${dots}</div><p style="font-size:30px;color:#ffd24a"><b>+${fmt(reward)}</b> fichas</p><button class="btn" id="getDaily">Pegar!</button>`,
+      (c) => c.querySelector('#getDaily').onclick = () => { Sound.init(); Sound.big(); S.lastDaily = today; S.streak = streak; S.balance += reward; setShown(S.balance); save(); rain(40); closeModal(); });
   }
+  // Lembrete de tempo de jogo (não é pressão nem contagem regressiva): a cada 30 min, sugere pausa.
+  const sessionStart = Date.now(); let lastRemind = 0;
+  setInterval(() => {
+    const mins = Math.floor((Date.now() - sessionStart) / 60000);
+    if (mins >= 30 && mins - lastRemind >= 30 && !busy) { lastRemind = mins; toast(`🐶 Você joga há ${mins} min. Que tal uma pausa?`, 3500); }
+  }, 60000);
   function menu() {
     modal(`<h2>Menu</h2><button class="btn alt" data-a="pay">🏮 Tabela de prêmios</button><button class="btn alt" data-a="mis">🎯 Missões</button><button class="btn alt" data-a="thm">🎨 Temas</button><button class="btn alt" data-a="set">⚙️ Configurações</button><button class="btn alt" data-a="about">ℹ️ Sobre o jogo</button><button class="btn" data-close>Voltar ao jogo</button>`,
       (c) => c.querySelectorAll('[data-a]').forEach((b) => (b.onclick = () => ({ pay: paytable, mis: missions, thm: themes, set: settings, about }[b.dataset.a]())))); }
@@ -279,9 +307,9 @@
   const wireBack = (c) => (c.querySelector('#back').onclick = menu);
   function paytable() {
     const lb = S.bet / 5;
-    modal(`<h2>Tabela de prêmios</h2><p>3 símbolos iguais em uma das <b>5 linhas</b>. O <b>Tigre WILD</b> substitui qualquer símbolo.</p>
+    modal(`<h2>Tabela de prêmios</h2><p>3 símbolos iguais em uma das <b>5 linhas</b>. O <b>Caramelo WILD</b> substitui qualquer símbolo.</p>
       ${E.SYMBOLS.map((s) => `<div class="row"><span class="l">${sym(s.id)}${s.name}</span><b>${fmt(s.pay * lb)}</b></div>`).join('')}
-      <p>🐯 <b>Respin:</b> se um Tigre WILD aparecer, ele trava e você ganha giros grátis (até ${E.MAX_RESPINS}) enquanto novos Tigres caírem!</p><p style="opacity:.7;font-size:12px">Valores para a aposta atual. Retorno teórico ≈ 95%. Fichas fictícias.</p>${back}`, wireBack); }
+      <p>🐶 <b>Respin:</b> se um Caramelo WILD aparecer, ele trava e você ganha giros grátis (até ${E.MAX_RESPINS}) enquanto novos Caramelos caírem!</p><p style="opacity:.7;font-size:12px">Valores para a aposta atual. Retorno teórico ≈ 95%. Fichas fictícias.</p>${back}`, wireBack); }
   const stat = (m) => S.stats[m.stat] - S.m[m.id].start;
   const target = (m) => m.base * Math.pow(2, S.m[m.id].tier);
   const reward = (m) => m.reward * (S.m[m.id].tier + 1);
@@ -299,7 +327,7 @@
       (c) => { wireBack(c);
         c.querySelectorAll('[data-s]').forEach((b) => (b.onclick = () => { const k = b.dataset.s; S.set[k] = !S.set[k]; if (k === 'music') Sound.setMusic(S.set[k]); if (k === 'sfx') Sound.setSfx(S.set[k]); updateHud(); save(); settings(); }));
         c.querySelector('#reset').onclick = () => { if (confirm('Apagar todo o progresso e recomeçar?')) { S = fresh(); save(); location.reload(); } }; }); }
-  function about() { modal(`<h2>Tigrinho da Sorte</h2><p>Jogo de entretenimento <b>gratuito</b> com fichas <b>fictícias</b>. Elas não têm valor em dinheiro, não podem ser compradas, trocadas, sacadas ou transferidas.</p><p>Este jogo não oferece chances de ganhar dinheiro real. Se jogar de verdade (com dinheiro) está te fazendo mal, procure ajuda: <b>CVV 188</b>.</p><p>Todas as fichas acabaram? O Tigre te dá mais de graça. 🐯</p>${back}`, wireBack); }
+  function about() { modal(`<h2>TIGRINHO</h2><p>Jogo de entretenimento <b>gratuito</b> com fichas <b>fictícias</b>. Elas não têm valor em dinheiro, não podem ser compradas, trocadas, sacadas ou transferidas.</p><p>Este jogo não oferece chances de ganhar dinheiro real. Se jogar de verdade (com dinheiro) está te fazendo mal, procure ajuda: <b>CVV 188</b>.</p><p>Fichas acabaram? O Caramelo te dá mais de graça. 🐶</p>${back}`, wireBack); }
   $('btnMenu').onclick = () => { Sound.init(); Sound.click(); menu(); };
   // Botão rápido de som — espelha SoundToggleButton do slot-game (mute/unmute).
   const btnSound = $('btnSound');
@@ -317,8 +345,13 @@
   const boot = $('boot');
   requestAnimationFrame(() => requestAnimationFrame(() => { if (boot) { boot.classList.add('hide'); setTimeout(() => boot.remove(), 500); } }));
   setTimeout(() => say('idle', 3000), 600);
-  daily();
-  // primeiro toque libera o áudio (política dos navegadores)
+  // Tela inicial: o bônus diário só aparece depois de "Começar" (também libera o áudio,
+  // exigência dos navegadores e do Safari iOS).
+  const splash = $('splash'), startBtn = $('start');
+  const hideSplash = () => { if (!splash || splash.hidden) return; splash.classList.add('out'); setTimeout(() => { splash.hidden = true; daily(); }, 350); };
+  if (startBtn) { startBtn.onclick = () => { Sound.init(); Sound.click(); hideSplash(); }; startBtn.focus({ preventScroll: true }); }
+  else daily();
   addEventListener('pointerdown', () => Sound.init(), { once: true });
-  window.__tigre = { S, spin, E }; // para testes
+  // prévia de celebração (testes e prints): preview(razão) mostra a faixa de prêmio correspondente
+  window.__tigrinho = { S, spin, E, preview: (r) => { const t = E.prizeTier(r); return t.level >= 3 ? bigWin(r * 10, t) : null; } };
 })();

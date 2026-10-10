@@ -1,4 +1,4 @@
-/* Motor de regras do Tigrinho — fichas fictícias, sem valor monetário.
+/* Motor de regras do TIGRINHO — fichas fictícias, sem valor monetário.
    Puro (sem DOM) para ser testado em Node e usado no navegador. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -6,7 +6,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   // pay = multiplicador sobre a aposta da linha (aposta total / 5)
   const SYMBOLS = [
-    { id: 'wild',    name: 'Tigre',        weight: 4,  pay: 60 },
+    { id: 'wild',    name: 'Caramelo',    weight: 4,  pay: 60 },
     { id: 'envelope',name: 'Envelope',     weight: 6,  pay: 25 },
     { id: 'ingot',   name: 'Lingote',      weight: 8,  pay: 15 },
     { id: 'bag',     name: 'Saco da Sorte',weight: 11, pay: 9  },
@@ -65,5 +65,34 @@
     return { steps, total, bet };
   }
 
-  return { SYMBOLS, LINES, BETS, MAX_RESPINS, BY_ID, randomSymbol, spinGrid, evaluate, playRound };
+  // Tiers de celebração, pela razão total/aposta. Puro: a UI só apresenta.
+  // level 0 = sem prêmio; 1 pequena; 2 média; 3 grande; 4 mega; 5 suprema.
+  const PRIZE_TIERS = [
+    { min: 60, level: 5, id: 'suprema', name: 'VITÓRIA SUPREMA!', coins: 120 },
+    { min: 25, level: 4, id: 'mega', name: 'MEGA VITÓRIA!', coins: 80 },
+    { min: 10, level: 3, id: 'grande', name: 'GRANDE VITÓRIA!', coins: 50 },
+    { min: 4, level: 2, id: 'media', name: 'BOA!', coins: 14 },
+    { min: 0.0001, level: 1, id: 'pequena', name: '', coins: 0 },
+  ];
+  function prizeTier(ratio) {
+    if (!(ratio > 0)) return { level: 0, id: 'nenhuma', name: '', coins: 0 };
+    return PRIZE_TIERS.find((t) => ratio >= t.min);
+  }
+
+  // Bônus diário com sequência: dias seguidos aumentam o prêmio até o 7º dia.
+  // streak = número de dias seguidos (1 = primeiro dia). Teto em 7.
+  const DAILY_BASE = 2000, DAILY_STEP = 500, DAILY_CAP_DAYS = 7;
+  function dailyReward(streak) {
+    const d = Math.min(Math.max(1, Math.floor(streak || 1)), DAILY_CAP_DAYS);
+    return DAILY_BASE + DAILY_STEP * (d - 1);
+  }
+  // Sequência: se o último bônus foi ontem, soma; se foi hoje, mantém; senão recomeça.
+  function nextStreak(lastDay, today, yesterday, streak) {
+    if (lastDay === today) return streak || 1;
+    if (lastDay === yesterday) return (streak || 0) + 1;
+    return 1;
+  }
+
+  return { SYMBOLS, LINES, BETS, MAX_RESPINS, BY_ID, randomSymbol, spinGrid, evaluate, playRound,
+           PRIZE_TIERS, prizeTier, dailyReward, nextStreak };
 });

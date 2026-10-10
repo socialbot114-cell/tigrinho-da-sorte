@@ -1,0 +1,52 @@
+name: UI — TIGRINHO (Playwright)
+
+# Testa as telas reais do jogo em viewport de iPhone (retrato e paisagem),
+# envia relatório HTML e screenshots como artefatos para revisão.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  ui:
+    name: ui (iPhone retrato + paisagem)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Instalar Chromium do Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Testes de UI
+        run: npm run test:ui
+        env:
+          CI: '1'
+
+      - name: Relatório HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Screenshots das telas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screens
+          path: ui-screens/
+          if-no-files-found: ignore
+          retention-days: 14

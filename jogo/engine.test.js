@@ -63,10 +63,45 @@ ok('engine BETS confere com config', () => {
 });
 
 // --- assets.json válido ---
-ok('assets.json válido com 9 símbolos inline', () => {
+ok('assets.json válido com 11 símbolos inline', () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'assets.json'), 'utf8'));
-  const syms = manifest.bundles.find((b) => b.name === 'tigre-symbols');
-  assert(syms && syms.assets.length === 9, 'esperava 9 símbolos');
+  const syms = manifest.bundles.find((b) => b.name === 'caramelo-symbols');
+  assert(syms && syms.assets.length === 11, 'esperava 11 símbolos');
+  const font = path.join(__dirname, 'fonts', 'Bangers-Regular.ttf');
+  assert(fs.existsSync(font) && fs.existsSync(font.replace('Bangers-Regular.ttf', 'OFL.txt')), 'fonte/licença ausentes');
+});
+
+// --- tiers de prêmio e bônus diário (ciclo de recompensa) ---
+ok('tiers de prêmio por razão', () => {
+  assert.strictEqual(E.prizeTier(0).level, 0);
+  assert.strictEqual(E.prizeTier(1).level, 1);
+  assert.strictEqual(E.prizeTier(4).level, 2);
+  assert.strictEqual(E.prizeTier(9.99).level, 2);
+  assert.strictEqual(E.prizeTier(10).level, 3);
+  assert.strictEqual(E.prizeTier(25).level, 4);
+  assert.strictEqual(E.prizeTier(60).level, 5);
+  assert.strictEqual(E.prizeTier(500).id, 'suprema');
+});
+ok('bônus diário cresce com a sequência e tem teto no 7º dia', () => {
+  assert.strictEqual(E.dailyReward(1), 2000);
+  assert.strictEqual(E.dailyReward(3), 3000);
+  assert.strictEqual(E.dailyReward(7), 5000);
+  assert.strictEqual(E.dailyReward(30), 5000);
+});
+ok('sequência: ontem soma, hoje mantém, pular dia recomeça', () => {
+  assert.strictEqual(E.nextStreak('d1', 'd2', 'd1', 3), 4);
+  assert.strictEqual(E.nextStreak('d2', 'd2', 'd1', 4), 4);
+  assert.strictEqual(E.nextStreak('d0', 'd2', 'd1', 4), 1);
+  assert.strictEqual(E.nextStreak('', 'd2', 'd1', 0), 1);
+});
+
+// --- HTML: ids obrigatórios da interface (tela inicial, rolos, HUD, mascote) ---
+ok('index.html contém ids e símbolos obrigatórios', () => {
+  const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+  for (const id of ['splash', 'start', 'reels', 'spin', 'btnSound', 'boot', 'rotateHint', 'modal', 'bigwin', 'mascot', 'id="s-dog"', 'id="s-mascot"', 'id="s-portico"', 'Fichas fictícias']) {
+    assert(html.includes(id), 'index.html sem ' + id);
+  }
+  assert(!/tigre|tiger/i.test(html.replace(/TigerEngine|TigerConfig/g, '')), 'resto de nome antigo no HTML');
 });
 
 // --- RTP teórico (amostragem; limite 92–98%) ---
