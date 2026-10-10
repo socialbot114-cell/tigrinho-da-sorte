@@ -230,10 +230,23 @@ test('saldo zerado abre o presente de fichas (sem girar)', async ({ page }) => {
 
 // --- Q1-10: baselines visuais (fonte e animações fixas; partículas mascaradas) ---
 const VISUAL = { animations: 'disabled', maxDiffPixelRatio: 0.03, mask: [] };
-test('baseline visual: tela inicial', async ({ page }) => {
+test('baseline visual: logo da tela inicial', async ({ page }) => {
   await page.goto('/index.html?test=1');
+  await expect(page.locator('#splash')).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
-  await expect(page).toHaveScreenshot('splash.png', { ...VISUAL, fullPage: false });
+  await expect(page.locator('#splash .logo')).toHaveScreenshot('splash-logo.png', VISUAL);
+});
+
+test('splash mantém a arte, chamada, botão e aviso em viewport', async ({ page }) => {
+  await page.goto('/index.html?test=1');
+  const splash = page.locator('#splash');
+  await expect(splash.locator('.splash-dog')).toBeVisible();
+  await expect(splash.locator('.tag')).toContainText('Caramelo da Sorte');
+  await expect(splash.locator('#start')).toBeVisible();
+  await expect(splash.locator('.fine')).toContainText('sem prêmios reais');
+  const box = await splash.boundingBox();
+  expect(box.width).toBeGreaterThan(300);
+  expect(box.height).toBeGreaterThan(300);
 });
 test('baseline visual: máquina parada', async ({ page }) => {
   await startGame(page);

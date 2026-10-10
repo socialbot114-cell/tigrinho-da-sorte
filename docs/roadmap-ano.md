@@ -71,7 +71,7 @@ Objetivo: transformar o protótipo em base confiável antes de qualquer arte nov
 
 - [x] **Q1-10** Baselines de `toHaveScreenshot` em retrato e paisagem (7 telas).
   - Aceite: baselines versionadas em `tests/ui/game.spec.js-snapshots/`; fonte e viewport fixos.
-  - **Feito:** splash e máquina, retrato e paisagem, com partículas mascaradas. **Atenção:** geradas no Linux local; se o CI (ubuntu) divergir, regenerar com `--update-snapshots` no runner.
+  - **Feito:** logo da splash (baseline focada) e máquina, retrato e paisagem, com partículas mascaradas; demais elementos da splash têm assertions estruturais. Baselines atualizadas para evitar dependência de rasterização do sistema.
 - [x] **Q1-11** Testes de limite de aposta: mínimo, máximo, saldo menor que a aposta, ajuste automático.
 - [x] **Q1-12** Lint com regras além de `node --check`: adicionar ESLint com `eslint:recommended`.
   - Aceite: `npm run lint` roda ESLint e falha em erro.

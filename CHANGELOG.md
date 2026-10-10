@@ -9,7 +9,7 @@ Formato simples por versão. Datas em ISO. Fichas são fictícias, sem valor em 
 - Módulos: `reels.js` (rolos e tempos), `celebration.js` (plano da celebração), `save.js` (persistência), `effects.js` (partículas).
 - Save v2 (`tigrinho.save.v2`) com migração do v1; o v1 é preservado.
 - Hook de teste `window.__tigrinho` só com `?test=1`.
-- Testes: unitários (28 checks), Playwright em retrato e paisagem (19 testes), baselines visuais da tela inicial e da máquina.
+- Testes: unitários (28 checks), Playwright em retrato e paisagem (20 testes por perfil), baselines visuais do logo da tela inicial e da máquina.
 - ESLint substitui `node --check` no lint.
 
 ## 2.1.0
