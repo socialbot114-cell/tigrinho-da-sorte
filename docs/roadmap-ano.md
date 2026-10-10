@@ -38,12 +38,12 @@ Objetivo: transformar o protótipo em base confiável antes de qualquer arte nov
 
 ### Sprint 1: verificação do que já existe
 
-- [ ] **Q1-01** Commitar o estado atual em branch `v2.2` com mensagem de versão.
+- [x] **Q1-01** Commitar o estado atual em branch `v2.2` com mensagem de versão.
   - Aceite: `git status` limpo; `refs-locais/` fora do repositório.
-- [ ] **Q1-02** Rodar `ui.yml` no GitHub Actions pela primeira vez.
+- [x] **Q1-02** Rodar `ui.yml` no GitHub Actions pela primeira vez.
   - Aceite: workflow verde em `ubuntu-latest`. Se falhar, corrigir ambiente (Chromium, dependências) e documentar a causa.
-- [ ] **Q1-03** Confirmar `ci.yml` e `ci-macos.yml` verdes no mesmo commit.
-  - Aceite: três workflows verdes no mesmo SHA.
+- [x] **Q1-03** Confirmar `ci.yml` e `ci-macos.yml` verdes no mesmo commit.
+  - Aceite: três workflows verdes no mesmo SHA. **Feito em a32b10c** (PR #1, rascunho em v2.2). Primeiro run do CI falhou por checagem errada de HTML; corrigido.
 - [ ] **Q1-04** Renderizar `blender/cachorro.py` no Mac (quando disponível).
   - Aceite: 4 PNGs transparentes (`idle`, `girando`, `vitoria`, `grande-vitoria`) em `renders/`, revisados em tela de 390×844.
   - Plano B: se o render não agradar, manter SVG e registrar a decisão.
