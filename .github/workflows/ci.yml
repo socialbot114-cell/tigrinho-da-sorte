@@ -22,8 +22,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
-          cache-dependency-path: package.json
 
       - name: Node info
         run: node --version && npm --version && sw_vers || lsb_release -a || true
@@ -48,7 +46,9 @@ jobs:
         run: |
           python3 -m http.server 8000 --directory jogo & SRV=$!
           sleep 2
-          curl -fsS http://localhost:8000/index.html | head -c 200
-          curl -fsS http://localhost:8000/engine.js | head -c 200
+          curl -fsS http://localhost:8000/index.html -o /tmp/idx.html
+          curl -fsS http://localhost:8000/engine.js -o /tmp/eng.js
+          head -c 200 /tmp/idx.html; echo
+          head -c 200 /tmp/eng.js; echo
           kill $SRV
         shell: bash
