@@ -19,7 +19,7 @@ async function clearOverlays(page) {
 }
 
 async function startGame(page) {
-  await page.goto('/index.html');
+  await page.goto('/index.html?test=1');
   await expect(page.locator('#splash .logo')).toHaveText('TIGRINHO');
   await page.locator('#start').click();
   await expect(page.locator('#splash')).toBeHidden({ timeout: 5000 });
@@ -30,7 +30,7 @@ async function waitSpinDone(page) {
 }
 
 test('tela inicial mostra logo e aviso de fichas fictícias', async ({ page }, info) => {
-  await page.goto('/index.html');
+  await page.goto('/index.html?test=1');
   await expect(page.locator('#splash .logo')).toHaveText('TIGRINHO');
   await expect(page.locator('#splash .fine')).toContainText('Fichas fictícias');
   await expect(page.locator('#start')).toBeVisible();
@@ -65,7 +65,7 @@ test('saldo persiste após recarregar', async ({ page }) => {
   await page.locator('#spin').click();
   await waitSpinDone(page);
   await clearOverlays(page);
-  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('tigrinho.save.v1')).balance);
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('tigrinho.save.v2')).balance);
   await page.reload();
   await page.locator('#start').click();
   await clearOverlays(page);
@@ -109,7 +109,7 @@ test('nenhum erro de console na sessão', async ({ page }) => {
 });
 
 test('bônus diário mostra dia da sequência e 7 marcadores', async ({ page }, info) => {
-  await page.goto('/index.html');
+  await page.goto('/index.html?test=1');
   await page.locator('#start').click();
   await expect(page.locator('#getDaily')).toBeVisible({ timeout: 5000 });
   await expect(page.locator('#modalCard')).toContainText('Dia 1 de sequência');
@@ -129,21 +129,21 @@ test('faixas de prêmio: pequena, média, grande, mega e suprema', async ({ page
 });
 
 test('bônus diário mantém sequência ao coletar hoje e o botão aparece uma vez', async ({ page }) => {
-  await page.goto('/index.html');
+  await page.goto('/index.html?test=1');
   await page.locator('#start').click();
   await page.locator('#getDaily').click();
   await expect(page.locator('#modal')).toBeHidden();
   await page.reload();
   await page.locator('#start').click();
   await expect(page.locator('#getDaily')).toHaveCount(0);
-  const streak = await page.evaluate(() => JSON.parse(localStorage.getItem('tigrinho.save.v1')).streak);
+  const streak = await page.evaluate(() => JSON.parse(localStorage.getItem('tigrinho.save.v2')).streak);
   expect(streak).toBe(1);
 });
 
 test.describe('com movimento', () => {
   test.use({ reducedMotion: 'no-preference' });
   test('celebração de vitória grande (mega) aparece, mostra print e fecha', async ({ page }, info) => {
-    await page.goto('/index.html');
+    await page.goto('/index.html?test=1');
     await page.evaluate(() => document.getElementById('start').click()); // botão pulsa: clique direto
     await page.waitForTimeout(900);
     await page.evaluate(() => { const b = document.getElementById('getDaily'); if (b) b.click(); });
@@ -158,7 +158,7 @@ test.describe('com movimento', () => {
   });
 
   test('nível 3 mostra raios sem multiplicador; nível 4 mostra multiplicador', async ({ page }) => {
-    await page.goto('/index.html');
+    await page.goto('/index.html?test=1');
     await page.evaluate(() => document.getElementById('start').click());
     await page.waitForTimeout(900);
     await page.evaluate(() => { const b = document.getElementById('getDaily'); if (b) b.click(); });
@@ -175,4 +175,22 @@ test.describe('com movimento', () => {
     await page.evaluate(() => document.getElementById('bigwin').click());
     await expect(page.locator('#bigwin')).toBeHidden();
   });
+});
+
+test('hook de teste não existe em produção (sem ?test=1)', async ({ page }) => {
+  await page.goto('/index.html');
+  expect(await page.evaluate(() => typeof window.__tigrinho)).toBe('undefined');
+});
+
+test('save v1 é migrado para v2 ao abrir o jogo', async ({ page }) => {
+  await page.goto('/index.html');
+  // o primeiro acesso já gravou um v2 padrão; simula um usuário que só tinha o v1
+  await page.evaluate(() => { localStorage.removeItem('tigrinho.save.v2'); localStorage.setItem('tigrinho.save.v1', JSON.stringify({ balance: 4321, bet: 25, streak: 2, stats: { spins: 5 } })); });
+  await page.reload();
+  await page.locator('#start').click();
+  await expect(page.locator('#balance')).toHaveText('4.321');
+  const v2 = await page.evaluate(() => JSON.parse(localStorage.getItem('tigrinho.save.v2')));
+  expect(v2.v).toBe(2);
+  expect(v2.bet).toBe(25);
+  expect(await page.evaluate(() => localStorage.getItem('tigrinho.save.v1') !== null)).toBe(true);
 });

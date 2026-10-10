@@ -95,10 +95,60 @@ ok('sequência: ontem soma, hoje mantém, pular dia recomeça', () => {
   assert.strictEqual(E.nextStreak('', 'd2', 'd1', 0), 1);
 });
 
+// --- save versionado (Q1-07) ---
+const SAVE = require('./save.js');
+function fakeStorage(init = {}) {
+  const m = new Map(Object.entries(init));
+  return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), _m: m };
+}
+ok('save: sem nada salvo começa do zero com saldo inicial', () => {
+  const s = SAVE.load(fakeStorage(), false, 10000);
+  assert.strictEqual(s.balance, 10000);
+  assert.strictEqual(s.v, 2);
+});
+ok('save: migra v1 para v2 e mantém progresso', () => {
+  const v1 = { balance: 4321, bet: 25, xp: 7, level: 3, theme: 'jade', streak: 2, lastDaily: 'Mon', stats: { spins: 9, wins: 3, wilds: 1, bigs: 0, best: 300 }, m: { spins: { tier: 1, start: 20 } }, set: { music: false, sfx: true, vib: true, reduce: false } };
+  const st = fakeStorage({ [SAVE.KEY_V1]: JSON.stringify(v1) });
+  const s = SAVE.load(st, false, 10000);
+  assert.strictEqual(s.balance, 4321); assert.strictEqual(s.bet, 25); assert.strictEqual(s.level, 3);
+  assert.strictEqual(s.stats.best, 300); assert.strictEqual(s.m.spins.tier, 1); assert.strictEqual(s.set.music, false);
+  SAVE.write(st, s);
+  assert(st._m.has(SAVE.KEY_V2), 'escrita deve ir para v2');
+  assert(st._m.has(SAVE.KEY_V1), 'v1 não é apagado (rollback)');
+});
+ok('save: JSON corrompido cai para padrão sem lançar erro', () => {
+  const s = SAVE.load(fakeStorage({ [SAVE.KEY_V2]: '{quebrado' }), false, 10000);
+  assert.strictEqual(s.balance, 10000);
+});
+ok('save: valores inválidos são saneados (aposta fora da lista, saldo negativo, tema desconhecido)', () => {
+  const s = SAVE.migrate({ balance: -5, bet: 7, theme: 'xyz', level: 0, stats: { spins: 'x' } }, false, 10000);
+  assert.strictEqual(s.balance, 10000);
+  assert.strictEqual(s.bet, 10);
+  assert.strictEqual(s.theme, 'red');
+  assert.strictEqual(s.level, 1);
+  assert.strictEqual(s.stats.spins, 0);
+});
+ok('save: preferência de reduzir movimento do sistema vale só se não houver escolha salva', () => {
+  assert.strictEqual(SAVE.migrate({}, true, 10000).set.reduce, true);
+  assert.strictEqual(SAVE.migrate({ set: { reduce: false } }, true, 10000).set.reduce, false);
+});
+
+// --- configuração de jogo (Q1-09) e hook de teste (Q1-08) ---
+ok('gameConfig central tem economia e lembrete', () => {
+  assert.strictEqual(C.gameConfig.START_CHIPS, 10000);
+  assert.strictEqual(C.gameConfig.REFILL_CHIPS, 1500);
+  assert.strictEqual(C.gameConfig.REMIND_EVERY_MIN, 30);
+});
+ok('game.js expõe o hook de teste só com ?test=1', () => {
+  const src = fs.readFileSync(path.join(__dirname, 'game.js'), 'utf8');
+  assert(/TEST_MODE\) window\.__tigrinho/.test(src), 'window.__tigrinho sem gate');
+  assert(/test=1/.test(src), 'gate ?test=1 ausente');
+});
+
 // --- HTML: ids obrigatórios da interface (tela inicial, rolos, HUD, mascote) ---
 ok('index.html contém ids e símbolos obrigatórios', () => {
   const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
-  for (const id of ['splash', 'start', 'reels', 'spin', 'btnSound', 'boot', 'rotateHint', 'modal', 'bigwin', 'mascot', 'id="s-dog"', 'id="s-mascot"', 'id="s-portico"', 'Fichas fictícias']) {
+  for (const id of ['splash', 'start', 'reels', 'spin', 'btnSound', 'boot', 'rotateHint', 'modal', 'bigwin', 'mascot', 'id="s-dog"', 'id="s-mascot"', 'id="s-portico"', 'Fichas fictícias', 'save.js', 'effects.js']) {
     assert(html.includes(id), 'index.html sem ' + id);
   }
   assert(!/tigre|tiger/i.test(html.replace(/TigerEngine|TigerConfig/g, '')), 'resto de nome antigo no HTML');

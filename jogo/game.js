@@ -6,8 +6,9 @@
   const CFG = (typeof TigerConfig !== 'undefined') ? TigerConfig : null;
   const RC = CFG ? CFG.reelsConfig : { SPIN_DURATION: 850, REEL_OFFSET_TIME: 300, TURBO_SPIN_DURATION: 380, TURBO_OFFSET_TIME: 110, ANTICIPATION_EXTRA: 900, BLUR_PX: 1.4, FILLER_DIVISOR: 85 };
   const $ = (id) => document.getElementById(id);
-  const KEY = 'tigrinho.save.v1';
-  const START_CHIPS = 10000, REFILL = 1500;
+  const GC = CFG ? CFG.gameConfig : { START_CHIPS: 10000, REFILL_CHIPS: 1500 };
+  const START_CHIPS = GC.START_CHIPS, REFILL = GC.REFILL_CHIPS;
+  const TEST_MODE = /[?&]test=1\b/.test(location.search);
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const fmt = (n) => Math.round(n).toLocaleString('pt-BR');
 
@@ -19,15 +20,11 @@
     { id: 'bigs', base: 1, stat: 'bigs', reward: 1500, text: (n) => `Consiga ${n} vitória(s) grande(s)` },
   ];
   const THEMES = [{ id: 'red', name: 'Festival Vermelho', lvl: 1 }, { id: 'jade', name: 'Jardim de Jade', lvl: 3 }, { id: 'noite', name: 'Noite de Lanternas', lvl: 6 }];
-  const fresh = () => ({
-    balance: START_CHIPS, bet: 10, xp: 0, level: 1, theme: 'red', lastDaily: '', streak: 0,
-    stats: { spins: 0, wins: 0, wilds: 0, bigs: 0, best: 0 },
-    m: Object.fromEntries(MISSIONS.map((x) => [x.id, { tier: 0, start: 0 }])),
-    set: { music: true, sfx: true, vib: true, reduce: matchMedia('(prefers-reduced-motion: reduce)').matches },
-  });
-  let S;
-  try { S = Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = fresh(); }
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+  const reduceDefault = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fresh = () => TigerSave.defaults(reduceDefault, START_CHIPS);
+  let S = TigerSave.load(localStorage, reduceDefault, START_CHIPS);
+  const save = () => TigerSave.write(localStorage, S);
+  save(); // grava já na v2 (migra o v1 de imediato)
 
   // ---------- DOM ----------
   const app = $('app'), reelsEl = $('reels'), frame = document.querySelector('.frame'), mascot = $('mascot'),
@@ -113,9 +110,11 @@
     if (level >= 1) burst(6 + level * 4, W / 2, Hh * .45, .5 + level * .15);
   }
 
-  // ---------- efeitos ----------
-  const fx = $('fx'), g = fx.getContext('2d'); let parts = [], petals = [], W = 0, Hh = 0;
-  function resize() { const d = Math.min(devicePixelRatio || 1, 2); fx.width = innerWidth * d; fx.height = innerHeight * d; g.setTransform(d, 0, 0, d, 0, 0); W = innerWidth; Hh = innerHeight; orient(); }
+  // ---------- efeitos (motor em effects.js) ----------
+  const fx = $('fx'); let W = 0, Hh = 0;
+  const FX = TigerFx.create(fx, () => S.set.reduce);
+  const burst = (...a) => FX.burst(...a), rain = (n) => FX.rain(n);
+  function resize() { W = innerWidth; Hh = innerHeight; FX.setSize(W, Hh); orient(); }
   // Orientação: retrato é o modo principal; paisagem usa layout adaptativo (CSS)
   // + dica discreta em ecrãs curtos. Tenta travar em retrato quando instalado (PWA).
   function orient() {
@@ -130,29 +129,7 @@
       }
     } catch (e) {}
   }
-  addEventListener('resize', resize); addEventListener('orientationchange', () => setTimeout(resize, 60)); resize();
-  for (let i = 0; i < 16; i++) petals.push({ x: Math.random() * 500, y: Math.random() * 900, v: .3 + Math.random() * .6, s: 4 + Math.random() * 5, p: Math.random() * 6 });
-  const coinImg = (() => { const c = document.createElement('canvas'); c.width = c.height = 48; const x = c.getContext('2d');
-    const gr = x.createRadialGradient(18, 16, 3, 24, 24, 22); gr.addColorStop(0, '#fff6b0'); gr.addColorStop(.6, '#ffc83a'); gr.addColorStop(1, '#b8740a');
-    x.fillStyle = gr; x.beginPath(); x.arc(24, 24, 22, 0, 7); x.fill(); x.strokeStyle = '#8a5a00'; x.lineWidth = 3; x.stroke();
-    x.fillStyle = '#a86a00'; x.fillRect(18, 18, 12, 12); return c; })();
-  function burst(n, x = W / 2, y = Hh * .4, power = 1) {
-    n = S.set.reduce ? Math.min(n, 8) : n;
-    for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, v = (4 + Math.random() * 9) * power;
-      parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 6 * power, r: Math.random() * 6, vr: .2 + Math.random() * .3, s: 14 + Math.random() * 14, life: 160 + Math.random() * 60 }); }
-  }
-  function rain(n) { n = S.set.reduce ? Math.min(n, 10) : n;
-    for (let i = 0; i < n; i++) setTimeout(() => parts.push({ x: Math.random() * W, y: -30, vx: (Math.random() - .5) * 2, vy: 2 + Math.random() * 4, r: Math.random() * 6, vr: .2 + Math.random() * .3, s: 16 + Math.random() * 14, life: 400, rain: 1 }), i * 25); }
-  function loop() {
-    g.clearRect(0, 0, W, Hh);
-    if (!S.set.reduce) for (const p of petals) { p.y += p.v; p.x += Math.sin((p.y + p.p * 40) / 40) * .6; p.p += .02; if (p.y > Hh + 10) { p.y = -10; p.x = Math.random() * W; }
-      g.fillStyle = 'rgba(255,170,190,.55)'; g.beginPath(); g.ellipse(p.x, p.y, p.s, p.s * .55, p.p, 0, 7); g.fill(); }
-    parts = parts.filter((p) => p.life-- > 0 && p.y < Hh + 40);
-    for (const p of parts) { p.vy += p.rain ? .06 : .35; p.x += p.vx; p.y += p.vy; p.r += p.vr;
-      g.save(); g.translate(p.x, p.y); g.scale(Math.abs(Math.cos(p.r)) * .9 + .1, 1); g.drawImage(coinImg, -p.s / 2, -p.s / 2, p.s, p.s); g.restore(); }
-    requestAnimationFrame(loop);
-  }
-  loop();
+  addEventListener('resize', resize); addEventListener('orientationchange', () => setTimeout(resize, 60)); resize(); FX.start();
   function shake() { if (S.set.reduce) return; frame.classList.remove('shake'); void frame.offsetWidth; frame.classList.add('shake'); }
 
   // ---------- UI helpers ----------
@@ -295,10 +272,10 @@
       (c) => c.querySelector('#getDaily').onclick = () => { Sound.init(); Sound.big(); S.lastDaily = today; S.streak = streak; S.balance += reward; setShown(S.balance); save(); rain(40); closeModal(); });
   }
   // Lembrete de tempo de jogo (não é pressão nem contagem regressiva): a cada 30 min, sugere pausa.
-  const sessionStart = Date.now(); let lastRemind = 0;
+  const sessionStart = Date.now(); let lastRemind = 0; const REMIND = GC.REMIND_EVERY_MIN || 30;
   setInterval(() => {
     const mins = Math.floor((Date.now() - sessionStart) / 60000);
-    if (mins >= 30 && mins - lastRemind >= 30 && !busy) { lastRemind = mins; toast(`🐶 Você joga há ${mins} min. Que tal uma pausa?`, 3500); }
+    if (mins >= REMIND && mins - lastRemind >= REMIND && !busy) { lastRemind = mins; toast(`🐶 Você joga há ${mins} min. Que tal uma pausa?`, 3500); }
   }, 60000);
   function menu() {
     modal(`<h2>Menu</h2><button class="btn alt" data-a="pay">🏮 Tabela de prêmios</button><button class="btn alt" data-a="mis">🎯 Missões</button><button class="btn alt" data-a="thm">🎨 Temas</button><button class="btn alt" data-a="set">⚙️ Configurações</button><button class="btn alt" data-a="about">ℹ️ Sobre o jogo</button><button class="btn" data-close>Voltar ao jogo</button>`,
@@ -353,5 +330,5 @@
   else daily();
   addEventListener('pointerdown', () => Sound.init(), { once: true });
   // prévia de celebração (testes e prints): preview(razão) mostra a faixa de prêmio correspondente
-  window.__tigrinho = { S, spin, E, preview: (r) => { const t = E.prizeTier(r); return t.level >= 3 ? bigWin(r * 10, t) : null; } };
+  if (TEST_MODE) window.__tigrinho = { S, spin, E, preview: (r) => { const t = E.prizeTier(r); return t.level >= 3 ? bigWin(r * 10, t) : null; } };
 })();

@@ -69,5 +69,14 @@
     return 0.5;
   }
 
-  return { reelsConfig, betConfig, designConfig, bigWinConfig, calculateScale };
+  // Economia e tempos de jogo (Q1-09): nenhum número mágico no game.js.
+  const gameConfig = {
+    START_CHIPS: 10000,
+    REFILL_CHIPS: 1500, // presente quando o saldo zera (fichas fictícias)
+    DAILY_BONUS: 2000, // dia 1 da sequência; ver engine.dailyReward
+    REMIND_EVERY_MIN: 30, // lembrete de pausa, sem contagem regressiva
+    WIN_SKIP_LABEL: 'toque para pular', // texto de acessibilidade do pulo
+  };
+
+  return { reelsConfig, betConfig, designConfig, bigWinConfig, gameConfig, calculateScale };
 });

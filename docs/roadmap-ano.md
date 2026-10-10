@@ -53,15 +53,19 @@ Objetivo: transformar o protótipo em base confiável antes de qualquer arte nov
 
 ### Sprint 2: arquitetura
 
-- [ ] **Q1-06** Dividir `jogo/game.js` em módulos ES (ou IIFEs com namespace):
+- [~] **Q1-06** (parcial: `effects.js` e `save.js` extraídos; resto pendente) Dividir `jogo/game.js` em módulos ES (ou IIFEs com namespace):
   `state.js`, `reels.js`, `celebration.js`, `hud.js`, `menus.js`, `effects.js`, `main.js`.
   - Aceite: `game.js` antigo removido; comportamento idêntico nos testes de UI.
-- [ ] **Q1-07** Versionar o save: `tigrinho.save.v2` com migração a partir de `tigrinho.save.v1`.
+  - **Pendente:** `game.js` ainda tem ~330 linhas com estado, render, celebração e menus. `effects.js` (partículas) e `save.js` (persistência) já saíram. Próximo passo: `reels.js` e `celebration.js`.
+- [x] **Q1-07** Versionar o save: `tigrinho.save.v2` com migração a partir de `tigrinho.save.v1`.
   - Aceite: teste unitário de migração com 3 saves de exemplo (novo, com progresso, corrompido).
-- [ ] **Q1-08** Remover `window.__tigrinho.preview` do build de produção.
+  - **Feito:** `jogo/save.js` (v2 grava; v1 é migrado e não é apagado). 5 checks unitários e 1 teste de UI.
+- [x] **Q1-08** Remover `window.__tigrinho.preview` do build de produção.
   - Aceite: a API só existe quando a URL tem `?test=1`. Testes de UI usam esse parâmetro.
-- [ ] **Q1-09** Mover constantes de design e tempo para `config.js` (durações, cores de tiers, valores de bônus).
+  - **Feito:** `window.__tigrinho` só existe com `?test=1` (teste de UI e checagem no `engine.test.js`).
+- [x] **Q1-09** Mover constantes de design e tempo para `config.js` (durações, cores de tiers, valores de bônus).
   - Aceite: nenhum número mágico de animação em `reels.js` e `celebration.js`.
+  - **Feito parcial:** economia e lembrete em `config.js > gameConfig`. Animações ainda em `game.js` (dependem da divisão de módulos).
 
 ### Sprint 3: qualidade
 
