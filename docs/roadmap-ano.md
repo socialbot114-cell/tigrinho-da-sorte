@@ -47,25 +47,27 @@ Objetivo: transformar o protótipo em base confiável antes de qualquer arte nov
 - [ ] **Q1-04** Renderizar `blender/cachorro.py` no Mac (quando disponível).
   - Aceite: 4 PNGs transparentes (`idle`, `girando`, `vitoria`, `grande-vitoria`) em `renders/`, revisados em tela de 390×844.
   - Plano B: se o render não agradar, manter SVG e registrar a decisão.
+  - **Bloqueado:** precisa de Blender em Mac; SVG adotado como arte principal em `docs/decisoes/mascote.md`.
 - [ ] **Q1-05** Medir FPS em iPhone real (Safari Web Inspector ou `requestAnimationFrame` com log).
   - Cenários: parado, giro, respin, vitória mega.
   - Aceite: planilha em `docs/perf/` com média e percentil 5 de cada cenário.
+  - **Bloqueado:** precisa de iPhone real e Safari Web Inspector; testes Chromium são apenas smoke funcional, não substituem essa medição.
 
 ### Sprint 2: arquitetura
 
-- [x] **Q1-06** Dividir `jogo/game.js` em módulos ES (ou IIFEs com namespace):
+- [~] **Q1-06** Dividir `jogo/game.js` em módulos ES (ou IIFEs com namespace):
   `state.js`, `reels.js`, `celebration.js`, `hud.js`, `menus.js`, `effects.js`, `main.js`.
-  - Aceite: `game.js` antigo removido; comportamento idêntico nos testes de UI.
-  - **Feito:** `reels.js` (rolos, travas, linhas, tempos puros em `stepPlan`) e `celebration.js` (plano puro por nível). `game.js` ficou com estado, controles e menus.
+  - Aceite: responsabilidades separadas sem regressão nos testes de UI.
+  - **Parcial:** `reels.js` (rolos, travas, linhas, tempos puros em `stepPlan`), `celebration.js` (plano puro por nível), `effects.js` (partículas) e `save.js` (persistência). `game.js` ainda orquestra estado, controles e menus; os módulos de HUD/menus/state/main ainda não foram separados.
 - [x] **Q1-07** Versionar o save: `tigrinho.save.v2` com migração a partir de `tigrinho.save.v1`.
   - Aceite: teste unitário de migração com 3 saves de exemplo (novo, com progresso, corrompido).
   - **Feito:** `jogo/save.js` (v2 grava; v1 é migrado e não é apagado). 5 checks unitários e 1 teste de UI.
 - [x] **Q1-08** Remover `window.__tigrinho.preview` do build de produção.
   - Aceite: a API só existe quando a URL tem `?test=1`. Testes de UI usam esse parâmetro.
   - **Feito:** `window.__tigrinho` só existe com `?test=1` (teste de UI e checagem no `engine.test.js`).
-- [x] **Q1-09** Mover constantes de design e tempo para `config.js` (durações, cores de tiers, valores de bônus).
+- [~] **Q1-09** Mover constantes de design e tempo para `config.js` (durações, cores de tiers, valores de bônus).
   - Aceite: nenhum número mágico de animação em `reels.js` e `celebration.js`.
-  - **Feito parcial:** economia e lembrete em `config.js > gameConfig`. Animações ainda em `game.js` (dependem da divisão de módulos).
+  - **Parcial:** economia e lembrete em `config.js > gameConfig`; valores de animação ainda precisam ser centralizados.
 
 ### Sprint 3: qualidade
 
@@ -78,7 +80,7 @@ Objetivo: transformar o protótipo em base confiável antes de qualquer arte nov
   - **Feito:** `eslint.config.js` (flat config, eslint 9). Sem erros.
 - [x] **Q1-13** Escrever `CHANGELOG.md` com v1.1.0, v2.0, v2.1 e v2.2 reconstruídas do histórico.
 
-**Saída do Q1:** CI verde, FPS medido, save versionado, `game.js` dividido em módulos, baselines visuais.
+**Saída do Q1:** CI verde, save versionado, `game.js` parcialmente dividido em módulos e baselines visuais. FPS em iPhone real segue bloqueado até acesso ao aparelho.
 
 ---
 
@@ -88,10 +90,11 @@ Objetivo: o visual parecer produto, não protótipo.
 
 ### Sprint 4: mascote
 
-- [ ] **Q2-01** Decidir o pipeline do mascote com base no Q1-04 (SVG ou PNG). Registrar em `docs/decisoes/mascote.md`.
-- [ ] **Q2-02** Separar o SVG do cachorro em partes: cabeça, orelhas, corpo, braços, cauda, colete.
+- [x] **Q2-01** Decidir o pipeline do mascote com base no Q1-04 (SVG ou PNG). Registrar em `docs/decisoes/mascote.md`.
+- [x] **Q2-02** Separar o SVG do cachorro em partes: cabeça, orelhas, corpo, braços, cauda, colete.
   - Aceite: cada parte anima sozinha por CSS sem quebrar a silhueta.
-- [ ] **Q2-03** Quatro poses finais (repouso, giro, vitória, grande vitória) aprovadas em screenshot.
+- [~] **Q2-03** Quatro poses finais (repouso, giro, vitória, grande vitória) aprovadas em screenshot.
+  - **Implementado:** repouso, cabeça inclinada no giro, orelhas/braços na vitória e pulo/orelhas na grande vitória. CSS testado com movimento habilitado; aprovação visual final continua pendente.
 
 ### Sprint 5: símbolos e máquina
 

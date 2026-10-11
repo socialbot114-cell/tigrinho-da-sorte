@@ -142,6 +142,32 @@ test('bônus diário mantém sequência ao coletar hoje e o botão aparece uma v
 
 test.describe('com movimento', () => {
   test.use({ reducedMotion: 'no-preference' });
+  test('peças do mascote animam separadamente nos estados de giro, vitória e grande vitória', async ({ page }, info) => {
+    await page.goto('/index.html?test=1');
+    await page.evaluate(() => document.getElementById('start').click());
+    await page.waitForTimeout(400);
+    await page.evaluate(() => { const daily = document.getElementById('getDaily'); if (daily) daily.click(); });
+    await expect(page.locator('#splash')).toBeHidden();
+    const mascot = page.locator('#mascot');
+    await expect(mascot.locator('.dog-ear-l')).toBeAttached();
+    await expect(mascot.locator('.dog-ear-r')).toBeAttached();
+    await expect(mascot.locator('.dog-head')).toBeAttached();
+    await expect(mascot.locator('.dog-collar')).toBeAttached();
+    for (const [state, selector, animation] of [
+      ['spinning', '.dog-head', 'headtilt'],
+      ['cheer', '.dog-ear-l', 'earflop'],
+      ['big', '.dog-ear-r', 'earflop'],
+    ]) {
+      await mascot.evaluate((el, name) => { el.setAttribute('class', `mascot ${name}`); }, state);
+      const name = await mascot.locator(selector).evaluate((el) => getComputedStyle(el).animationName);
+      expect(name).toBe(animation);
+      await page.screenshot({
+        path: path.join(SHOTS, `${info.project.name}-mascote-${state}.png`),
+        style: '#fx { display: none !important } #bubble { visibility: hidden !important }',
+      });
+    }
+  });
+
   test('celebração de vitória grande (mega) aparece, mostra print e fecha', async ({ page }, info) => {
     await page.goto('/index.html?test=1');
     await page.evaluate(() => document.getElementById('start').click()); // botão pulsa: clique direto

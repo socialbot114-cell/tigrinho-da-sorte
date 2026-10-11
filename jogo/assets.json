@@ -55,6 +55,26 @@
           "kind": "svg-symbol"
         },
         {
+          "alias": "s-dog-ear-l",
+          "src": "inline#index.html#s-dog-ear-l",
+          "kind": "svg-symbol-part"
+        },
+        {
+          "alias": "s-dog-ear-r",
+          "src": "inline#index.html#s-dog-ear-r",
+          "kind": "svg-symbol-part"
+        },
+        {
+          "alias": "s-dog-face",
+          "src": "inline#index.html#s-dog-face",
+          "kind": "svg-symbol-part"
+        },
+        {
+          "alias": "s-dog-collar",
+          "src": "inline#index.html#s-dog-collar",
+          "kind": "svg-symbol-part"
+        },
+        {
           "alias": "s-portico",
           "src": "inline#index.html#s-portico",
           "kind": "svg-symbol"

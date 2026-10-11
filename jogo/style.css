@@ -272,5 +272,16 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 .mascot.big .arm-l{animation:wave2 .32s ease-in-out infinite;transform-box:view-box;transform-origin:36px 120px}
 .mascot.big .arm-r{animation:wave .32s ease-in-out infinite alternate}
 @keyframes jumpbig{50%{transform:translateY(-30px) rotate(-3deg) scale(1.06)}}
+.dog-ear,.dog-head,.dog-collar{transform-box:fill-box}
+.dog-ear{transform-origin:50% 12%}
+.mascot.spinning .dog-head{animation:headtilt .25s ease-in-out infinite alternate;transform-origin:50% 80%}
+.mascot.cheer .dog-ear-l{animation:earflop .5s ease-in-out infinite alternate}
+.mascot.cheer .dog-ear-r{animation:earflop .5s ease-in-out infinite alternate-reverse}
+.mascot.big .dog-head{animation:headtilt .42s ease-in-out infinite alternate}
+.mascot.big .dog-ear{animation:earflop .34s ease-in-out infinite alternate}
+.mascot.big .dog-collar{filter:drop-shadow(0 0 5px #ffd24a)}
+@keyframes headtilt{to{transform:rotate(4deg) translateY(-2px)}}
+@keyframes earflop{to{transform:rotate(12deg)}}
 .reduce .mascot.big,.reduce .mascot.big .arm-l,.reduce .mascot.big .arm-r,.reduce .mascot.cheer .arm-l,.reduce .mascot.spinning .arm-l{animation:none!important}
+.reduce .dog-ear,.reduce .dog-head{animation:none!important}
 @media (prefers-reduced-motion:reduce){.bw-rays,.bw-mult:not(:empty){animation:none}}

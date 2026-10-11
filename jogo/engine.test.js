@@ -63,10 +63,10 @@ ok('engine BETS confere com config', () => {
 });
 
 // --- assets.json válido ---
-ok('assets.json válido com 11 símbolos inline', () => {
+ok('assets.json válido com 15 símbolos e partes inline', () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'assets.json'), 'utf8'));
   const syms = manifest.bundles.find((b) => b.name === 'caramelo-symbols');
-  assert(syms && syms.assets.length === 11, 'esperava 11 símbolos');
+  assert(syms && syms.assets.length === 15, 'esperava 15 símbolos e partes');
   const font = path.join(__dirname, 'fonts', 'Bangers-Regular.ttf');
   assert(fs.existsSync(font) && fs.existsSync(font.replace('Bangers-Regular.ttf', 'OFL.txt')), 'fonte/licença ausentes');
 });
@@ -190,7 +190,7 @@ ok('celebração: multiplicador é total/aposta inteiro', () => {
 // --- HTML: ids obrigatórios da interface (tela inicial, rolos, HUD, mascote) ---
 ok('index.html contém ids e símbolos obrigatórios', () => {
   const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
-  for (const id of ['splash', 'start', 'reels', 'spin', 'btnSound', 'boot', 'rotateHint', 'modal', 'bigwin', 'mascot', 'id="s-dog"', 'id="s-mascot"', 'id="s-portico"', 'Fichas fictícias', 'save.js', 'effects.js', 'reels.js', 'celebration.js']) {
+  for (const id of ['splash', 'start', 'reels', 'spin', 'btnSound', 'boot', 'rotateHint', 'modal', 'bigwin', 'mascot', 'id="s-dog"', 'id="s-dog-ear-l"', 'id="s-dog-ear-r"', 'id="s-dog-face"', 'id="s-dog-collar"', 'id="s-mascot"', 'id="s-portico"', 'Fichas fictícias', 'save.js', 'effects.js', 'reels.js', 'celebration.js']) {
     assert(html.includes(id), 'index.html sem ' + id);
   }
   assert(!/tigre|tiger/i.test(html.replace(/TigerEngine|TigerConfig/g, '')), 'resto de nome antigo no HTML');
