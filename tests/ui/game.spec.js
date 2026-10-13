@@ -336,10 +336,12 @@ test('baseline visual: máquina parada', async ({ page }) => {
   await startGame(page);
   await clearOverlays(page);
   await page.evaluate(() => {
-    document.getElementById('winbar').style.display = 'none';
-    document.getElementById('bubble').style.display = 'none';
+    const style = document.createElement('style');
+    const cell = innerWidth > innerHeight ? 72 : 100;
+    style.textContent = `:root { --cell: ${cell}px !important } #fx, #mascot, #bubble, #toast, #winbar { display: none !important }`;
+    document.head.appendChild(style);
   });
   await page.evaluate(() => document.fonts.ready);
-  // Recorta a máquina/símbolos para que a comparação não dependa das fontes do HUD.
-  await expect(page.locator('#machine')).toHaveScreenshot('maquina.png', VISUAL);
+  // Tamanho de célula fixo só na captura; compara arte/rolos sem HUD, texto ou canvas.
+  await expect(page.locator('.frame')).toHaveScreenshot('maquina.png', VISUAL);
 });
