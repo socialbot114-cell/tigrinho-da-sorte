@@ -283,5 +283,10 @@
   else daily();
   addEventListener('pointerdown', () => Sound.init(), { once: true });
   // prévia de celebração (testes e prints): preview(razão) mostra a faixa de prêmio correspondente
-  if (TEST_MODE) window.__tigrinho = { S, spin, E, preview: (r) => { const t = E.prizeTier(r); return t.level >= 3 ? bigWin(r * 10, t) : null; } };
+  if (TEST_MODE) window.__tigrinho = {
+    S, spin, E,
+    preview: (r) => { const t = E.prizeTier(r); return t.level >= 3 ? bigWin(r * 10, t) : null; },
+    highlightLine: () => R.highlight([{ cells: [[0, 0], [1, 0], [2, 0]] }]),
+    lockWild: () => R.setLocks(['1,1']),
+  };
 })();

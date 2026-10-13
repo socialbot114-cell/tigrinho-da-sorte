@@ -148,6 +148,13 @@ ok('game.js expõe o hook de teste só com ?test=1', () => {
 // --- módulos de rolos e celebração (Q1-06) ---
 const RL = require('./reels.js');
 const CEL = require('./celebration.js');
+ok('cada símbolo tem um material de apresentação próprio', () => {
+  assert.deepStrictEqual(RL.SYMBOL_MATERIALS, {
+    wild: 'wild', envelope: 'paper', ingot: 'metal', bag: 'fabric',
+    orange: 'fruit', cracker: 'enamel', lantern: 'glass',
+  });
+  assert.strictEqual(new Set(Object.values(RL.SYMBOL_MATERIALS)).size, 7);
+});
 ok('stepPlan: anticipação só no 3º rolo com wild nos dois primeiros', () => {
   const rc = C.reelsConfig;
   const p = RL.stepPlan(rc, { turbo: false, reduce: false, grid: [['wild', 'a', 'b'], ['c', 'd', 'e'], ['f', 'g', 'h']] });

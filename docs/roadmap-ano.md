@@ -73,7 +73,7 @@ Objetivo: transformar o protótipo em base confiável antes de qualquer arte nov
 
 - [x] **Q1-10** Baselines de `toHaveScreenshot` em retrato e paisagem (7 telas).
   - Aceite: baselines versionadas em `tests/ui/game.spec.js-snapshots/`; fonte e viewport fixos.
-  - **Feito:** logo da splash (baseline focada) e máquina, retrato e paisagem, com partículas mascaradas; demais elementos da splash têm assertions estruturais. Baselines atualizadas para evitar dependência de rasterização do sistema.
+  - **Feito:** logo da splash (baseline focada) e máquina, retrato e paisagem; efeitos transitórios são ocultados, sem mascarar a arte. Baselines atualizadas para evitar dependência de rasterização do sistema.
 - [x] **Q1-11** Testes de limite de aposta: mínimo, máximo, saldo menor que a aposta, ajuste automático.
 - [x] **Q1-12** Lint com regras além de `node --check`: adicionar ESLint com `eslint:recommended`.
   - Aceite: `npm run lint` roda ESLint e falha em erro.
@@ -98,9 +98,10 @@ Objetivo: o visual parecer produto, não protótipo.
 
 ### Sprint 5: símbolos e máquina
 
-- [ ] **Q2-04** Sete símbolos com material próprio: metal, papel, vidro, fruta.
-- [ ] **Q2-05** Cada símbolo em três estados: normal, travado (WILD), vencedor.
-  - Aceite: tabela de 21 sprites revisada em grade 7×3.
+- [x] **Q2-04** Sete símbolos com material próprio: metal, papel, vidro, fruta.
+  - **Feito:** metal/foil (lingote), papel esmaltado (envelope), tecido bordado (saco), fruta polida (tangerina), esmalte (rojões), vidro luminoso (lanterna) e ouro/mascote (Caramelo WILD). Arte em SVG local.
+- [x] **Q2-05** Estados de apresentação: normal e vencedor para os sete símbolos; estado travado especial para Caramelo WILD.
+  - **Feito:** classes CSS por material, aura de vitória tonal e moldura dourada do WILD travado. Atlas 7×3 (normal/vencedor/lock aplicável) em `docs/prints/10-simbolos-estados.png`; a coluna lock só se aplica ao WILD pelas regras do jogo.
 - [ ] **Q2-06** Atlas WebP dos sprites (substitui SVG inline onde o desempenho exigir).
   - Aceite: tempo de primeira pintura medido antes e depois; sem regressão visual.
 - [ ] **Q2-07** Moldura da máquina final, com reflexo e lâmpadas definidas em arte.

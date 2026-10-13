@@ -108,6 +108,64 @@ test('nenhum erro de console na sessão', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+test('símbolos mostram materiais próprios, destaque vencedor e WILD travado', async ({ page }, info) => {
+  await startGame(page);
+  await clearOverlays(page);
+  const materials = await page.locator('#reels .cell').evaluateAll((cells) => [...new Set(cells.map((c) => [...c.classList].find((x) => x.startsWith('material-'))))].sort());
+  expect(materials).toEqual(['material-enamel', 'material-fabric', 'material-fruit', 'material-glass', 'material-metal', 'material-paper']);
+
+  await page.evaluate(() => window.__tigrinho.highlightLine());
+  const winners = page.locator('#reels .cell.win');
+  await expect(winners).toHaveCount(3);
+  const winBg = await winners.first().evaluate((el) => getComputedStyle(el).backgroundImage);
+  expect(winBg).toContain('radial-gradient');
+  const winBgs = await winners.evaluateAll((cells) => cells.map((el) => getComputedStyle(el).backgroundImage));
+  expect(new Set(winBgs).size).toBe(3);
+
+  await page.evaluate(() => window.__tigrinho.lockWild());
+  const locked = page.locator('.lock--wild');
+  await expect(locked).toHaveCount(1);
+  await expect(locked).toHaveAttribute('aria-label', 'Caramelo WILD travado');
+  const border = await locked.evaluate((el) => getComputedStyle(el).borderTopWidth);
+  expect(border).toBe('2px');
+  await shot(page, '05-simbolos-estados', info);
+});
+
+test('folha visual mostra os 7 símbolos normais/vencedores e o WILD travado', async ({ page }, info) => {
+  await startGame(page);
+  await clearOverlays(page);
+  const symbols = ['wild', 'envelope', 'ingot', 'bag', 'orange', 'cracker', 'lantern'];
+  await page.evaluate((ids) => {
+    const materials = window.TigerReels.SYMBOL_MATERIALS;
+    const labels = { wild: 'Caramelo WILD', envelope: 'Envelope', ingot: 'Lingote', bag: 'Saco', orange: 'Tangerina', cracker: 'Rojões', lantern: 'Lanterna' };
+    const rows = ids.map((id) => {
+      const cell = (state) => `<div class="preview"><div class="cell material-${materials[id]} ${state}" data-symbol="${id}"><svg viewBox="0 0 100 100"><use href="#s-${id}"/></svg></div></div>`;
+      const locked = id === 'wild' ? '<div class="preview"><div class="lock lock--wild"><svg viewBox="0 0 100 100"><use href="#s-wild"/></svg></div></div>' : '<div class="preview empty">—</div>';
+      return `<div class="symbol-row"><b>${labels[id]}</b>${cell('')}${cell('win')}${locked}</div>`;
+    }).join('');
+    document.body.insertAdjacentHTML('beforeend', `<style id="symbol-proof-style">
+      #symbolProof{position:fixed;inset:0;z-index:999;background:radial-gradient(ellipse at 50% 0,#94172a,#26040a 76%);color:#fff;padding:16px 12px;overflow:auto;font:600 13px system-ui}
+      #symbolProof h2{text-align:center;color:#ffe27a;font:36px Bangers,Impact,sans-serif;letter-spacing:1px;margin:0 0 10px}
+      .symbol-head,.symbol-row{display:grid;grid-template-columns:75px repeat(3,minmax(58px,1fr));gap:5px;align-items:center;text-align:center}
+      .symbol-head{color:#ffe7a0;font-size:11px;margin-bottom:5px}.symbol-row{min-height:63px;border-top:1px solid #ffd24a33}
+      .symbol-row>b{text-align:left;color:#ffe7a0;font-size:11px}
+      #symbolProof .preview{position:relative;width:58px;height:58px;margin:auto;border-radius:10px;background:linear-gradient(#fff1ce,#e8c879);box-shadow:inset 0 0 0 1px #fff7,inset 0 0 8px #6a3b0066;display:flex;align-items:center;justify-content:center;overflow:hidden}
+      #symbolProof .cell{width:58px;height:58px;border-radius:10px}
+      #symbolProof .cell svg{width:88%;height:88%;filter:none}
+      #symbolProof .cell::before{left:22%;right:22%;bottom:3%;height:12%}
+      #symbolProof .cell::after{left:27%;top:9%;width:25%;height:14%}
+      #symbolProof .lock{inset:0;height:58px;border-radius:10px}
+      #symbolProof .lock svg{width:92%;height:92%;filter:none}
+      #symbolProof .empty{background:#0002;color:#ffd24a66;font-size:20px}
+    </style><section id="symbolProof"><h2>Materiais e estados</h2><div class="symbol-head"><span>SÍMBOLO</span><span>NORMAL</span><span>VENCEDOR</span><span>WILD TRAVADO</span></div>${rows}</section>`);
+  }, symbols);
+  await expect(page.locator('#symbolProof .symbol-row')).toHaveCount(7);
+  await expect(page.locator('#symbolProof .cell:not(.win)')).toHaveCount(7);
+  await expect(page.locator('#symbolProof .cell.win')).toHaveCount(7);
+  await expect(page.locator('#symbolProof .lock--wild')).toHaveCount(1);
+  await page.screenshot({ path: path.join(SHOTS, `${info.project.name}-symbol-atlas.png`) });
+});
+
 test('bônus diário mostra dia da sequência e 7 marcadores', async ({ page }, info) => {
   await page.goto('/index.html?test=1');
   await page.locator('#start').click();
@@ -277,9 +335,10 @@ test('splash mantém a arte, chamada, botão e aviso em viewport', async ({ page
 test('baseline visual: máquina parada', async ({ page }) => {
   await startGame(page);
   await clearOverlays(page);
-  await page.evaluate(() => document.fonts.ready);
-  await expect(page).toHaveScreenshot('maquina.png', {
-    ...VISUAL,
-    mask: [page.locator('#fx'), page.locator('#mascot'), page.locator('#bubble'), page.locator('#toast')],
+  await page.evaluate(() => {
+    document.getElementById('fx').hidden = true;
+    for (const id of ['mascot', 'bubble', 'toast']) document.getElementById(id).style.visibility = 'hidden';
   });
+  await page.evaluate(() => document.fonts.ready);
+  await expect(page).toHaveScreenshot('maquina.png', VISUAL);
 });

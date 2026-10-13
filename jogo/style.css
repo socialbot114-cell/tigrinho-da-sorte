@@ -68,6 +68,8 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 .lock{position:absolute;left:0;right:0;height:var(--cell);display:flex;align-items:center;justify-content:center;z-index:3;background:radial-gradient(circle,#ffd24acc,#ff8a1a55);animation:lockglow .7s ease-in-out infinite;pointer-events:none}
 .lock svg{width:86%;height:86%}
 @keyframes lockglow{50%{filter:brightness(1.35)}}
+.lock--wild{border:2px solid #fff0a0;border-radius:10px;box-shadow:inset 0 0 0 2px #c8860a,inset 0 0 20px #fff4a8,0 0 16px #ffd24a;overflow:hidden}
+.lock--wild::after{content:"";position:absolute;inset:4px;border:1px solid #fff9c5;border-radius:7px;opacity:.85;pointer-events:none}
 .linefx{position:absolute;inset:0;pointer-events:none}
 .winbar{margin-top:10px;display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-radius:30px;background:#0009;border:2px solid #ffd24a88;font-size:15px}
 .winbar b{font-size:22px;color:var(--gold)}
@@ -249,6 +251,20 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 @keyframes frameglow{to{box-shadow:0 0 46px #ffd24aee,0 0 0 4px #fff3b0aa,0 14px 26px #000c,inset 0 2px 0 #fff9,inset 0 -4px 0 #5a2e00aa}}
 @media (prefers-reduced-motion:reduce){.frame::before,.machine.sweep::after{animation:none}}
 .reduce .frame::before,.reduce .machine.sweep::after{animation:none}
+
+/* ===== Q2-04/05: materiais e estados visuais dos sete símbolos ===== */
+.cell[data-symbol]{border-radius:10px;transition:background-color .16s,box-shadow .16s}
+
+/* Vitória: brilho tonal específico por material; a linha continua a mesma. */
+.cell.material-metal.win{background:radial-gradient(circle,#fffbdc 0,#ffd24a9c 48%,#b7780500 78%);box-shadow:inset 0 0 0 2px #fff1a8}
+.cell.material-paper.win{background:radial-gradient(circle,#fff0cf 0,#ff6c6380 50%,#aa142600 80%);box-shadow:inset 0 0 0 2px #ffb07a}
+.cell.material-fabric.win{background:radial-gradient(circle,#ffe8a5 0,#e42b4e80 52%,#7a061400 82%);box-shadow:inset 0 0 0 2px #ffcc64}
+.cell.material-fruit.win{background:radial-gradient(circle,#fff5bd 0,#ff9a1888 48%,#d34d0000 80%);box-shadow:inset 0 0 0 2px #ffd36a}
+.cell.material-enamel.win{background:radial-gradient(circle,#eff7ff 0,#658cff8c 48%,#1e327800 80%);box-shadow:inset 0 0 0 2px #c7dbff}
+.cell.material-glass.win{background:radial-gradient(circle,#fff0ca 0,#ff514d88 48%,#9b0c1b00 80%);box-shadow:inset 0 0 0 2px #ffd477}
+.cell.material-wild.win{background:radial-gradient(circle,#fffde7 0,#ffc83acc 52%,#e16a0011 82%);box-shadow:inset 0 0 0 2px #fff2a8,0 0 14px #ffd24a88}
+.lock--wild svg{filter:drop-shadow(0 0 8px #fff2a8) saturate(1.25)}
+@media (prefers-reduced-motion:reduce){.cell[data-symbol]{transition:none}}
 
 /* ===== v2.2: celebrações por nível e poses do cachorro ===== */
 .bw-rays{position:absolute;left:50%;top:50%;width:170vmax;height:170vmax;margin:-85vmax 0 0 -85vmax;display:none;pointer-events:none;z-index:0;

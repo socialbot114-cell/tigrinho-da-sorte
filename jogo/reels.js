@@ -6,6 +6,10 @@
   else root.TigerReels = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   const NS = 'http://www.w3.org/2000/svg';
+  const SYMBOL_MATERIALS = Object.freeze({
+    wild: 'wild', envelope: 'paper', ingot: 'metal', bag: 'fabric',
+    orange: 'fruit', cracker: 'enamel', lantern: 'glass',
+  });
 
   // Tempos de uma rodada de giro. Pura: recebe a configuração e devolve números.
   // rc: reelsConfig (SPIN_DURATION, REEL_OFFSET_TIME, TURBO_*, ANTICIPATION_EXTRA, FILLER_DIVISOR).
@@ -32,7 +36,7 @@
       const strip = document.createElement('div'); strip.className = 'strip'; el.appendChild(strip);
       container.appendChild(el); return { el, strip };
     });
-    const cellHtml = (s) => `<div class="cell">${sym(s)}</div>`;
+    const cellHtml = (s) => `<div class="cell material-${SYMBOL_MATERIALS[s] || 'unknown'}" data-symbol="${s}">${sym(s)}</div>`;
     const cellH = () => reels[0].el.clientHeight / 3;
 
     function paintStatic(c) {
@@ -70,7 +74,8 @@
       reels.forEach((r) => r.el.querySelectorAll('.lock').forEach((l) => l.remove()));
       locked.forEach((k) => {
         const [c, r] = k.split(',').map(Number);
-        const d = document.createElement('div'); d.className = 'lock';
+        const d = document.createElement('div'); d.className = 'lock lock--wild';
+        d.setAttribute('role', 'img'); d.setAttribute('aria-label', 'Caramelo WILD travado');
         d.style.top = `calc(${cellVar} * ${r})`; d.innerHTML = sym('wild');
         reels[c].el.appendChild(d);
       });
@@ -105,5 +110,5 @@
     };
   }
 
-  return { create, stepPlan };
+  return { create, stepPlan, SYMBOL_MATERIALS };
 });

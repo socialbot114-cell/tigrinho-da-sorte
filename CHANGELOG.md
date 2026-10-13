@@ -6,8 +6,10 @@ Formato simples por versão. Datas em ISO. Fichas são fictícias, sem valor em 
 - Pipeline do Caramelo documentado: SVG original como arte principal; Blender opcional para renders após validação em Mac/iPhone.
 - Componentes reutilizáveis da cabeça separados (orelhas esquerda/direita, face, coleira) e disponíveis como elementos animáveis na tela.
 - Poses de giro, vitória e grande vitória aplicadas em partes do mascote; testes verificam as animações CSS.
+- Sete materiais distintos em SVG; estados vencedores tonalizados por material e Caramelo WILD travado com moldura dourada.
+- Atlas visual de 7 símbolos e estados em `docs/prints/10-simbolos-estados.png`.
 - Prints de giro, vitória e grande vitória em `docs/prints/07–09`.
-- Verificação atual: 28 checks unitários e 21 testes Playwright por perfil (retrato/paisagem).
+- Verificação atual: 29 checks unitários e 23 testes Playwright por perfil (retrato/paisagem).
 
 ## 2.2.0 — 2026-10-10 (branch `v2.2`)
 - Mascote: poses por estado (girando, acenando, pulo em vitória grande).
