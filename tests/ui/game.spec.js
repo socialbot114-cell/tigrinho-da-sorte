@@ -335,6 +335,10 @@ test('splash mantém a arte, chamada, botão e aviso em viewport', async ({ page
 test('baseline visual: máquina parada', async ({ page }) => {
   await startGame(page);
   await clearOverlays(page);
+  await page.evaluate(() => {
+    document.getElementById('winbar').style.display = 'none';
+    document.getElementById('bubble').style.display = 'none';
+  });
   await page.evaluate(() => document.fonts.ready);
   // Recorta a máquina/símbolos para que a comparação não dependa das fontes do HUD.
   await expect(page.locator('#machine')).toHaveScreenshot('maquina.png', VISUAL);
