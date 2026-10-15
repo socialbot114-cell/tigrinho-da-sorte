@@ -54,7 +54,7 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 
 .machine{position:relative;width:100%;max-width:400px}
 @media (orientation:portrait) and (max-width:699px){:root{--cell:min(25vw,16vh,104px)}.stage>.machine{flex-shrink:0}}
-.frame{position:relative;padding:39px 10px 10px;border-radius:22px;background:linear-gradient(145deg,#ffe27a,#c8860a 50%,#ffd24a);box-shadow:0 0 30px #ffb42055,0 10px 24px #000a,inset 0 0 0 3px #7a4a00}
+.frame{--rim:10px;--top:39px;position:relative;padding:39px 10px 10px;border-radius:22px;background:linear-gradient(145deg,#ffe27a,#c8860a 50%,#ffd24a);box-shadow:0 0 30px #ffb42055,0 10px 24px #000a,inset 0 0 0 3px #7a4a00}
 .machine-crown{position:absolute;left:50%;top:5px;transform:translateX(-50%);width:min(82%,290px);height:29px;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid #fff1a1;border-radius:999px;background:linear-gradient(180deg,#c91c30,#730817);box-shadow:inset 0 1px 0 #fff8,inset 0 -3px 0 #4b0710,0 2px 5px #592600;color:#ffe89a;white-space:nowrap}
 .machine-crown b{font:18px/1 "Bangers",Impact,sans-serif;letter-spacing:1.2px;text-shadow:0 1px 0 #5c080f}
 .machine-crown span{color:#fff2b0;font-size:13px;text-shadow:0 0 6px #ffdd58}
@@ -164,7 +164,7 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
   .mrow{flex:0 0 auto;width:104px;height:min(52vh,140px);margin:0;max-width:none;align-self:center}
   .mascot{left:0}
   .bubble{left:90px;top:-4px;max-width:150px;font-size:11px;padding:5px 9px}
-  .frame{padding:27px 6px 6px}
+  .frame{padding:27px 6px 6px;--rim:6px;--top:27px}
   .machine-crown{top:3px;height:21px;width:min(86%,220px);gap:6px}
   .machine-crown b{font-size:14px}
   .machine-crown span{font-size:10px}
@@ -188,7 +188,7 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 @font-face{font-family:"Bangers";src:url("fonts/Bangers-Regular.ttf") format("truetype");font-display:swap}
 
 .portico{position:absolute;top:0;left:0;width:100%;height:150px;opacity:.55;z-index:0;pointer-events:none}
-.frame::after{content:"";position:absolute;inset:4px;border-radius:18px;border:2px dashed #fff3b066;pointer-events:none}
+.frame::after{content:"";position:absolute;inset:calc(var(--top) - 1px) calc(var(--rim) - 1px) calc(var(--rim) - 1px);border-radius:14px;border:1px solid #6b3d0a88;box-shadow:0 1px 0 #fff3b055;pointer-events:none}
 .frame{z-index:1}
 
 /* Tela inicial (splash) */
@@ -253,14 +253,14 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 .reel{box-shadow:inset 0 0 0 1px #fff6,inset 0 10px 14px -8px #fff9,inset 0 -16px 18px -10px #6a3a0077,0 2px 6px #0006}
 .reel::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#fff0 0,#fff5 10%,#fff0 26%,#fff0 74%,#fff3 90%,#fff0 100%);pointer-events:none;z-index:4}
 
-/* Moldura: bisel superior claro, base escura e lâmpadas nos cantos. */
+/* Moldura: bisel superior claro, base escura e uma fileira de lâmpadas nos lados e na base (o topo fica com a faixa). */
 .frame{box-shadow:0 0 30px #ffb42055,0 14px 26px #000c,inset 0 2px 0 #fff9,inset 0 -4px 0 #5a2e00aa,inset 0 0 0 3px #7a4a00}
 .frame::before{content:"";position:absolute;inset:0;border-radius:22px;pointer-events:none;z-index:3;
+  --bulb:radial-gradient(circle closest-side,#fffbe0 0 34%,#ffd24a 62%,#ffd24a00 100%);
   background:
-    radial-gradient(circle at 12px 12px,#fffbe0 0 3px,#ffd24a 4px,#0000 7px),
-    radial-gradient(circle at calc(100% - 12px) 12px,#fffbe0 0 3px,#ffd24a 4px,#0000 7px),
-    radial-gradient(circle at 12px calc(100% - 12px),#fffbe0 0 3px,#ffd24a 4px,#0000 7px),
-    radial-gradient(circle at calc(100% - 12px) calc(100% - 12px),#fffbe0 0 3px,#ffd24a 4px,#0000 7px);
+    var(--bulb) left top / var(--rim) 20px repeat-y,
+    var(--bulb) right top / var(--rim) 20px repeat-y,
+    var(--bulb) left bottom / 20px var(--rim) repeat-x;
   animation:bulbs 1.6s ease-in-out infinite alternate}
 @keyframes bulbs{to{filter:brightness(1.35) drop-shadow(0 0 4px #ffd24a)}}
 

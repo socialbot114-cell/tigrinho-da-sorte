@@ -787,6 +787,17 @@ test('botão GIRAR tem reflexo de esmalte e anel interno', async ({ page }) => {
   expect(await page.locator('#spin').evaluate((el) => getComputedStyle(el, '::after').borderTopWidth)).toBe('1px');
 });
 
+// --- Q2-07: moldura com lâmpadas no aro (lados e base); a espessura do aro acompanha a orientação ---
+test('moldura tem lâmpadas nos lados e na base, e o aro acompanha a orientação', async ({ page }) => {
+  await startGame(page);
+  await clearOverlays(page);
+  const frame = page.locator('.frame');
+  const landscape = await page.evaluate(() => innerWidth > innerHeight);
+  expect(await frame.evaluate((el) => getComputedStyle(el).getPropertyValue('--rim').trim())).toBe(landscape ? '6px' : '10px');
+  const bulbs = await frame.evaluate((el) => getComputedStyle(el, '::before').backgroundImage);
+  expect(bulbs.match(/radial-gradient/g)?.length).toBe(3);
+});
+
 // --- Q4-09: idioma inglês troca rótulos e atributos de acessibilidade, e a escolha fica salva ---
 test('idioma inglês troca os textos e fica salvo depois de recarregar', async ({ page }) => {
   await startGame(page);

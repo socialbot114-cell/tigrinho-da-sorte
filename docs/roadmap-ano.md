@@ -106,7 +106,7 @@ Objetivo: o visual parecer produto, não protótipo.
   - Aceite: tempo de primeira pintura medido antes e depois; sem regressão visual.
   - **Bloqueado:** primeiro medir desempenho em iPhone real (Q1-05); sem evidência de gargalo, manter SVG vetorial offline.
 - [~] **Q2-07** Moldura da máquina final, com reflexo e lâmpadas definidas em arte.
-  - **Parcial:** adicionado cabeçalho “Festival do Caramelo” e acabamento dourado; revisão final da arte ainda pendente.
+  - **Parcial:** adicionado cabeçalho “Festival do Caramelo” e acabamento dourado; lâmpadas correndo pelos lados e pela base do aro, sulco fino em volta da janela dos rolos e espessura do aro por orientação (teste de UI). Falta a revisão final da arte, que é decisão de design.
 
 ### Sprint 6: marca e cenário
 
