@@ -10,12 +10,22 @@
 <meta name="apple-mobile-web-app-title" content="TIGRINHO">
 <title>TIGRINHO</title>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <!-- ===== Arte original em SVG (cachorro caramelo, sem assets de terceiros) ===== -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
 <defs>
+  <!-- Caramelo (redesenho): luz do alto à esquerda, contorno marrom, sombra e brilho por forma. -->
+  <linearGradient id="gFur" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7bd7c"/><stop offset=".5" stop-color="#cf7f3a"/><stop offset="1" stop-color="#8a4418"/></linearGradient>
+  <radialGradient id="gHead" cx=".36" cy=".3" r=".78"><stop offset="0" stop-color="#f6c183"/><stop offset=".55" stop-color="#cc8140"/><stop offset="1" stop-color="#8a4418"/></radialGradient>
+  <linearGradient id="gEarOut" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b06c34"/><stop offset="1" stop-color="#5a2a0c"/></linearGradient>
+  <linearGradient id="gEarIn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3bb83"/><stop offset="1" stop-color="#b8692c"/></linearGradient>
+  <linearGradient id="gCream" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff7e6"/><stop offset="1" stop-color="#eccb93"/></linearGradient>
+  <radialGradient id="gEye" cx=".4" cy=".36" r=".7"><stop offset="0" stop-color="#7a4620"/><stop offset=".55" stop-color="#2e1608"/><stop offset="1" stop-color="#120702"/></radialGradient>
+  <radialGradient id="gShadow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#2a0a04" stop-opacity=".5"/><stop offset="1" stop-color="#2a0a04" stop-opacity="0"/></radialGradient>
   <linearGradient id="gOr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb43a"/><stop offset="1" stop-color="#f27a12"/></linearGradient>
   <linearGradient id="gCar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8a05a"/><stop offset=".6" stop-color="#c46f2e"/><stop offset="1" stop-color="#9a4f1a"/></linearGradient>
   <linearGradient id="gEar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a5524"/><stop offset="1" stop-color="#5e2c0c"/></linearGradient>
@@ -31,31 +41,40 @@
 
   <!-- Peças do cachorro caramelo: orelhas, face e coleira; reutilizadas no WILD e no mascote. -->
   <symbol id="s-dog-ear-l" viewBox="2 30 32 58">
-    <path d="M22 34 C6 34 3 62 13 76 C20 84 31 74 31 60 Z" fill="url(#gEar)" stroke="#3a1804" stroke-width="2"/>
+    <path d="M23 36 C10 35 4 52 5 67 C6 80 15 88 24 84 C31 81 32 70 31 60 C30 48 29 37 23 36Z" fill="url(#gEarOut)" stroke="#3a1804" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M21 45 C14 47 11 58 12 68 C13 76 19 78 23 74 C26 70 26 60 25 53 C24 48 23 46 21 45Z" fill="url(#gEarIn)" opacity=".85"/>
   </symbol>
   <symbol id="s-dog-ear-r" viewBox="66 30 32 58">
-    <path d="M78 34 C94 34 97 62 87 76 C80 84 69 74 69 60 Z" fill="url(#gEar)" stroke="#3a1804" stroke-width="2"/>
+    <g transform="translate(100 0) scale(-1 1)"><path d="M23 36 C10 35 4 52 5 67 C6 80 15 88 24 84 C31 81 32 70 31 60 C30 48 29 37 23 36Z" fill="url(#gEarOut)" stroke="#3a1804" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M21 45 C14 47 11 58 12 68 C13 76 19 78 23 74 C26 70 26 60 25 53 C24 48 23 46 21 45Z" fill="url(#gEarIn)" opacity=".85"/></g>
   </symbol>
   <symbol id="s-dog-face" viewBox="18 8 64 76">
-    <circle cx="50" cy="46" r="32" fill="url(#gCar)" stroke="#5a2a0a" stroke-width="2"/>
-    <ellipse cx="50" cy="24" rx="13" ry="7" fill="#fff" opacity=".16"/>
-    <ellipse cx="50" cy="60" rx="19" ry="14" fill="#f8e6c4" stroke="#b8865a" stroke-width="1.2"/>
+    <circle cx="50" cy="46" r="32" fill="url(#gHead)" stroke="#5a2a0a" stroke-width="2.2"/>
+    <path d="M28 30 Q34 20 46 17" fill="none" stroke="#ffe2b0" stroke-width="2.4" stroke-linecap="round" opacity=".35"/>
+    <ellipse cx="51" cy="23" rx="14" ry="6" fill="#fff" opacity=".2"/>
+    <path d="M40 16 q2.5 -3.5 5 0 M52 14.5 q2.5 -3.5 5 0 M46 13 q2.5 -3 5 0" fill="none" stroke="#7a3d12" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>
+    <ellipse cx="50" cy="61" rx="19.5" ry="14.5" fill="url(#gCream)" stroke="#b8865a" stroke-width="1.2"/>
+    <ellipse cx="27" cy="57" rx="5.6" ry="4.2" fill="#ff7a7a" opacity=".42"/>
+    <ellipse cx="73" cy="57" rx="5.6" ry="4.2" fill="#ff7a7a" opacity=".42"/>
     <g class="eye">
-      <circle cx="38" cy="44" r="5.5" fill="#2a1408"/><circle cx="62" cy="44" r="5.5" fill="#2a1408"/>
-      <circle cx="39.8" cy="42.2" r="1.9" fill="#fff"/><circle cx="63.8" cy="42.2" r="1.9" fill="#fff"/>
+      <ellipse cx="38" cy="44" rx="5" ry="5.8" fill="url(#gEye)"/>
+      <ellipse cx="62" cy="44" rx="5" ry="5.8" fill="url(#gEye)"/>
+      <circle cx="36.3" cy="42" r="1.9" fill="#fff"/><circle cx="60.3" cy="42" r="1.9" fill="#fff"/>
+      <circle cx="39.6" cy="46.3" r=".9" fill="#fff" opacity=".75"/><circle cx="63.6" cy="46.3" r=".9" fill="#fff" opacity=".75"/>
+      <rect class="lid" x="32" y="37.5" width="12" height="13" rx="5" fill="url(#gHead)"/>
+      <rect class="lid" x="56" y="37.5" width="12" height="13" rx="5" fill="url(#gHead)"/>
     </g>
-    <path d="M30 35 Q38 31 44 35 M56 35 Q62 31 70 35" stroke="#3a1804" stroke-width="2" fill="none" stroke-linecap="round" opacity=".7"/>
-    <circle cx="27" cy="57" r="5" fill="#ff7a7a" opacity=".45"/><circle cx="73" cy="57" r="5" fill="#ff7a7a" opacity=".45"/>
-    <ellipse cx="50" cy="54" rx="6.2" ry="4.4" fill="#2a1408"/>
-    <ellipse cx="48.4" cy="52.6" rx="1.8" ry="1" fill="#fff" opacity=".6"/>
-    <path class="mouth-closed" d="M50 58.5 L50 63 M50 63 Q44 68 40 64 M50 63 Q56 68 60 64" stroke="#2a1408" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-    <path class="mouth-open" d="M40 62 Q50 80 60 62 Z" fill="#6a1220" stroke="#2a1408" stroke-width="1.6"/>
-    <path class="mouth-open" d="M44 72 Q50 81 56 72 Q50 67 44 72Z" fill="#ff7a8a"/>
+    <path d="M44 54.5 Q50 50 56 54.5 Q55 59.6 50 60.4 Q45 59.6 44 54.5Z" fill="#2a1408"/>
+    <ellipse cx="47.6" cy="53" rx="2.2" ry="1.1" fill="#fff" opacity=".6"/>
+    <path class="mouth-closed" d="M50 60.4 V63.6 M50 63.6 Q45.4 68.2 41.2 64.6 M50 63.6 Q54.6 68.2 58.8 64.6" fill="none" stroke="#2a1408" stroke-width="2" stroke-linecap="round"/>
+    <path class="mouth-open" d="M41 63 Q50 81 59 63 Z" fill="#6a1220" stroke="#2a1408" stroke-width="1.4"/>
+    <path class="mouth-open" d="M44.6 71.4 Q50 80.4 55.4 71.4 Q50 67.4 44.6 71.4Z" fill="#ff8fa0"/>
   </symbol>
   <symbol id="s-dog-collar" viewBox="26 78 48 22">
     <path d="M26 80 Q50 94 74 80 L72 88 Q50 100 28 88 Z" fill="url(#gRed)" stroke="url(#gGold)" stroke-width="2"/>
+    <path d="M31 84 Q50 95 69 84" fill="none" stroke="#ffd98a" stroke-width="1" opacity=".45"/>
     <circle cx="50" cy="91" r="6.5" fill="url(#gGold)" stroke="#a86a00" stroke-width="1.5"/>
-    <text x="50" y="94.5" text-anchor="middle" font-size="8" font-weight="bold" fill="#b8101c" font-family="serif">福</text>
+    <circle cx="48" cy="89" r="1.8" fill="#fff6c8" opacity=".8"/>
   </symbol>
   <symbol id="s-dog" viewBox="0 0 100 100">
     <use href="#s-dog-ear-l" x="2" y="30" width="32" height="58"/>
@@ -135,27 +154,47 @@
 
   <!-- mascote de corpo inteiro: cachorro caramelo sentado, colete vermelho -->
   <symbol id="s-mascot" viewBox="0 0 160 190">
-    <ellipse cx="80" cy="182" rx="52" ry="7" fill="#000" opacity=".28"/>
-    <path d="M122 150 Q156 140 150 112 Q146 100 138 108" fill="none" stroke="#9a4f1a" stroke-width="11" stroke-linecap="round" class="tail"/>
-    <ellipse cx="80" cy="142" rx="46" ry="40" fill="url(#gCar)" stroke="#5a2a0a" stroke-width="2.5"/>
-    <ellipse cx="80" cy="148" rx="25" ry="28" fill="#f8e6c4"/>
-    <path d="M40 104 Q80 122 120 104 L126 146 Q80 160 34 146Z" fill="url(#gRed)" stroke="url(#gGold)" stroke-width="3"/>
-    <circle cx="80" cy="134" r="12" fill="url(#gGold)" stroke="#a86a00" stroke-width="2"/>
-    <text x="80" y="140" text-anchor="middle" font-size="15" font-weight="bold" fill="#b8101c" font-family="serif">福</text>
-    <ellipse cx="60" cy="178" rx="16" ry="9" fill="url(#gCar)" stroke="#5a2a0a" stroke-width="2"/>
-    <ellipse cx="100" cy="178" rx="16" ry="9" fill="url(#gCar)" stroke="#5a2a0a" stroke-width="2"/>
-    <g class="arm-l"><ellipse cx="36" cy="132" rx="12" ry="24" fill="url(#gCar)" stroke="#5a2a0a" stroke-width="2" transform="rotate(16 36 132)"/></g>
-    <g class="arm-r"><ellipse cx="124" cy="128" rx="12" ry="24" fill="url(#gCar)" stroke="#5a2a0a" stroke-width="2" transform="rotate(-20 124 128)"/>
-      <g transform="translate(128 98) rotate(14)"><rect x="-10" y="-16" width="22" height="30" rx="3" fill="url(#gRed)" stroke="url(#gGold)" stroke-width="2"/><circle cx="1" cy="0" r="6" fill="url(#gGold)"/></g></g>
-    <use class="dog-ear dog-ear-l" href="#s-dog-ear-l" x="22.4" y="34" width="38.4" height="69.6"/>
-    <use class="dog-ear dog-ear-r" href="#s-dog-ear-r" x="99.2" y="34" width="38.4" height="69.6"/>
-    <use class="dog-head" href="#s-dog-face" x="41.6" y="7.6" width="76.8" height="91.2"/>
-    <use class="dog-collar" href="#s-dog-collar" x="51.2" y="91.6" width="57.6" height="26.4"/>
+        <ellipse cx="80" cy="184" rx="60" ry="8" fill="url(#gShadow)"/>
+        <g class="tail">
+          <path d="M116 156 C138 160 146 142 142 128 C139 118 128 116 128 124" fill="none" stroke="url(#gFur)" stroke-width="13" stroke-linecap="round"/>
+          <circle cx="128" cy="120" r="6.5" fill="#fff2d6" opacity=".9"/>
+        </g>
+        <path d="M80 94 C114 94 127 120 127 148 C127 174 107 186 80 186 C53 186 33 174 33 148 C33 120 46 94 80 94Z" fill="url(#gFur)" stroke="#5a2a0a" stroke-width="2.4"/>
+        <path d="M40 124 C37 133 36 141 37 150" fill="none" stroke="#ffe3b0" stroke-width="3" stroke-linecap="round" opacity=".4"/>
+        <path d="M80 116 C99 116 110 133 108 153 C106 170 94 181 80 181 C66 181 54 170 52 153 C50 133 61 116 80 116Z" fill="url(#gCream)" opacity=".96"/>
+        <ellipse cx="62" cy="180" rx="16" ry="9" fill="url(#gFur)" stroke="#5a2a0a" stroke-width="2.2"/>
+        <ellipse cx="98" cy="180" rx="16" ry="9" fill="url(#gFur)" stroke="#5a2a0a" stroke-width="2.2"/>
+        <path d="M52 175 Q62 169 72 175 M88 175 Q98 169 108 175" fill="none" stroke="#ffe3b0" stroke-width="2" stroke-linecap="round" opacity=".35"/>
+        <ellipse cx="80" cy="103" rx="40" ry="10" fill="url(#gShadow)"/>
+                <path d="M45 110 Q80 123 115 110 L119 142 Q80 165 41 142 Z" fill="url(#gRed)" stroke="url(#gGold)" stroke-width="2.6" stroke-linejoin="round"/>
+        <path d="M48 128 Q80 148 112 128" fill="none" stroke="#ffd98a" stroke-width="1.2" stroke-dasharray="3 3" opacity=".55"/>
+                <path d="M53 121 Q80 131 107 121" fill="none" stroke="#ffc4b5" stroke-width="2" stroke-linecap="round" opacity=".35"/>
+        <circle cx="80" cy="136" r="11" fill="url(#gGold)" stroke="#a86a00" stroke-width="1.8"/>
+        <circle cx="80" cy="136" r="7.2" fill="none" stroke="#fff0a0" stroke-width=".9" opacity=".7"/>
+        <text x="80" y="141" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#b8101c" font-family="serif">福</text>
+        <g class="arm-l">
+          <path d="M54 112 C40 116 34 132 35 146 C36 156 44 162 52 158 C60 150 62 132 60 118Z" fill="url(#gFur)" stroke="#5a2a0a" stroke-width="2.2" stroke-linejoin="round"/>
+          <ellipse cx="46" cy="160" rx="10" ry="7" fill="url(#gFur)" stroke="#5a2a0a" stroke-width="2"/>
+        </g>
+        <g class="arm-r">
+          <path d="M106 112 C120 116 127 132 125 146 C124 156 117 161 110 156 C102 148 100 130 101 118Z" fill="url(#gFur)" stroke="#5a2a0a" stroke-width="2.2" stroke-linejoin="round"/>
+          <ellipse cx="116" cy="158" rx="10" ry="7" fill="url(#gFur)" stroke="#5a2a0a" stroke-width="2"/>
+          <g transform="translate(120 146) rotate(10)"><rect x="-11" y="-16" width="22" height="31" rx="3" fill="url(#gRed)" stroke="url(#gGold)" stroke-width="2"/><circle cx="0" cy="-1" r="5.6" fill="url(#gGold)"/></g>
+        </g>
+        <use class="dog-ear dog-ear-l" href="#s-dog-ear-l" x="22.4" y="34" width="38.4" height="69.6"/>
+        <use class="dog-ear dog-ear-r" href="#s-dog-ear-r" x="99.2" y="34" width="38.4" height="69.6"/>
+        <use class="dog-head" href="#s-dog-face" x="41.6" y="7.6" width="76.8" height="91.2"/>
+        <use class="dog-collar" href="#s-dog-collar" x="51.2" y="91.6" width="57.6" height="26.4"/>
   </symbol>
 
   <symbol id="s-coin" viewBox="0 0 100 100">
-    <circle cx="50" cy="50" r="46" fill="url(#gGold)" stroke="#a86a00" stroke-width="5"/><circle cx="50" cy="50" r="34" fill="none" stroke="#c8860a" stroke-width="3"/>
-    <rect x="40" y="40" width="20" height="20" fill="#a86a00" opacity=".85"/>
+    <ellipse cx="50" cy="93" rx="36" ry="5" fill="#2a0a04" opacity=".35"/>
+    <circle cx="50" cy="50" r="46" fill="url(#gGold)" stroke="#8a4d08" stroke-width="4"/>
+    <circle cx="50" cy="50" r="41.5" fill="none" stroke="#a86a00" stroke-width="3" stroke-dasharray="1.8 2.6" opacity=".7"/>
+    <circle cx="50" cy="50" r="36" fill="url(#gGold)" stroke="#b07612" stroke-width="2"/>
+    <circle cx="50" cy="50" r="21" fill="url(#gRed)" stroke="#ffe27a" stroke-width="2"/>
+    <text x="50" y="58.5" text-anchor="middle" font-size="25" font-weight="bold" fill="#ffe27a" font-family="serif">福</text>
+    <path d="M22 36 Q30 18 50 14" fill="none" stroke="#fff8d0" stroke-width="3" stroke-linecap="round" opacity=".7"/>
   </symbol>
 
   <!-- pórtico decorativo do cenário (fundo) -->
@@ -168,97 +207,155 @@
     <circle cx="200" cy="120" r="16" fill="url(#gGold)" stroke="#a86a00" stroke-width="2" opacity=".9"/>
     <path d="M90 100 L110 100 M290 100 L310 100" stroke="#ffd24a" stroke-width="2" opacity=".6"/>
   </symbol>
+
+  <!-- Ícones de interface próprios, locais e monocromáticos para manter leitura consistente. -->
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M4 12h16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.5 2 5 13h6l-.5 9L19 10h-6z" fill="currentColor" stroke="#fff3b0" stroke-width=".6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-sound-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9z" fill="currentColor"/><path d="M15 9a4 4 0 0 1 0 6m2.5-9a8 8 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-sound-off" viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9z" fill="currentColor"/><path d="m16 9 5 6m0-6-5 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
 </defs>
 </svg>
 
 <canvas id="fx"></canvas>
 
-<div id="boot" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#s-dog"/></svg><p>Preparando o Caramelo…</p></div>
-<div id="rotateHint" hidden>🔄 Vire o celular para <b>retrato</b> para a melhor experiência</div>
+<div id="boot" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#s-dog"/></svg><p data-i18n="boot.loading">Preparando o Caramelo…</p></div>
+<div id="rotateHint" hidden data-i18n-html="rotate.hint">🔄 Vire o celular para <b>retrato</b> para a melhor experiência</div>
 
 <!-- Tela inicial -->
-<section id="splash" class="splash" aria-label="Início">
+<section id="splash" class="splash" aria-label="Início" data-i18n-aria="splash.label">
   <div class="splash-glow" aria-hidden="true"></div>
   <h1 class="logo">TIGRINHO</h1>
-  <svg class="splash-dog" viewBox="0 0 160 190" aria-hidden="true"><use href="#s-mascot"/></svg>
-  <p class="tag">Gire, combine símbolos e comemore com o Caramelo da Sorte!</p>
-  <button id="start" class="btn start">Começar</button>
-  <p class="fine">Fichas fictícias, sem valor em dinheiro. Sem depósito, sem saque e sem prêmios reais.</p>
+  <svg class="splash-dog" id="splashDog" viewBox="0 0 160 190" aria-hidden="true"></svg>
+  <p class="tag" data-i18n="splash.tag">Gire, combine símbolos e comemore com o Caramelo da Sorte!</p>
+  <button id="start" class="btn start" data-i18n="splash.start">Começar</button>
+  <p class="fine" data-i18n="splash.fine">Fichas fictícias, sem valor em dinheiro. Sem depósito, sem saque e sem prêmios reais.</p>
 </section>
 
 <div id="app" data-theme="red" data-orient="portrait">
-  <svg class="portico" aria-hidden="true" viewBox="0 0 400 150" preserveAspectRatio="xMidYMin slice"><use href="#s-portico"/></svg>
-  <div class="lanterns" aria-hidden="true"><i></i><i></i><i></i></div>
+  <!-- Cenário em três camadas (Q2-09). Tudo decorativo, abaixo do palco e dos controles. -->
+  <div class="cenario" id="cenario" aria-hidden="true">
+    <div class="camada-fundo"></div>
+    <div class="camada-portico">
+      <svg class="portico" viewBox="0 0 400 150" preserveAspectRatio="xMidYMin slice"><use href="#s-portico"/></svg>
+      <div class="lanterns"><i></i><i></i><i></i></div>
+    </div>
+    <div class="camada-frente"><i class="bokeh b1"></i><i class="bokeh b2"></i><i class="bokeh b3"></i></div>
+  </div>
 
   <header class="top">
-    <button id="btnMenu" class="icon" aria-label="Menu">☰</button>
+    <button id="btnMenu" class="icon" aria-label="Menu" data-i18n-aria="hud.menu"><svg aria-hidden="true"><use href="#i-menu"/></svg><span class="menu-dot" aria-hidden="true">•</span></button>
     <div class="levelbox"><b>Nv <span id="lvl">1</span></b><div class="xp"><i id="xpbar"></i></div></div>
-    <button id="btnSound" class="icon" aria-label="Ativar ou desativar som">🔊</button>
-    <div class="chips" title="Fichas fictícias"><svg aria-hidden="true"><use href="#s-coin"/></svg><span id="balance">0</span></div>
+    <button id="btnSound" class="icon" aria-label="Desativar som"><svg aria-hidden="true"><use href="#i-sound-on"/></svg></button>
+    <div class="chips" title="Fichas fictícias" aria-label="Saldo de fichas fictícias" data-i18n-title="hud.chipsTitle" data-i18n-aria="hud.chipsLabel"><svg aria-hidden="true"><use href="#s-coin"/></svg><span class="chip-info"><small data-i18n="hud.chips">FICHAS</small><span id="balance">0</span></span></div>
   </header>
 
   <section class="stage">
     <div class="mrow">
-      <svg class="mascot idle" id="mascot" viewBox="0 0 160 190" role="img" aria-label="Caramelo da Sorte">
-        <ellipse cx="80" cy="182" rx="52" ry="7" fill="#000" opacity=".28"/>
-        <path d="M122 150 Q156 140 150 112 Q146 100 138 108" fill="none" stroke="#9a4f1a" stroke-width="11" stroke-linecap="round" class="tail"/>
-        <ellipse cx="80" cy="142" rx="46" ry="40" fill="url(#gCar)" stroke="#5a2a0a" stroke-width="2.5"/>
-        <ellipse cx="80" cy="148" rx="25" ry="28" fill="#f8e6c4"/>
-        <path d="M40 104 Q80 122 120 104 L126 146 Q80 160 34 146Z" fill="url(#gRed)" stroke="url(#gGold)" stroke-width="3"/>
-        <circle cx="80" cy="134" r="12" fill="url(#gGold)" stroke="#a86a00" stroke-width="2"/>
-        <text x="80" y="140" text-anchor="middle" font-size="15" font-weight="bold" fill="#b8101c" font-family="serif">福</text>
-        <ellipse cx="60" cy="178" rx="16" ry="9" fill="url(#gCar)" stroke="#5a2a0a" stroke-width="2"/>
-        <ellipse cx="100" cy="178" rx="16" ry="9" fill="url(#gCar)" stroke="#5a2a0a" stroke-width="2"/>
-        <g class="arm-l"><ellipse cx="36" cy="132" rx="12" ry="24" fill="url(#gCar)" stroke="#5a2a0a" stroke-width="2" transform="rotate(16 36 132)"/></g>
-        <g class="arm-r"><ellipse cx="124" cy="128" rx="12" ry="24" fill="url(#gCar)" stroke="#5a2a0a" stroke-width="2" transform="rotate(-20 124 128)"/>
-          <g transform="translate(128 98) rotate(14)"><rect x="-10" y="-16" width="22" height="30" rx="3" fill="url(#gRed)" stroke="url(#gGold)" stroke-width="2"/><circle cx="1" cy="0" r="6" fill="url(#gGold)"/></g></g>
+      <svg class="mascot idle" id="mascot" viewBox="0 0 160 190" role="img" aria-label="Caramelo da Sorte" data-i18n-aria="mascot.label">
+        <ellipse cx="80" cy="184" rx="60" ry="8" fill="url(#gShadow)"/>
+        <g class="tail">
+          <path d="M116 156 C138 160 146 142 142 128 C139 118 128 116 128 124" fill="none" stroke="url(#gFur)" stroke-width="13" stroke-linecap="round"/>
+          <circle cx="128" cy="120" r="6.5" fill="#fff2d6" opacity=".9"/>
+        </g>
+        <path d="M80 94 C114 94 127 120 127 148 C127 174 107 186 80 186 C53 186 33 174 33 148 C33 120 46 94 80 94Z" fill="url(#gFur)" stroke="#5a2a0a" stroke-width="2.4"/>
+        <path d="M40 124 C37 133 36 141 37 150" fill="none" stroke="#ffe3b0" stroke-width="3" stroke-linecap="round" opacity=".4"/>
+        <path d="M80 116 C99 116 110 133 108 153 C106 170 94 181 80 181 C66 181 54 170 52 153 C50 133 61 116 80 116Z" fill="url(#gCream)" opacity=".96"/>
+        <ellipse cx="62" cy="180" rx="16" ry="9" fill="url(#gFur)" stroke="#5a2a0a" stroke-width="2.2"/>
+        <ellipse cx="98" cy="180" rx="16" ry="9" fill="url(#gFur)" stroke="#5a2a0a" stroke-width="2.2"/>
+        <path d="M52 175 Q62 169 72 175 M88 175 Q98 169 108 175" fill="none" stroke="#ffe3b0" stroke-width="2" stroke-linecap="round" opacity=".35"/>
+        <ellipse cx="80" cy="103" rx="40" ry="10" fill="url(#gShadow)"/>
+                <path d="M45 110 Q80 123 115 110 L119 142 Q80 165 41 142 Z" fill="url(#gRed)" stroke="url(#gGold)" stroke-width="2.6" stroke-linejoin="round"/>
+        <path d="M48 128 Q80 148 112 128" fill="none" stroke="#ffd98a" stroke-width="1.2" stroke-dasharray="3 3" opacity=".55"/>
+                <path d="M53 121 Q80 131 107 121" fill="none" stroke="#ffc4b5" stroke-width="2" stroke-linecap="round" opacity=".35"/>
+        <circle cx="80" cy="136" r="11" fill="url(#gGold)" stroke="#a86a00" stroke-width="1.8"/>
+        <circle cx="80" cy="136" r="7.2" fill="none" stroke="#fff0a0" stroke-width=".9" opacity=".7"/>
+        <text x="80" y="141" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#b8101c" font-family="serif">福</text>
+        <g class="arm-l">
+          <path d="M54 112 C40 116 34 132 35 146 C36 156 44 162 52 158 C60 150 62 132 60 118Z" fill="url(#gFur)" stroke="#5a2a0a" stroke-width="2.2" stroke-linejoin="round"/>
+          <ellipse cx="46" cy="160" rx="10" ry="7" fill="url(#gFur)" stroke="#5a2a0a" stroke-width="2"/>
+        </g>
+        <g class="arm-r">
+          <path d="M106 112 C120 116 127 132 125 146 C124 156 117 161 110 156 C102 148 100 130 101 118Z" fill="url(#gFur)" stroke="#5a2a0a" stroke-width="2.2" stroke-linejoin="round"/>
+          <ellipse cx="116" cy="158" rx="10" ry="7" fill="url(#gFur)" stroke="#5a2a0a" stroke-width="2"/>
+          <g transform="translate(120 146) rotate(10)"><rect x="-11" y="-16" width="22" height="31" rx="3" fill="url(#gRed)" stroke="url(#gGold)" stroke-width="2"/><circle cx="0" cy="-1" r="5.6" fill="url(#gGold)"/></g>
+        </g>
         <use class="dog-ear dog-ear-l" href="#s-dog-ear-l" x="22.4" y="34" width="38.4" height="69.6"/>
         <use class="dog-ear dog-ear-r" href="#s-dog-ear-r" x="99.2" y="34" width="38.4" height="69.6"/>
         <use class="dog-head" href="#s-dog-face" x="41.6" y="7.6" width="76.8" height="91.2"/>
         <use class="dog-collar" href="#s-dog-collar" x="51.2" y="91.6" width="57.6" height="26.4"/>
+        <!-- Coleção do mascote (Q3-04): cada acessório fica oculto até o id estar em data-cos (CSS em style.css). -->
+        <g class="cos cos-laco"><path d="M80 104 L65 95 L65 112 Z M80 104 L95 95 L95 112 Z" fill="url(#gRed)" stroke="url(#gGold)" stroke-width="1.6" stroke-linejoin="round"/><circle cx="80" cy="104" r="3.2" fill="url(#gGold)" stroke="#a86a00" stroke-width="1"/></g>
+        <g class="cos cos-flor cos-head" stroke="#c2456d" stroke-width=".8"><circle cx="34" cy="40.4" r="3.6" fill="#ff9fbf"/><circle cx="37.4" cy="42.8" r="3.6" fill="#ff9fbf"/><circle cx="36.1" cy="46.9" r="3.6" fill="#ff9fbf"/><circle cx="31.9" cy="46.9" r="3.6" fill="#ff9fbf"/><circle cx="30.6" cy="42.8" r="3.6" fill="#ff9fbf"/><circle cx="34" cy="44.2" r="2.2" fill="url(#gGold)"/></g>
+        <g class="cos cos-guizos" fill="url(#gGold)" stroke="#8c4d08" stroke-width=".8"><circle cx="60" cy="103" r="3"/><circle cx="80" cy="110" r="3"/><circle cx="100" cy="103" r="3"/></g>
+        <g class="cos cos-oculos cos-head"><ellipse cx="65.6" cy="50.8" rx="10.5" ry="8" fill="#181818" stroke="url(#gGold)" stroke-width="2.4" opacity=".92"/><ellipse cx="94.4" cy="50.8" rx="10.5" ry="8" fill="#181818" stroke="url(#gGold)" stroke-width="2.4" opacity=".92"/><path d="M76 50 Q80 47 84 50" stroke="url(#gGold)" stroke-width="2" fill="none"/><ellipse cx="62" cy="47.5" rx="2" ry="1.2" fill="#fff" opacity=".5"/><ellipse cx="91" cy="47.5" rx="2" ry="1.2" fill="#fff" opacity=".5"/></g>
+        <g class="cos cos-estrela cos-head"><path d="M122 33 L124.2 39.2 L130.6 39.4 L125.5 43.3 L127.3 49.5 L122 45.8 L116.7 49.5 L118.5 43.3 L113.4 39.4 L119.8 39.2 Z" fill="url(#gGold)" stroke="#8c4d08" stroke-width="1" stroke-linejoin="round"/></g>
+        <g class="cos cos-lanterna"><path d="M104 104 L108 116" stroke="#7a4a10" stroke-width="1.2"/><rect x="103.5" y="114" width="9" height="3" fill="url(#gGold)"/><ellipse cx="108" cy="124" rx="6.5" ry="8" fill="url(#gRed)" stroke="url(#gGold)" stroke-width="1.4"/></g>
+      
       </svg>
-      <div class="bubble" id="bubble">Vamos girar!</div>
+      <div class="bubble" id="bubble" data-i18n="bubble.default">Vamos girar!</div>
     </div>
     <div class="machine" id="machine">
       <div class="frame">
-        <div class="reels" id="reels" role="img" aria-label="Rolos da máquina"></div>
+        <div class="machine-crown" id="machineCrown" aria-hidden="true"><span>✦</span><b data-i18n="machine.crown">FESTIVAL DO CARAMELO</b><span>✦</span></div>
+        <div class="reels" id="reels" role="img" aria-label="Rolos da máquina" data-i18n-aria="reels.label"></div>
         <div class="linefx" id="linefx"></div>
       </div>
-      <div class="winbar" id="winbar"><span id="winlabel">Última vitória</span><b id="winamt" aria-live="polite">0</b></div>
+      <div class="winbar" id="winbar"><span id="winlabel" data-i18n="win.last">Última vitória</span><b id="winamt" aria-live="polite">0</b><button class="skip-win" id="skipWin" hidden data-i18n="win.skip">Pular</button><button class="share-win" id="shareWin" hidden data-i18n-aria="share.aria" aria-label="Compartilhar vitória">📤</button></div>
     </div>
   </section>
 
   <section class="controls">
-    <button id="betDown" class="round small" aria-label="Diminuir aposta">−</button>
-    <div class="betbox"><small>APOSTA</small><b id="bet">10</b></div>
-    <button id="betUp" class="round small" aria-label="Aumentar aposta">+</button>
-    <button id="spin" class="spin" aria-label="Girar"><span>GIRAR</span></button>
-    <button id="auto" class="round small toggle" aria-label="Giro automático">AUTO</button>
-    <button id="turbo" class="round small toggle" aria-label="Turbo">⚡</button>
+    <button id="betDown" class="round small" aria-label="Diminuir aposta" data-i18n-aria="bet.down"><svg aria-hidden="true"><use href="#i-minus"/></svg></button>
+    <div class="betbox"><small data-i18n="bet.label">APOSTA</small><b id="bet">10</b></div>
+    <button id="betUp" class="round small" aria-label="Aumentar aposta" data-i18n-aria="bet.up"><svg aria-hidden="true"><use href="#i-plus"/></svg></button>
+    <button id="spin" class="spin" aria-label="Girar" data-i18n-aria="spin.aria"><span data-i18n="spin.label">GIRAR</span></button>
+    <button id="auto" class="round small toggle" aria-label="Giro automático" data-i18n-aria="auto.aria">AUTO</button>
+    <button id="turbo" class="round small toggle" aria-label="Turbo" data-i18n-aria="turbo.aria"><svg aria-hidden="true"><use href="#i-bolt"/></svg></button>
   </section>
-  <footer class="legal">Jogo de entretenimento • Fichas fictícias, sem valor real, sem depósito e sem saque • +18</footer>
+  <footer class="legal" data-i18n="legal.footer">Jogo de entretenimento • Fichas fictícias, sem valor real, sem depósito e sem saque • +18</footer>
 
   <div class="toast" id="toast" role="status"></div>
 
   <!-- Vitória grande -->
   <div class="overlay" id="bigwin" hidden>
     <div class="bw-rays" aria-hidden="true"></div>
-    <div class="bw-title" id="bwTitle">GRANDE VITÓRIA</div>
+    <div class="bw-title" id="bwTitle" data-i18n="bigwin.default">GRANDE VITÓRIA</div>
     <div class="bw-mult" id="bwMult"></div>
     <div class="bw-amt"><svg aria-hidden="true"><use href="#s-coin"/></svg><b id="bwAmt">0</b></div>
-    <small>toque para continuar</small>
+    <small id="bwHint" data-i18n="bigwin.skip">Toque para pular</small>
   </div>
 
   <!-- Modal genérico -->
   <div class="overlay modal" id="modal" hidden><div class="card" id="modalCard"></div></div>
+
+  <!-- Bloqueio de bem-estar (Q3-10 e Q3-12): sem botão de fechar nem Escape. Só some quando o prazo acaba. -->
+  <div class="overlay modal" id="bloqueio" role="alertdialog" aria-modal="true" aria-labelledby="bloqueioTitle" aria-describedby="bloqueioText" hidden>
+    <div class="card"><h2 id="bloqueioTitle"></h2><p id="bloqueioText"></p><p data-i18n-html="block.support">Precisa de apoio? <b>CVV 188</b>, ligação gratuita, 24 horas.</p></div>
+  </div>
 </div>
-<script src="engine.js"></script>
 <script src="config.js"></script>
+<script src="i18n/pt-BR.js"></script>
+<script src="i18n/en.js"></script>
+<script src="i18n.js"></script>
+<script src="engine.js"></script>
 <script src="save.js"></script>
+<script src="progression.js"></script>
 <script src="effects.js"></script>
+<script src="parallax.js"></script>
+<script src="haptics.js"></script>
+<script src="analytics.js"></script>
 <script src="reels.js"></script>
 <script src="celebration.js"></script>
 <script src="audio.js"></script>
+<script src="game-ui.js"></script>
+<script src="tutorial.js"></script>
+<script src="session.js"></script>
+<script src="share-card.js"></script>
+<script src="wellbeing.js"></script>
+<script src="game-menus.js"></script>
+<script src="game-round-controller.js"></script>
 <script src="game.js"></script>
 </body>
 </html>

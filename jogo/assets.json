@@ -96,6 +96,11 @@
       "name": "game-ui",
       "assets": [
         {
+          "alias": "app-icon",
+          "src": "icon.svg + icon-512.png + icon-1024.png (variante de loja, sem cantos arredondados)",
+          "kind": "pwa-icon"
+        },
+        {
           "alias": "spin-button",
           "src": "css:.spin (botão DOM)",
           "kind": "css"

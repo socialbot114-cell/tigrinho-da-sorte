@@ -55,19 +55,19 @@ Objetivo: transformar o protótipo em base confiável antes de qualquer arte nov
 
 ### Sprint 2: arquitetura
 
-- [~] **Q1-06** Dividir `jogo/game.js` em módulos ES (ou IIFEs com namespace):
-  `state.js`, `reels.js`, `celebration.js`, `hud.js`, `menus.js`, `effects.js`, `main.js`.
+- [x] **Q1-06** Dividir `jogo/game.js` em módulos locais sem build:
+  `save.js`, `progression.js`, `reels.js`, `celebration.js`, `game-ui.js`, `game-menus.js`, `game-round-controller.js`, `effects.js`; `game.js` é o entry point.
   - Aceite: responsabilidades separadas sem regressão nos testes de UI.
-  - **Parcial:** `reels.js` (rolos, travas, linhas, tempos puros em `stepPlan`), `celebration.js` (plano puro por nível), `effects.js` (partículas) e `save.js` (persistência). `game.js` ainda orquestra estado, controles e menus; os módulos de HUD/menus/state/main ainda não foram separados.
+  - **Feito:** regras de progressão são puras; o controller injeta motor, UI, áudio e efeitos; menus/HUD ficam fora do entry point.
 - [x] **Q1-07** Versionar o save: `tigrinho.save.v2` com migração a partir de `tigrinho.save.v1`.
   - Aceite: teste unitário de migração com 3 saves de exemplo (novo, com progresso, corrompido).
-  - **Feito:** `jogo/save.js` (v2 grava; v1 é migrado e não é apagado). 5 checks unitários e 1 teste de UI.
+  - **Feito:** `jogo/save.js` (v2 grava; v1 é migrado e preservado). Validação limita saldo, XP, nível, streak, estatísticas e tiers de missão; streak diário é limitado a 7 antes de persistir.
 - [x] **Q1-08** Remover `window.__tigrinho.preview` do build de produção.
   - Aceite: a API só existe quando a URL tem `?test=1`. Testes de UI usam esse parâmetro.
   - **Feito:** `window.__tigrinho` só existe com `?test=1` (teste de UI e checagem no `engine.test.js`).
-- [~] **Q1-09** Mover constantes de design e tempo para `config.js` (durações, cores de tiers, valores de bônus).
+- [x] **Q1-09** Mover constantes de design e tempo para `config.js` (durações, cores de tiers, valores de bônus).
   - Aceite: nenhum número mágico de animação em `reels.js` e `celebration.js`.
-  - **Parcial:** economia e lembrete em `config.js > gameConfig`; valores de animação ainda precisam ser centralizados.
+  - **Feito:** tempos de rolos, hitstop, auto, progressão, áudio de contagem, sessão e celebração centralizados em `config.js`; CSS guarda propriedades visuais.
 
 ### Sprint 3: qualidade
 
@@ -80,7 +80,7 @@ Objetivo: transformar o protótipo em base confiável antes de qualquer arte nov
   - **Feito:** `eslint.config.js` (flat config, eslint 9). Sem erros.
 - [x] **Q1-13** Escrever `CHANGELOG.md` com v1.1.0, v2.0, v2.1 e v2.2 reconstruídas do histórico.
 
-**Saída do Q1:** CI verde, save versionado, `game.js` parcialmente dividido em módulos e baselines visuais. FPS em iPhone real segue bloqueado até acesso ao aparelho.
+**Saída do Q1:** CI verde, save versionado, `game.js` dividido em módulos locais e baselines visuais. FPS em iPhone real segue bloqueado até acesso ao aparelho.
 
 ---
 
@@ -104,14 +104,20 @@ Objetivo: o visual parecer produto, não protótipo.
   - **Feito:** classes CSS por material, aura de vitória tonal e moldura dourada do WILD travado. Atlas 7×3 (normal/vencedor/lock aplicável) em `docs/prints/10-simbolos-estados.png`; a coluna lock só se aplica ao WILD pelas regras do jogo.
 - [ ] **Q2-06** Atlas WebP dos sprites (substitui SVG inline onde o desempenho exigir).
   - Aceite: tempo de primeira pintura medido antes e depois; sem regressão visual.
-- [ ] **Q2-07** Moldura da máquina final, com reflexo e lâmpadas definidas em arte.
+  - **Bloqueado:** primeiro medir desempenho em iPhone real (Q1-05); sem evidência de gargalo, manter SVG vetorial offline.
+- [~] **Q2-07** Moldura da máquina final, com reflexo e lâmpadas definidas em arte.
+  - **Parcial:** adicionado cabeçalho “Festival do Caramelo” e acabamento dourado; revisão final da arte ainda pendente.
 
 ### Sprint 6: marca e cenário
 
-- [ ] **Q2-08** Logo final com Bangers (OFL) e variação para ícone 1024 px.
-- [ ] **Q2-09** Cenário em três camadas (fundo, pórtico, primeiro plano).
-- [ ] **Q2-10** Parallax leve com `DeviceOrientationEvent`, desligado em redução de movimento e sem pedir permissão no iOS sem gesto do usuário.
-- [ ] **Q2-11** Três temas (vermelho, jade, noite), desbloqueados por nível. Revisar contraste WCAG AA em cada um.
+- [~] **Q2-08** Logo final com Bangers (OFL) e variação para ícone 1024 px.
+  - **Parcial:** ícone SVG, PNG 512 e variante 1024 (`jogo/icon-1024.png`, quadrada, sem transparência e sem cantos arredondados), ligados ao manifesto PWA e cobertos por teste. Falta revisão do ícone em aparelho e aprovação visual.
+- [x] **Q2-09** Cenário em três camadas (fundo, pórtico, primeiro plano).
+  - **Feito:** `.cenario` com `camada-fundo` (raios e vinheta), `camada-portico` (arco e lanternas) e `camada-frente` (brilho e bokeh). Camadas não capturam toque, ficam abaixo do palco e dos controles e usam só gradiente e `transform` (sem `filter`). Movimento reduzido desliga tudo, inclusive os raios. Verificado em Chromium no viewport do iPhone 13, retrato e paisagem: nenhum alvo de toque bloqueado.
+- [~] **Q2-10** Parallax leve com `DeviceOrientationEvent`, desligado em redução de movimento e sem pedir permissão no iOS sem gesto do usuário.
+  - **Parcial:** `jogo/parallax.js` desloca as três camadas (profundidades 4, 8 e 12 px). Liga só pela opção "Profundidade ao inclinar" no menu, desligada por padrão. A permissão é pedida dentro do clique; sem permissão concedida, não liga e avisa. Redução de movimento desliga tudo. Testes: deslocamento puro (Node) e fluxo do menu com permissão concedida, negada e redução (Playwright). **Falta** validar o fluxo de permissão em iPhone real.
+- [x] **Q2-11** Três temas (vermelho, jade, noite), desbloqueados por nível. Revisar contraste WCAG AA em cada um.
+  - **Feito:** desbloqueio por nível já existia em `progression.js` (jade no nível 3, noite no nível 6). A revisão de contraste reprovou o jade (textos dourados e brancos pequenos entre 3,2:1 e 4,1:1) e o rodapé do vermelho (4,4:1). Ajustes: jade com fundo `#0a442f` (mesma matiz, mais fundo) e rodapé com opacidade 70%. Teste em Playwright lê as cores do DOM real nos três temas e aplica a fórmula WCAG, nos dois viewports.
 
 **Saída do Q2:** tela inicial, máquina e mascote aprovados em screenshot; atlas de sprites no build.
 
@@ -125,31 +131,42 @@ Atenção: este é o trimestre mais fácil de estourar (ver riscos). Itens marca
 
 ### Sprint 7: onboarding
 
-- [ ] **Q3-01** Tutorial interativo de 60 segundos com skip visível em todas as etapas.
+- [x] **Q3-01** Tutorial interativo de 60 segundos com skip visível em todas as etapas.
   - Aceite: ao concluir, o saldo e a aposta não mudam; o tutorial não gera rodada real.
-- [ ] **Q3-02** Dica contextual uma única vez por tipo (respin, tiers), registrada no save.
+  - **Feito:** quatro passos (`jogo/tutorial.js`) em modal, com "Pular tutorial" em todos. Aparece no primeiro uso, antes do bônus diário, e pode ser reaberto em Menu > Como jogar. Teste confere saldo, aposta e giros antes e depois. **Limitação:** a tecla Escape fecha o tutorial sem marcá-lo como visto, então ele volta na próxima abertura.
+- [x] **Q3-02** Dica contextual uma única vez por tipo (respin, tiers), registrada no save.
+  - **Feito:** dicas `respin` e `tiers` em `TIPS`, gravadas em `seen.tips` do save v2 e mostradas com atraso para não disputar o aviso da rodada. Teste confirma que o tipo não se repete.
 
 ### Sprint 8: missões e coleção
 
-- [ ] **Q3-03** Missões diárias (3) e semanais (3), com recompensa em fichas e cosmético.
+- [x] **Q3-03** Missões diárias (3) e semanais (3), com recompensa em fichas e cosmético.
   - Aceite: missão não expira com pressão visual de contagem regressiva; reset às 00:00 local.
-- [ ] **Q3-04** Coleção de cosméticos do mascote: 6 itens (roupas e acessórios) desbloqueados por marcos.
+  - **Feito:** três diárias e três semanais por período, escolhidas de um pool pela data (`progression.js`). Diárias renovam à meia-noite local; semanais, na segunda. Recompensa em fichas em todas; cosmético pelo item "Guizos dourados", que vem de resgatar as três semanais. Sem contagem regressiva na tela. Decisão tomada: as missões em faixas continuam ao lado das novas.
+- [x] **Q3-04** Coleção de cosméticos do mascote: 6 itens (roupas e acessórios) desbloqueados por marcos.
+  - **Feito:** laço (nível 2), flor no ouvido (nível 4), guizos (semana completa de missões semanais), óculos (100 giros), estrela (3 vitórias grandes) e lanterna da coleira (10 WILD). Acessórios em SVG próprio no mascote do jogo; estado em `cos` do save. Tela "🎀 Coleção" no menu. **Limite:** o splash usa o mascote sem acessórios, e os acessórios não acompanham a inclinação da cabeça na animação de giro.
 - [ ] **Q3-05** (opcional) Conquistas com lista visível e sem contador de "faltam X" comparativo.
 
 ### Sprint 9: celebrações e áudio
 
-- [ ] **Q3-06** Revisão de duração por nível. Meta: nível 3 abaixo de 2,5 s; nível 5 abaixo de 4 s.
+- [x] **Q3-06** Revisão de duração por nível. Meta: nível 3 abaixo de 2,5 s; nível 5 abaixo de 4 s.
   - Aceite: "pular" visível desde o primeiro frame em todos os níveis.
-- [ ] **Q3-07** Trilha com instrumentos por nível de prêmio (camadas, não só volume).
-- [ ] **Q3-08** Volume independente para música e efeitos, com persistência no save.
+  - **Feito:** duração medida como contagem mais pausa (até fechar sozinho). Nível 3: 1,4 s + 0,9 s = 2,3 s. Nível 4: 2,0 s + 1,0 s = 3,0 s. Nível 5: 2,6 s + 1,1 s = 3,7 s (antes: 4,1 s, 4,9 s e 5,7 s). Teste de unidade trava as metas. "Toque para pular" é escrito antes da contagem começar, e o teste de interface confere sua visibilidade nos três níveis. **Nota:** o overlay ainda tem fade de entrada de 0,3 s, então a dica também aparece com esse fade.
+- [x] **Q3-07** Trilha com instrumentos por nível de prêmio (camadas, não só volume).
+  - **Feito:** a base da música continua igual. Cada nível de prêmio acrescenta uma camada por 1,8 s (vitória de nível 1 e 2) ou pelo tempo da celebração (nível 3 em diante): sinos (2), tambor grave (3), cordas (4) e brilho agudo (5). Teste confere a camada ativa e o retorno à base.
+- [x] **Q3-08** Volume independente para música e efeitos, com persistência no save.
+  - **Feito:** dois controles deslizantes (0 a 10) em Configurações, aplicados ao vivo e salvos em `set.musicVol` e `set.sfxVol`. O botão de som continua ligando e desligando os dois juntos.
 
 ### Sprint 10: bem-estar e histórico
 
-- [ ] **Q3-09** Histórico local das últimas 50 rodadas: data, aposta, total. Sem comparativo com "melhor rodada" nem sugestão de aposta maior.
-- [ ] **Q3-10** Limite de sessão opcional (15, 30, 60 min), com aviso e pausa obrigatória ao atingir.
-- [ ] **Q3-11** Lembrete de pausa a cada 30 min, mantido e testado.
-- [ ] **Q3-12** Autoexclusão local de 24 h, 7 dias ou 30 dias, com tela de bloqueio que não pode ser contornada pela UI (só pelo tempo ou por limpeza do save).
+- [x] **Q3-09** Histórico local das últimas 50 rodadas: data, aposta, total. Sem comparativo com "melhor rodada" nem sugestão de aposta maior.
+  - **Feito:** `state.hist` no save v2 (limite 50, validado na migração), registrado no mesmo ponto em que as estatísticas são atualizadas. Tela "🧾 Histórico" no menu, com data, aposta e total. Teste confere o limite e a tela com rodadas reais.
+- [x] **Q3-10** Limite de sessão opcional (15, 30, 60 min), com aviso e pausa obrigatória ao atingir.
+  - **Feito:** desligado por padrão, em Configurações (ciclo 15 → 30 → 60 → desligado). Aviso 2 min antes. Ao atingir o limite, pausa de 10 min gravada no save, então recarregar não a encerra. A sessão recomeça depois da pausa.
+- [x] **Q3-11** Lembrete de pausa a cada 30 min, mantido e testado.
+  - **Feito:** a regra de intervalo saiu para `wellbeing.js` (testada em Node). Teste de interface confere o aviso aos 30 min. O lembrete não aparece durante bloqueio nem durante uma rodada.
+- [x] **Q3-12** Autoexclusão local de 24 h, 7 dias ou 30 dias, com tela de bloqueio que não pode ser contornada pela UI (só pelo tempo ou por limpeza do save).
   - Aceite: teste de que o jogo não gira durante o período.
+  - **Feito:** o prazo só cresce e não há botão de cancelar. A tela de bloqueio não tem botão de fechar nem Escape, e a rodada recusa giro com clique, Espaço ou automático. O prazo sobrevive a recarregar, e "Apagar progresso" o preserva (na prática, esse botão fica inacessível enquanto o bloqueio está ativo). **Limite conhecido:** quem editar o `localStorage` pelo navegador consegue limpar o save; o roadmap aceita isso como saída.
 
 ### Sprint 11: playtest
 
@@ -177,21 +194,27 @@ Objetivo: publicar, com o gate jurídico concluído.
 ### Sprint 13: iOS
 
 - [ ] **Q4-04** Projeto Capacitor (`npx cap add ios`) em Mac com Xcode. Versão mínima de iOS definida.
-- [ ] **Q4-05** Ícone, splash e `PrivacyInfo.xcprivacy` (declarar que não há rastreamento).
-- [ ] **Q4-06** Haptics via plugin do Capacitor; `navigator.vibrate` mantido só na web.
+- [~] **Q4-05** Ícone, splash e `PrivacyInfo.xcprivacy` (declarar que não há rastreamento).
+  - **Parcial:** ícone 1024 pronto (`jogo/icon-1024.png`). `docs/ios/PrivacyInfo.xcprivacy` escrito e validado como plist, declarando que não há rastreamento nem coleta. **Falta:** splash do iOS e a inclusão do arquivo no projeto Xcode (Q4-04).
+- [~] **Q4-06** Haptics via plugin do Capacitor; `navigator.vibrate` mantido só na web.
+  - **Parcial:** `jogo/haptics.js` escolhe a via (plugin do Capacitor, depois `navigator.vibrate`, ou nenhuma) e respeita a preferência de vibração. Testado com dependências falsas. **Falta:** o plugin de verdade, que depende de Q4-04.
 - [ ] **Q4-07** Áreas seguras (Dynamic Island, indicador inferior) validadas em iPhone pequeno e grande.
 - [ ] **Q4-08** Build de TestFlight e teste em pelo menos 3 aparelhos.
 
 ### Sprint 14: localização e analytics
 
-- [ ] **Q4-09** Textos em português e inglês em arquivo separado (`i18n/`), sem texto fixo no código.
-- [ ] **Q4-10** Analytics somente opt-in, agregado e sem identificador individual. Desligado por padrão.
+- [x] **Q4-09** Textos em português e inglês em arquivo separado (`i18n/`), sem texto fixo no código.
+  - **Feito:** textos em `jogo/i18n/pt-BR.js` e `jogo/i18n/en.js`, com `jogo/i18n.js` para trocar o idioma. O código usa só chaves; módulos puros (engine, progressão, tutorial) guardam chaves e a interface traduz na exibição. Escolha de idioma em Configurações, salva em `set.lang`; padrão pt-BR. Teste confere que os dois idiomas têm as mesmas chaves e parâmetros, que toda chave usada existe e que nenhuma sobra. **Fora do alcance:** mensagens de erro para desenvolvedor (console e exceções internas) continuam em português; o jogador não as vê.
+- [x] **Q4-10** Analytics somente opt-in, agregado e sem identificador individual. Desligado por padrão.
+  - **Feito:** `jogo/analytics.js` com contadores em memória, sem identificador. Opção "📊 Estatísticas anônimas" em Configurações, desligada por padrão. Sem endpoint configurado, nada sai do aparelho; o endpoint depende da decisão de publicação (Q4-13). Teste de Playwright confere que nenhuma requisição sai do servidor local, com opt-out ou opt-in.
   - Aceite: com opt-out, nenhuma chamada de rede é feita (teste de rede no Playwright).
 
 ### Sprint 15: loja e web
 
-- [ ] **Q4-11** Descrição, screenshots (6.5" e 5.5") e classificação etária alta.
-- [ ] **Q4-12** Descrição sem promessa de ganho e com aviso de fichas fictícias.
+- [~] **Q4-11** Descrição, screenshots (6.5" e 5.5") e classificação etária alta.
+  - **Parcial:** rascunho em `docs/loja/descricao.md`; capturas 6,5" (1284×2778) e 5,5" (1242×2208) em `docs/loja/capturas/` (início, máquina e vitória grande). **Falta:** confirmar a classificação 18+ com o parecer jurídico e revisar as capturas em aparelho.
+- [x] **Q4-12** Descrição sem promessa de ganho e com aviso de fichas fictícias.
+  - **Feito no rascunho:** o texto diz que as fichas são fictícias e que o jogo não garante ganhos. Revisar contra as diretrizes atuais antes do envio.
 - [ ] **Q4-13** PWA publicada (GitHub Pages ou similar) como canal paralelo, com domínio definido.
 
 ### Sprint 16: beta e lançamento

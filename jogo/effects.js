@@ -7,7 +7,8 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   function create(canvas, reduced) {
     const g = canvas.getContext('2d');
-    let parts = [], petals = [], W = 0, H = 0;
+    let parts = [], petals = [], W = 0, H = 0, running = false, rafId = 0;
+    const pendingRain = new Set();
     const isReduced = () => !!(reduced && reduced());
 
     const coinImg = (() => {
@@ -16,7 +17,8 @@
       gr.addColorStop(0, '#fff6b0'); gr.addColorStop(.6, '#ffc83a'); gr.addColorStop(1, '#b8740a');
       x.fillStyle = gr; x.beginPath(); x.arc(24, 24, 22, 0, 7); x.fill();
       x.strokeStyle = '#8a5a00'; x.lineWidth = 3; x.stroke();
-      x.fillStyle = '#a86a00'; x.fillRect(18, 18, 12, 12);
+      x.fillStyle = '#b8101c'; x.beginPath(); x.arc(24, 24, 9, 0, 7); x.fill();
+      x.strokeStyle = '#ffe27a'; x.lineWidth = 1.5; x.stroke();
       return c;
     })();
 
@@ -38,10 +40,18 @@
 
     function rain(n) {
       n = isReduced() ? Math.min(n, 10) : n;
-      for (let i = 0; i < n; i++) setTimeout(() => parts.push({ x: Math.random() * W, y: -30, vx: (Math.random() - .5) * 2, vy: 2 + Math.random() * 4, r: Math.random() * 6, vr: .2 + Math.random() * .3, s: 16 + Math.random() * 14, life: 400, rain: 1 }), i * 25);
+      for (let i = 0; i < n; i++) {
+        const timer = setTimeout(() => {
+          pendingRain.delete(timer);
+          if (!running) return;
+          parts.push({ x: Math.random() * W, y: -30, vx: (Math.random() - .5) * 2, vy: 2 + Math.random() * 4, r: Math.random() * 6, vr: .2 + Math.random() * .3, s: 16 + Math.random() * 14, life: 400, rain: 1 });
+        }, i * 25);
+        pendingRain.add(timer);
+      }
     }
 
-    function frame() {
+    function renderFrame() {
+      if (!running) return;
       g.clearRect(0, 0, W, H);
       if (!isReduced()) for (const p of petals) {
         p.y += p.v; p.x += Math.sin((p.y + p.p * 40) / 40) * .6; p.p += .02;
@@ -54,10 +64,26 @@
         g.save(); g.translate(p.x, p.y); g.scale(Math.abs(Math.cos(p.r)) * .9 + .1, 1);
         g.drawImage(coinImg, -p.s / 2, -p.s / 2, p.s, p.s); g.restore();
       }
-      requestAnimationFrame(frame);
+      rafId = requestAnimationFrame(renderFrame);
     }
 
-    return { setSize, burst, rain, start: frame, count: () => parts.length };
+    function start() {
+      if (running) return;
+      running = true;
+      rafId = requestAnimationFrame(renderFrame);
+    }
+
+    function stop() {
+      if (!running) return;
+      running = false;
+      cancelAnimationFrame(rafId);
+      pendingRain.forEach(clearTimeout);
+      pendingRain.clear();
+      parts = [];
+      g.clearRect(0, 0, W, H);
+    }
+
+    return { setSize, burst, rain, start, stop, isRunning: () => running, count: () => parts.length };
   }
 
   return { create };

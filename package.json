@@ -1,6 +1,6 @@
 {
   "name": "tigrinho",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "TIGRINHO — caça-níquel casual com fichas fictícias (vanilla JS + SVG + WebAudio). Mascote: cachorro caramelo. Referência slot-game (MIT) vendorizada.",
   "type": "commonjs",
   "scripts": {

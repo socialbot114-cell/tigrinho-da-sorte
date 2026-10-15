@@ -1,292 +1,338 @@
-/* TIGRINHO — interface, animações, progressão. Fichas fictícias.
-   Enriquecido com padrões do groangroan/slot-game (MIT): timings, blur,
-   bounce, disableSpin e auto-stop de vitória. Ver THIRD_PARTY_NOTICES.md. */
+/* Entry point do TIGRINHO: compõe módulos locais e liga eventos da tela.
+   Sem bundler; os scripts locais em index.html preservam a execução offline. */
 (() => {
-  const E = TigerEngine;
-  const CFG = (typeof TigerConfig !== 'undefined') ? TigerConfig : null;
-  const RC = CFG ? CFG.reelsConfig : { SPIN_DURATION: 850, REEL_OFFSET_TIME: 300, TURBO_SPIN_DURATION: 380, TURBO_OFFSET_TIME: 110, ANTICIPATION_EXTRA: 900, BLUR_PX: 1.4, FILLER_DIVISOR: 85 };
-  const $ = (id) => document.getElementById(id);
-  const GC = CFG ? CFG.gameConfig : { START_CHIPS: 10000, REFILL_CHIPS: 1500 };
-  const START_CHIPS = GC.START_CHIPS, REFILL = GC.REFILL_CHIPS;
+  const E = TigerEngine, CFG = TigerConfig;
+  const PR = TigerProgression, $ = (id) => document.getElementById(id);
+  const RC = CFG.reelsConfig, BC = CFG.betConfig, GC = CFG.gameConfig, CC = CFG.celebrationConfig;
   const TEST_MODE = /[?&]test=1\b/.test(location.search);
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  const fmt = (n) => Math.round(n).toLocaleString('pt-BR');
-
-  // ---------- estado salvo ----------
-  const MISSIONS = [
-    { id: 'spins', base: 20, stat: 'spins', reward: 500, text: (n) => `Gire ${n} vezes` },
-    { id: 'wins', base: 8, stat: 'wins', reward: 600, text: (n) => `Ganhe ${n} rodadas` },
-    { id: 'wilds', base: 3, stat: 'wilds', reward: 800, text: (n) => `Acerte ${n} Caramelos WILD` },
-    { id: 'bigs', base: 1, stat: 'bigs', reward: 1500, text: (n) => `Consiga ${n} vitória(s) grande(s)` },
-  ];
-  const THEMES = [{ id: 'red', name: 'Festival Vermelho', lvl: 1 }, { id: 'jade', name: 'Jardim de Jade', lvl: 3 }, { id: 'noite', name: 'Noite de Lanternas', lvl: 6 }];
+  const format = (n) => Math.round(n).toLocaleString(TigerI18n.locale());
   const reduceDefault = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const fresh = () => TigerSave.defaults(reduceDefault, START_CHIPS);
-  let S = TigerSave.load(localStorage, reduceDefault, START_CHIPS);
-  const save = () => TigerSave.write(localStorage, S);
-  save(); // grava já na v2 (migra o v1 de imediato)
+  let state = TigerSave.load(localStorage, reduceDefault);
+  TigerI18n.setLang(state.set.lang); // idioma salvo vale antes de qualquer texto aparecer (Q4-09)
+  TigerI18n.applyTo(document);
+  const save = () => TigerSave.write(localStorage, state);
+  save(); // persiste imediatamente qualquer migração de save
 
-  // ---------- DOM ----------
-  const app = $('app'), reelsEl = $('reels'), frame = document.querySelector('.frame'), mascot = $('mascot'),
-        bubble = $('bubble'), spinBtn = $('spin'), balEl = $('balance'), winAmt = $('winamt'), winbar = $('winbar'), winLabel = $('winlabel');
+  const app = $('app'), frame = document.querySelector('.frame'), mascot = $('mascot');
+  // Tela inicial usa uma cópia do mascote, para mostrar a mesma coleção (Q3-04).
+  const splashDog = $('splashDog');
+  splashDog.innerHTML = mascot.innerHTML;
+  const winbar = $('winbar'), winAmount = $('winamt'), winLabel = $('winlabel'), skipButton = $('skipWin'), spinButton = $('spin');
+  document.documentElement.style.setProperty('--settle-duration', RC.SETTLE_POP_MS + 'ms');
+  const UI = TigerGameUI.create({
+    elements: {
+      app, mascot, spin: spinButton, balance: $('balance'), bet: $('bet'), lvl: $('lvl'), xpbar: $('xpbar'),
+      bubble: $('bubble'), toast: $('toast'), auto: $('auto'), betUp: $('betUp'), betDown: $('betDown'), turbo: $('turbo'),
+    },
+    getState: () => state,
+    progression: PR,
+    gameConfig: GC,
+    format,
+  });
   const sym = (id) => `<svg viewBox="0 0 100 100"><use href="#s-${id}"/></svg>`;
-  let busy = false, turbo = false, autoLeft = 0, shown = S.balance;
-  const vib = (p) => { if (S.set.vib && navigator.vibrate) try { navigator.vibrate(p); } catch (e) {} };
+  const reels = TigerReels.create($('reels'), {
+    sym,
+    randomSymbol: () => E.randomSymbol(Math.random),
+    config: RC,
+    initial: [['lantern', 'orange', 'bag'], ['cracker', 'ingot', 'envelope'], ['orange', 'lantern', 'cracker']],
+  });
+  const effects = TigerFx.create($('fx'), () => state.set.reduce);
+  const Parallax = TigerParallax.create({ scene: $('cenario'), reduced: () => state.set.reduce });
+  const Analytics = TigerAnalytics.create(); // sem endpoint: nada sai do aparelho (Q4-10)
+  let session = TigerSession.start(Date.now()); // resumo desta visita; não vai para o save
+  Analytics.setEnabled(state.set.analytics);
+  let viewport = { width: 0, height: 0 };
 
-  // ---------- rolos (módulo reels.js) ----------
-  const RC_ = RC;
-  const R = TigerReels.create(reelsEl, { sym, randomSymbol: () => E.randomSymbol(Math.random),
-    initial: [['lantern', 'orange', 'bag'], ['cracker', 'ingot', 'envelope'], ['orange', 'lantern', 'cracker']] });
-  const reels = R.reels;
-
-  // Padrão disableSpin portado de SpinButton.setEnabled do slot-game:
-  // desabilita giro/aposta/auto durante o spin (alpha + bloqueio de clique).
-  function disableSpin(spinning) {
-    const disabled = !!spinning;
-    for (const id of ['spin', 'auto', 'betUp', 'betDown', 'turbo']) {
-      const b = $(id);
-      if (!b) continue;
-      if (disabled) { b.setAttribute('aria-disabled', 'true'); b.style.opacity = '.55'; }
-      else { b.removeAttribute('aria-disabled'); b.style.opacity = ''; }
+  // Reação às opções de movimento. Roda dentro do clique no menu (requisito do iOS para o sensor).
+  function onSettingChange(key, on) {
+    if (key === 'analytics') { Analytics.setEnabled(on); return; } // opt-in (Q4-10)
+    if (key === 'reduce' && on) Parallax.disable();
+    if (key !== 'tilt') return;
+    if (!on) { Parallax.disable(); return; }
+    if (state.set.reduce) {
+      state.set.tilt = false; save();
+      UI.toast(TigerI18n.t('toast.tiltNeedsMotion'), GC.TOAST_MS);
+      Menus.settings();
+      return;
     }
-    spinBtn.classList.toggle('busy', disabled);
-  }
-
-  async function animateStep(step) {
-    const plan = TigerReels.stepPlan(RC_, { turbo, reduce: S.set.reduce, grid: step.grid });
-    const ps = reels.map(async (r, c) => {
-      const p = plan.cols[c];
-      if (p.antic) setTimeout(() => { r.el.classList.add('anticipate'); Sound.anticipation(); }, p.anticAt);
-      await R.spinReel(c, step.grid[c], p.dur, p.filler, RC_.BLUR_PX);
-      r.el.classList.remove('anticipate');
-      R.setCell(c, step.grid[c]); Sound.stop(c); vib(8);
+    Parallax.enable().then((ok) => {
+      if (ok) return;
+      state.set.tilt = false; save();
+      UI.toast(TigerI18n.t('toast.tiltDenied'), GC.TOAST_MS);
+      if ($('modalTitle') && $('modalTitle').textContent === TigerI18n.t('settings.title')) Menus.settings();
     });
-    const tk = setInterval(() => Sound.tick(), 70); await Promise.all(ps); clearInterval(tk);
-    if (plan.hitstop) { impact(1); await sleep(90); }
-  }
-  // impacto proporcional ao tier: vibração, tremor e faíscas
-  function impact(level) {
-    if (level >= 2) shake();
-    vib(level >= 3 ? [40, 30, 40] : level === 2 ? 22 : 10);
-    if (level >= 1) burst(6 + level * 4, W / 2, Hh * .45, .5 + level * .15);
   }
 
-  // ---------- efeitos (motor em effects.js) ----------
-  const fx = $('fx'); let W = 0, Hh = 0;
-  const FX = TigerFx.create(fx, () => S.set.reduce);
-  const burst = (...a) => FX.burst(...a), rain = (n) => FX.rain(n);
-  function resize() { W = innerWidth; Hh = innerHeight; FX.setSize(W, Hh); orient(); }
-  // Orientação: retrato é o modo principal; paisagem usa layout adaptativo (CSS)
-  // + dica discreta em ecrãs curtos. Tenta travar em retrato quando instalado (PWA).
   function orient() {
-    const land = innerWidth > innerHeight;
-    const short = innerHeight < 500 && land;
-    app.dataset.orient = land ? 'landscape' : 'portrait';
+    const landscape = innerWidth > innerHeight;
+    app.dataset.orient = landscape ? 'landscape' : 'portrait';
     const hint = $('rotateHint');
-    if (hint) hint.hidden = !short;
+    if (hint) hint.hidden = !(innerHeight < GC.SHORT_LANDSCAPE_HEIGHT && landscape);
     try {
-      if (!orient._locked && document.fullscreenElement && screen.orientation && screen.orientation.lock) {
-        orient._locked = true; screen.orientation.lock('portrait').catch(() => {});
+      if (!orient.locked && document.fullscreenElement && screen.orientation && screen.orientation.lock) {
+        orient.locked = true;
+        screen.orientation.lock('portrait').catch(() => {});
       }
-    } catch (e) {}
-  }
-  addEventListener('resize', resize); addEventListener('orientationchange', () => setTimeout(resize, 60)); resize(); FX.start();
-  function shake() { if (S.set.reduce) return; frame.classList.remove('shake'); void frame.offsetWidth; frame.classList.add('shake'); }
-
-  // ---------- UI helpers ----------
-  function setShown(v) { shown = v; balEl.textContent = fmt(v); }
-  let skipNow = false; // toque na barra de vitória pula a contagem
-  function countTo(el, from, to, ms, cb, snd) {
-    return new Promise((res) => { const t0 = performance.now(); let last = -1;
-      (function f(t) { if (skipNow) { cb(to, 1); res(); return; } const k = Math.min(1, (t - t0) / ms), v = from + (to - from) * (1 - Math.pow(1 - k, 3)); cb(v, k);
-        const n = Math.floor(k * 14); if (snd && n !== last) { last = n; Sound.coin(n); } k < 1 ? requestAnimationFrame(f) : res(); })(t0); });
-  }
-  function toast(msg, ms = 1800) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), ms); }
-  const PHRASES = { idle: ['Vamos girar!', 'Hoje é meu dia de sorte!', 'Bora, campeão(ã)!', 'Toque em GIRAR!'], win: ['Isso aí!', 'Ganhamos!', 'Que giro lindo!', 'Rugiu a sorte!'], big: ['INCRÍVEL!', 'RUUUGIIIU!', 'Eu sabia!!'], lose: ['Quase! De novo!', 'Vai vir!', 'A próxima é nossa!'], wild: ['Caramelo em campo!', 'Respin!']};
-  function say(kind, ms = 2200) { const a = PHRASES[kind]; bubble.textContent = a[Math.floor(Math.random() * a.length)]; bubble.classList.add('show'); clearTimeout(say._h); say._h = setTimeout(() => bubble.classList.remove('show'), ms); }
-  function mood(m) { mascot.setAttribute('class', 'mascot ' + m); }
-  function updateHud() {
-    $('bet').textContent = fmt(S.bet); $('lvl').textContent = S.level;
-    $('xpbar').style.width = Math.min(100, (S.xp / xpNeed()) * 100) + '%';
-    app.dataset.theme = S.theme; app.classList.toggle('reduce', S.set.reduce);
-  }
-  const xpNeed = () => 100 + (S.level - 1) * 80;
-  function addXp(n) {
-    S.xp += n;
-    while (S.xp >= xpNeed()) { S.xp -= xpNeed(); S.level++; const bonus = 500 * S.level; S.balance += bonus; setShown(shown + bonus);
-      Sound.levelup(); burst(30); toast(`⭐ Nível ${S.level}! +${fmt(bonus)} fichas`, 2600); const th = THEMES.find((t) => t.lvl === S.level); if (th) setTimeout(() => toast(`🎨 Novo tema: ${th.name}`, 2600), 2700); }
+    } catch (error) { /* orientação é opcional no navegador */ }
   }
 
-  // ---------- linhas vencedoras ----------
-  const highlight = (wins) => R.highlight(wins);
-  const clearHighlight = () => R.clearHighlight();
-  const setLocks = (locked) => R.setLocks(locked);
-
-  // ---------- vitória grande ----------
-  function bigWin(total, tier) {
-    return new Promise((res) => { (async () => {
-      const P = TigerCelebration.plan(tier, { reduce: S.set.reduce, turbo, auto: autoLeft > 0 });
-      const ov = $('bigwin'); ov.hidden = false; ov.dataset.lvl = tier.level;
-      $('bwTitle').textContent = tier.name; $('bwAmt').textContent = '0';
-      $('bwMult').textContent = TigerCelebration.multiplierText(tier, total, S.bet);
-      Sound.big(); Sound.gong(); Sound.boost(P.boostMs); frame.classList.add('glow'); mascot.classList.add('big');
-      mood('cheer'); shake(); vib([60, 40, 60, 40, 120]);
-      if (P.rainNow) rain(P.rainNow);
-      burst(40, W / 2, Hh * .45, 1.3);
-      for (const w of P.waves) setTimeout(() => {
-        if (ov.hidden) return;
-        if (w.kind === 'rain') rain(w.n); else burst(w.n, W / 2, Hh * .45, 1.6);
-      }, w.atMs);
-      let done = false;
-      const close = () => {
-        done = true; ov.hidden = true; ov.removeAttribute('data-lvl'); ov.onclick = null;
-        frame.classList.remove('glow'); mascot.classList.remove('big'); skipNow = false; res();
-      };
-      ov.onclick = () => { if (!done) { $('bwAmt').textContent = fmt(total); setTimeout(close, 150); } };
-      await countTo($('bwAmt'), 0, total, P.countMs, (v) => { if (!done) $('bwAmt').textContent = fmt(v); }, true);
-      if (!done) { burst(30, W / 2, Hh * .45); await sleep(P.holdMs); if (!done) close(); }
-    })(); });
+  function resize() {
+    viewport = { width: innerWidth, height: innerHeight };
+    effects.setSize(viewport.width, viewport.height);
+    orient();
   }
+  addEventListener('resize', resize);
+  addEventListener('orientationchange', () => setTimeout(resize, GC.ORIENTATION_RETRY_MS));
+  resize();
+  effects.start();
 
-  // ---------- rodada ----------
-  async function spin() {
-    if (busy) return; Sound.init();
-    if (S.balance < S.bet) {
-      const aff = [...E.BETS].reverse().find((b) => b <= S.balance);
-      if (aff) { S.bet = aff; updateHud(); toast('Aposta ajustada ao seu saldo'); } else return refill();
+  function shake() {
+    if (state.set.reduce) return;
+    frame.classList.remove('shake'); void frame.offsetWidth; frame.classList.add('shake');
+  }
+  const Haptics = TigerHaptics.browser(); // plugin do Capacitor no iOS; navigator.vibrate na web (Q4-06)
+  function vibrate(pattern) { Haptics.pulse(pattern, state.set.vib); }
+  function setShown(value) { UI.setBalance(value); }
+  function updateMissionsDot() {
+    PR.refreshRotations(state, new Date());
+    checkCosmetics();
+    const ready = PR.MISSIONS.some((mission) => PR.missionProgress(state, mission) >= PR.missionTarget(state, mission, GC.MISSION_GROWTH_FACTOR))
+      || ['daily', 'weekly'].some((kind) => PR.rotationView(state, kind).some((m) => m.ready));
+    $('btnMenu').classList.toggle('has-ready', ready);
+    $('btnMenu').setAttribute('aria-label', ready ? TigerI18n.t('hud.menuReady') : TigerI18n.t('hud.menu'));
+  }
+  // Coleção do mascote (Q3-04): avisa itens novos e reflete a coleção no mascote do jogo.
+  function checkCosmetics() {
+    const fresh = PR.grantCosmetics(state);
+    session = TigerSession.recordItems(session, fresh.map((item) => item.id));
+    if (fresh.length) { save(); UI.toast(TigerI18n.t('toast.cosmetic', { names: fresh.map((item) => TigerI18n.t(item.name)).join(', ') }), GC.TOAST_MS); }
+    mascot.dataset.cos = state.cos.join(' ');
+    splashDog.dataset.cos = mascot.dataset.cos;
+  }
+  function addXp(amount) {
+    const levelUps = PR.addXp(state, amount, GC);
+    for (const item of levelUps) {
+      effects.burst(30); Sound.levelup(); UI.mood('proud'); UI.toast(TigerI18n.t('toast.level', { level: item.level, bonus: format(item.bonus) }), GC.LEVEL_TOAST_MS);
+      if (item.theme) setTimeout(() => UI.toast(TigerI18n.t('toast.theme', { name: TigerI18n.t(item.theme.name) }), GC.LEVEL_TOAST_MS), GC.THEME_UNLOCK_TOAST_DELAY_MS);
     }
-    busy = true; disableSpin(true); mood('spinning'); clearHighlight(); setLocks([]);
-    winbar.classList.remove('flash'); winLabel.textContent = 'Girando…'; winAmt.textContent = '0';
-    const bet = S.bet, round = E.playRound(Math.random, bet);
-    // débito e crédito exatamente uma vez, salvos antes da animação
-    S.balance += round.total - bet; S.stats.spins++; if (round.total > 0) S.stats.wins++;
-    S.stats.wilds += round.steps.reduce((a, st) => a + st.grid.flat().filter((s) => s === 'wild').length - st.locked.length, 0);
-    S.stats.best = Math.max(S.stats.best, round.total); const ratio = round.total / bet; if (ratio >= 10) S.stats.bigs++;
-    const before = S.balance - round.total; setShown(before); vib(12); Sound.click(); Sound.spin(); say('idle', 800);
+  }
 
-    let credited = 0; skipNow = false;
-    for (const [i, st] of round.steps.entries()) {
-      if (st.respin) { toast(`🐶 RESPIN ${i}/${E.MAX_RESPINS}`, 1300); Sound.lock(); say('wild', 1400); mood('cheer'); setLocks(st.locked); await sleep(S.set.reduce ? 100 : 700); mood('spinning'); }
-      await animateStep(st);
-      const wilds = st.grid.flat().filter((s) => s === 'wild').length;
-      if (st.payout > 0) {
-        const stTier = E.prizeTier(st.payout / bet);
-        highlight(st.wins); mood('cheer'); mascot.classList.add('happy'); Sound.win(Math.min(4, stTier.level)); impact(stTier.level);
-        winLabel.textContent = st.respin ? 'Vitória no respin!' : (stTier.level >= 2 ? stTier.name : 'VITÓRIA!'); winbar.classList.add('flash');
-        burst(Math.min(40, 8 + st.payout / bet * 3), W / 2, Hh * .45, .8);
-        if (stTier.level >= 2) { coinRain(stTier.coins); sweepMachine(); }
-        const a = credited, b = credited + st.payout; credited = b;
-        await Promise.all([countTo(winAmt, a, b, S.set.reduce ? 200 : 700, (v) => { winAmt.textContent = fmt(v); }, true), countTo(balEl, shown, before + b, S.set.reduce ? 200 : 700, (v) => { balEl.textContent = fmt(v); })]);
-        shown = before + b; $('balance').parentElement.classList.add('pop'); setTimeout(() => $('balance').parentElement.classList.remove('pop'), 300);
-        await sleep(S.set.reduce ? 100 : turbo ? 250 : 650);
-      } else if (wilds && st.respin === false) { Sound.lock(); }
+  const Menus = TigerMenus.create({
+    getState: () => state,
+    setState: (next) => { state = next; },
+    fresh: () => TigerSave.defaults(reduceDefault),
+    progression: PR, gameConfig: GC, engine: E, ui: UI, sound: Sound, save, setShown, format, sym,
+    burst: (...args) => effects.burst(...args), rain: (n) => effects.rain(n),
+    refillChips: BC.REFILL_CHIPS, dailyBonus: BC.DAILY_BONUS,
+    dailyStep: GC.DAILY_STREAK_STEP, dailyDays: GC.DAILY_STREAK_DAYS,
+    onSetting: onSettingChange,
+    onProgress: () => updateMissionsDot(),
+    onWellbeing: () => refreshBlock(),
+    onLanguage: () => applyLanguage(),
+    onFeel: (value) => { Analytics.track('feel_' + value); },
+    getSession: () => TigerSession.summarize(session, Date.now()),
+  });
+
+  // Dica contextual uma única vez por tipo (Q3-02). Espera o aviso da rodada sair antes de aparecer.
+  // Se outro aviso (ex.: um toast de ação do jogador) estiver na tela, a dica espera ele sair em vez de substituí-lo.
+  function tip(id) {
+    const text = TigerTutorial.TIPS[id];
+    if (!text || state.seen.tips.includes(id)) return;
+    state.seen.tips.push(id); save();
+    const show = () => {
+      if ($('toast').classList.contains('show')) return setTimeout(show, GC.TIP_DELAY_MS);
+      UI.toast('💡 ' + TigerI18n.t(text), GC.TIP_TOAST_MS);
+    };
+    setTimeout(show, GC.TIP_DELAY_MS);
+  }
+
+  // Cartão de vitória (experiência): imagem com o Caramelo e o momento, sem valor em dinheiro.
+  // O mascote vai para a imagem sem CSS, então sai sem os acessórios não desbloqueados e sem as partes que dependem de CSS.
+  let lastWin = null;
+  function mascotMarkup(shown) {
+    const clone = mascot.cloneNode(true);
+    clone.querySelectorAll('.cos').forEach((el) => { if (!shown.has([...el.classList].find((c) => c.startsWith('cos-')))) el.remove(); });
+    TigerShareCard.CSS_ONLY.forEach((cls) => clone.querySelectorAll('.' + cls).forEach((el) => el.remove()));
+    return clone.innerHTML;
+  }
+  // Definições do SVG (gradientes e símbolos) para a imagem, sem as partes que só o CSS da página controla.
+  function cardDefs() {
+    const defs = document.querySelector('svg[width="0"][height="0"]').cloneNode(true);
+    TigerShareCard.CSS_ONLY.forEach((cls) => defs.querySelectorAll('.' + cls).forEach((el) => el.remove()));
+    return defs.innerHTML;
+  }
+  function showShare(tier, total, bet) { lastWin = { tier, total, bet }; $('shareWin').hidden = false; }
+  async function shareLast() {
+    if (!lastWin) return;
+    const t = (key, params) => TigerI18n.t(key, params);
+    try {
+      const blob = await TigerShareCard.build({
+        title: t(lastWin.tier.name), amount: '+' + format(lastWin.total), caption: t('share.caption'),
+        subtitle: t('share.subtitle'), footer: t('share.footer'),
+        mascotSvg: mascotMarkup, defsSvg: cardDefs(), unlocked: state.cos,
+      });
+      const result = await TigerShareCard.share(blob, { fileName: 'tigrinho-vitoria.png', title: t('share.title'), text: t('share.text') });
+      if (result !== 'cancelled') Analytics.track('share_' + result);
+    } catch (error) { UI.toast(TigerI18n.t('share.failed'), GC.TOAST_MS); }
+  }
+  $('shareWin').onclick = () => shareLast();
+
+  let Round;
+  // Bem-estar (Q3-10 a Q3-12): sessão, lembrete de pausa e bloqueio. Regras em wellbeing.js.
+  let sessionStart = Date.now(), lastReminder = 0, warned = false;
+  const blockBox = $('bloqueio');
+  const shortTime = (t, options) => new Date(t).toLocaleString(TigerI18n.locale(), options);
+  function refreshBlock(at = Date.now()) {
+    const reason = TigerWellbeing.blockReason(state.wb, at);
+    if (!reason) { blockBox.hidden = true; return; }
+    if (reason === 'exclusion') {
+      $('bloqueioTitle').textContent = TigerI18n.t('block.exclusionTitle');
+      $('bloqueioText').textContent = TigerI18n.t('block.exclusionText', { date: shortTime(state.wb.excludeUntil, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) });
+    } else {
+      $('bloqueioTitle').textContent = TigerI18n.t('block.pauseTitle');
+      $('bloqueioText').textContent = TigerI18n.t('block.pauseText', { time: shortTime(state.wb.pauseUntil, { hour: '2-digit', minute: '2-digit' }) }) + ' ' + TigerI18n.t('block.pauseSummary', { rounds: session.rounds });
     }
-    mascot.classList.remove('happy'); skipNow = false;
-    const tier = E.prizeTier(ratio);
-    if (tier.level >= 3) { say('big', 3000); await bigWin(round.total, tier); }
-    else if (tier.level >= 1) { say('win'); }
-    else { winLabel.textContent = 'Tente de novo!'; say('lose'); }
-    if (round.total > 0) { winLabel.textContent = 'Total ganho'; winAmt.textContent = fmt(round.total); }
-    addXp(10 + Math.min(40, Math.round(ratio * 2)));
-    setShown(S.balance); updateHud(); save(); clearHighlightSoon(round.total > 0);
-    mood('idle'); busy = false; disableSpin(false); updateMissionsDot();
-    if (autoLeft > 0) { autoLeft--; setAuto(); if (autoLeft > 0 && S.balance >= S.bet) setTimeout(() => !busy && spin(), turbo ? 250 : 700); else if (S.balance < S.bet) { autoLeft = 0; setAuto(); } }
+    blockBox.hidden = false;
   }
-  function sweepMachine() { if (S.set.reduce) return; const m = $('machine'); m.classList.remove('sweep'); void m.offsetWidth; m.classList.add('sweep'); setTimeout(() => m.classList.remove('sweep'), 1000); }
-  function coinRain(n) { rain(Math.max(4, Math.min(24, n))); }
-  function clearHighlightSoon(had) { if (had) setTimeout(() => { if (!busy) clearHighlight(); }, 2000); }
+  function tickSession(at = Date.now()) {
+    if (state.wb.pauseUntil && state.wb.pauseUntil <= at) { state.wb.pauseUntil = 0; save(); sessionStart = at; lastReminder = 0; warned = false; }
+    const blocked = !!TigerWellbeing.blockReason(state.wb, at);
+    const elapsed = (at - sessionStart) / GC.SESSION_MINUTE_MS;
+    const status = TigerWellbeing.sessionStatus(elapsed, state.wb.limit);
+    if (status === 'pause' && !blocked) { state.wb.pauseUntil = at + TigerWellbeing.PAUSE_MIN * GC.SESSION_MINUTE_MS; save(); }
+    else if (status === 'warn' && !warned && !blocked) {
+      warned = true; UI.toast(TigerI18n.t('toast.warnBreak', { min: TigerWellbeing.WARN_BEFORE_MIN }), GC.SESSION_REMINDER_TOAST_MS);
+    }
+    if (!blocked && Round && !Round.busy && TigerWellbeing.reminderDue(elapsed, lastReminder, GC.REMIND_EVERY_MIN)) {
+      lastReminder = Math.floor(elapsed);
+      UI.toast(TigerI18n.t('toast.reminder', { min: lastReminder }), GC.SESSION_REMINDER_TOAST_MS);
+    }
+    refreshBlock(at);
+  }
+  setInterval(() => tickSession(), GC.SESSION_MINUTE_MS);
+  tickSession();
 
-  // ---------- controles ----------
-  function setAuto() { const b = $('auto'); b.classList.toggle('on', autoLeft > 0); b.textContent = autoLeft > 0 ? autoLeft : 'AUTO'; }
-  spinBtn.onclick = () => spin();
-  winbar.addEventListener('pointerdown', () => { skipNow = true; });
-  $('betUp').onclick = () => { if (busy) return; const i = E.BETS.indexOf(S.bet); S.bet = E.BETS[Math.min(E.BETS.length - 1, i + 1)]; Sound.init(); Sound.click(); updateHud(); save(); };
-  $('betDown').onclick = () => { if (busy) return; const i = E.BETS.indexOf(S.bet); S.bet = E.BETS[Math.max(0, i - 1)]; Sound.init(); Sound.click(); updateHud(); save(); };
-  $('auto').onclick = () => { Sound.init(); if (autoLeft > 0) { autoLeft = 0; setAuto(); return; } autoLeft = 25; setAuto(); if (!busy) spin(); };
-  $('turbo').onclick = () => { turbo = !turbo; $('turbo').classList.toggle('on', turbo); Sound.click(); toast(turbo ? '⚡ Turbo ligado' : 'Turbo desligado', 900); };
-  addEventListener('keydown', (e) => { if ((e.code === 'Space' || e.code === 'Enter') && $('modal').hidden && $('bigwin').hidden && (!$('splash') || $('splash').hidden)) { e.preventDefault(); spin(); } });
-  document.addEventListener('visibilitychange', () => document.hidden ? Sound.suspend() : Sound.resume());
-  mascot.addEventListener('pointerdown', () => { say('idle'); });
+  Round = TigerRoundController.create({
+    engine: E, random: Math.random, reels, stepPlan: TigerReels.stepPlan, reelConfig: RC, gameConfig: GC, celebrationConfig: CC, celebration: TigerCelebration,
+    canSpin: () => $('modal').hidden && $('bigwin').hidden && $('splash').hidden && $('bloqueio').hidden,
+    getState: () => state, ui: UI, sound: Sound, effects,
+    frame, mascot, winAmount, winbar, winLabel, skipButton,
+    getSize: () => viewport, save, addXp, updateMissionsDot,
+    refill: () => Menus.refill(), format, shake, vibrate, tip,
+    onRoundStart: () => { PR.refreshRotations(state, new Date()); $('shareWin').hidden = true; },
+    onWinTier: (tier, total, bet) => showShare(tier, total, bet),
+    onRound: (entry) => { PR.recordRound(state, entry, GC.HISTORY_LIMIT); session = TigerSession.recordRound(session, entry); Analytics.track('spin'); },
+  });
 
-  // ---------- modais ----------
-  function modal(html, onMount) { const m = $('modal'); $('modalCard').innerHTML = html; m.hidden = false; $('modalCard').querySelectorAll('[data-close]').forEach((b) => (b.onclick = () => { m.hidden = true; Sound.click(); })); onMount && onMount($('modalCard')); }
-  const closeModal = () => { $('modal').hidden = true; };
-  function refill() {
-    Sound.init(); Sound.levelup(); busy = false; disableSpin(false);
-    modal(`<svg class="dog-big" viewBox="0 0 160 190"><use href="#s-mascot"/></svg><h2>O Caramelo te ajuda!</h2><p>Suas fichas acabaram, mas aqui o jogo nunca para.<br>Ganhe <b>${fmt(REFILL)} fichas</b> de presente!</p><button class="btn" id="getRefill">Pegar fichas grátis</button>`,
-      (c) => c.querySelector('#getRefill').onclick = () => { S.balance += REFILL; setShown(S.balance); save(); burst(40, W / 2, Hh / 2); closeModal(); toast('🎁 +' + fmt(REFILL) + ' fichas'); });
+  // Troca de idioma (Q4-09): textos estáticos, rótulos dinâmicos e o botão de som são redesenhados na hora.
+  function applyLanguage() {
+    TigerI18n.applyTo(document);
+    UI.updateHud();
+    paintSound();
+    updateMissionsDot();
+    refreshBlock();
   }
-  function daily() {
-    const today = new Date().toDateString(); if (S.lastDaily === today) return;
-    const yest = new Date(Date.now() - 864e5).toDateString();
-    const streak = E.nextStreak(S.lastDaily, today, yest, S.streak), reward = E.dailyReward(streak);
-    const dots = Array.from({ length: 7 }, (_, i) => `<span class="${i < streak ? 'on' : ''}"></span>`).join('');
-    modal(`<svg class="dog-big" viewBox="0 0 160 190"><use href="#s-mascot"/></svg><h2>Bônus diário!</h2><p>Dia <b>${streak}</b> de sequência${streak >= 7 ? ' — prêmio máximo!' : '. Volte amanhã para subir o prêmio.'}</p><div class="days">${dots}</div><p style="font-size:30px;color:#ffd24a"><b>+${fmt(reward)}</b> fichas</p><button class="btn" id="getDaily">Pegar!</button>`,
-      (c) => c.querySelector('#getDaily').onclick = () => { Sound.init(); Sound.big(); S.lastDaily = today; S.streak = streak; S.balance += reward; setShown(S.balance); save(); rain(40); closeModal(); });
-  }
-  // Lembrete de tempo de jogo (não é pressão nem contagem regressiva): a cada 30 min, sugere pausa.
-  const sessionStart = Date.now(); let lastRemind = 0; const REMIND = GC.REMIND_EVERY_MIN || 30;
-  setInterval(() => {
-    const mins = Math.floor((Date.now() - sessionStart) / 60000);
-    if (mins >= REMIND && mins - lastRemind >= REMIND && !busy) { lastRemind = mins; toast(`🐶 Você joga há ${mins} min. Que tal uma pausa?`, 3500); }
-  }, 60000);
-  function menu() {
-    modal(`<h2>Menu</h2><button class="btn alt" data-a="pay">🏮 Tabela de prêmios</button><button class="btn alt" data-a="mis">🎯 Missões</button><button class="btn alt" data-a="thm">🎨 Temas</button><button class="btn alt" data-a="set">⚙️ Configurações</button><button class="btn alt" data-a="about">ℹ️ Sobre o jogo</button><button class="btn" data-close>Voltar ao jogo</button>`,
-      (c) => c.querySelectorAll('[data-a]').forEach((b) => (b.onclick = () => ({ pay: paytable, mis: missions, thm: themes, set: settings, about }[b.dataset.a]())))); }
-  const back = '<button class="btn alt" id="back">← Menu</button>';
-  const wireBack = (c) => (c.querySelector('#back').onclick = menu);
-  function paytable() {
-    const lb = S.bet / 5;
-    modal(`<h2>Tabela de prêmios</h2><p>3 símbolos iguais em uma das <b>5 linhas</b>. O <b>Caramelo WILD</b> substitui qualquer símbolo.</p>
-      ${E.SYMBOLS.map((s) => `<div class="row"><span class="l">${sym(s.id)}${s.name}</span><b>${fmt(s.pay * lb)}</b></div>`).join('')}
-      <p>🐶 <b>Respin:</b> se um Caramelo WILD aparecer, ele trava e você ganha giros grátis (até ${E.MAX_RESPINS}) enquanto novos Caramelos caírem!</p><p style="opacity:.7;font-size:12px">Valores para a aposta atual. Retorno teórico ≈ 95%. Fichas fictícias.</p>${back}`, wireBack); }
-  const stat = (m) => S.stats[m.stat] - S.m[m.id].start;
-  const target = (m) => m.base * Math.pow(2, S.m[m.id].tier);
-  const reward = (m) => m.reward * (S.m[m.id].tier + 1);
-  function missions() {
-    modal(`<h2>Missões</h2>${MISSIONS.map((m) => { const p = Math.min(stat(m), target(m)), ok = p >= target(m);
-      return `<div class="mission"><div>${m.text(target(m))}</div><div class="bar"><i style="width:${(p / target(m)) * 100}%"></i></div><div style="display:flex;justify-content:space-between;align-items:center"><span>${p}/${target(m)} • 🪙 ${fmt(reward(m))}</span><button data-m="${m.id}" ${ok ? '' : 'disabled'}>Resgatar</button></div></div>`; }).join('')}${back}`,
-      (c) => { wireBack(c); c.querySelectorAll('[data-m]').forEach((b) => (b.onclick = () => { const m = MISSIONS.find((x) => x.id === b.dataset.m); S.balance += reward(m); setShown(S.balance); S.m[m.id].tier++; S.m[m.id].start = S.stats[m.stat]; save(); Sound.levelup(); burst(30, W / 2, Hh / 2); missions(); updateMissionsDot(); })); }); }
-  function updateMissionsDot() { const any = MISSIONS.some((m) => stat(m) >= target(m)); $('btnMenu').textContent = any ? '☰•' : '☰'; $('btnMenu').style.color = any ? '#7aff9a' : ''; }
-  function themes() {
-    modal(`<h2>Temas</h2>${THEMES.map((t) => `<div class="row"><span>${t.name}${S.theme === t.id ? ' ✅' : ''}</span>${S.level >= t.lvl ? `<button class="btn" style="width:auto;margin:0;padding:6px 14px" data-t="${t.id}">Usar</button>` : `<span>🔒 Nv ${t.lvl}</span>`}</div>`).join('')}${back}`,
-      (c) => { wireBack(c); c.querySelectorAll('[data-t]').forEach((b) => (b.onclick = () => { S.theme = b.dataset.t; updateHud(); save(); themes(); })); }); }
-  function settings() {
-    const o = (k, l) => `<div class="row"><span>${l}</span><button class="btn ${S.set[k] ? '' : 'alt'}" style="width:auto;margin:0;padding:6px 16px" data-s="${k}">${S.set[k] ? 'Ligado' : 'Desligado'}</button></div>`;
-    modal(`<h2>Configurações</h2>${o('music', '🎵 Música')}${o('sfx', '🔊 Efeitos sonoros')}${o('vib', '📳 Vibração')}${o('reduce', '🧘 Reduzir movimento')}<button class="btn alt" id="reset" style="margin-top:18px">Apagar progresso</button>${back}`,
-      (c) => { wireBack(c);
-        c.querySelectorAll('[data-s]').forEach((b) => (b.onclick = () => { const k = b.dataset.s; S.set[k] = !S.set[k]; if (k === 'music') Sound.setMusic(S.set[k]); if (k === 'sfx') Sound.setSfx(S.set[k]); updateHud(); save(); settings(); }));
-        c.querySelector('#reset').onclick = () => { if (confirm('Apagar todo o progresso e recomeçar?')) { S = fresh(); save(); location.reload(); } }; }); }
-  function about() { modal(`<h2>TIGRINHO</h2><p>Jogo de entretenimento <b>gratuito</b> com fichas <b>fictícias</b>. Elas não têm valor em dinheiro, não podem ser compradas, trocadas, sacadas ou transferidas.</p><p>Este jogo não oferece chances de ganhar dinheiro real. Se jogar de verdade (com dinheiro) está te fazendo mal, procure ajuda: <b>CVV 188</b>.</p><p>Fichas acabaram? O Caramelo te dá mais de graça. 🐶</p>${back}`, wireBack); }
-  $('btnMenu').onclick = () => { Sound.init(); Sound.click(); menu(); };
-  // Botão rápido de som — espelha SoundToggleButton do slot-game (mute/unmute).
+
+  $('btnMenu').onclick = () => { Sound.init(); Sound.click(); Menus.menu(); };
   const btnSound = $('btnSound');
-  const paintSound = () => { if (btnSound) btnSound.textContent = (S.set.music || S.set.sfx) ? '🔊' : '🔇'; };
-  if (btnSound) btnSound.onclick = () => {
-    Sound.init();
-    const on = !(S.set.music || S.set.sfx);
-    S.set.music = on; S.set.sfx = on;
-    Sound.setMusic(on); Sound.setSfx(on); save(); paintSound(); Sound.click();
+  const paintSound = () => {
+    if (!btnSound) return;
+    const enabled = state.set.music || state.set.sfx;
+    btnSound.setAttribute('aria-label', enabled ? TigerI18n.t('sound.disable') : TigerI18n.t('sound.enable'));
+    btnSound.innerHTML = `<svg aria-hidden="true"><use href="#${enabled ? 'i-sound-on' : 'i-sound-off'}"/></svg>`;
   };
+  if (btnSound) btnSound.onclick = () => {
+    Sound.init(); const enabled = !(state.set.music || state.set.sfx);
+    state.set.music = enabled; state.set.sfx = enabled;
+    Sound.setMusic(enabled); Sound.setSfx(enabled); save(); paintSound(); Sound.click();
+  };
+  $('betUp').onclick = () => {
+    if (Round.busy) return;
+    const index = E.BETS.indexOf(state.bet);
+    const previousBet = state.bet; state.bet = E.BETS[Math.min(E.BETS.length - 1, index + 1)];
+    if (state.bet !== previousBet) state.stats.betChanges++; // missão de descoberta
+    Sound.init(); Sound.click(); UI.updateHud(); save();
+  };
+  $('betDown').onclick = () => {
+    if (Round.busy) return;
+    const index = E.BETS.indexOf(state.bet);
+    const previousBet = state.bet; state.bet = E.BETS[Math.max(0, index - 1)];
+    if (state.bet !== previousBet) state.stats.betChanges++; // missão de descoberta
+    Sound.init(); Sound.click(); UI.updateHud(); save();
+  };
+  spinButton.onclick = () => Round.spin();
+  $('auto').onclick = () => Round.toggleAuto();
+  $('turbo').onclick = () => Round.toggleTurbo();
+  winbar.addEventListener('pointerdown', () => Round.skipCount());
+  skipButton.onclick = (event) => { event.stopPropagation(); Round.skipCount(); };
+  addEventListener('keydown', (event) => {
+    if ((event.code === 'Space' || event.code === 'Enter') && $('modal').hidden && $('bigwin').hidden && $('splash').hidden === true) {
+      event.preventDefault(); Round.spin();
+    }
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { Sound.suspend(); effects.stop(); }
+    else { Sound.resume(); effects.start(); }
+  });
+  mascot.addEventListener('pointerdown', () => UI.say('idle'));
 
-  // ---------- início ----------
-  Sound.setMusic(S.set.music); Sound.setSfx(S.set.sfx);
-  setShown(S.balance); updateHud(); updateMissionsDot(); mood('idle'); paintSound(); orient();
+  Sound.setMusicVolume(state.set.musicVol / 10); Sound.setSfxVolume(state.set.sfxVol / 10);
+  Sound.setMusic(state.set.music); Sound.setSfx(state.set.sfx);
+  setShown(state.balance); UI.updateHud(); updateMissionsDot(); UI.mood('idle'); paintSound(); orient();
+
+  // Parallax (Q2-10): sem sensor, a opção não se aplica. Com permissão pedida pelo iOS, espera o próximo clique.
+  if (!Parallax.hasSensor()) state.set.tilt = false;
+  else if (state.set.tilt && !state.set.reduce) {
+    if (Parallax.needsPermission()) addEventListener('click', () => Parallax.enable(), { once: true });
+    else Parallax.enable();
+  }
   const boot = $('boot');
-  requestAnimationFrame(() => requestAnimationFrame(() => { if (boot) { boot.classList.add('hide'); setTimeout(() => boot.remove(), 500); } }));
-  setTimeout(() => say('idle', 3000), 600);
-  // Tela inicial: o bônus diário só aparece depois de "Começar" (também libera o áudio,
-  // exigência dos navegadores e do Safari iOS).
-  const splash = $('splash'), startBtn = $('start');
-  const hideSplash = () => { if (!splash || splash.hidden) return; splash.classList.add('out'); setTimeout(() => { splash.hidden = true; daily(); }, 350); };
-  if (startBtn) { startBtn.onclick = () => { Sound.init(); Sound.click(); hideSplash(); }; startBtn.focus({ preventScroll: true }); }
-  else daily();
+  requestAnimationFrame(() => requestAnimationFrame(() => { if (boot) { boot.classList.add('hide'); setTimeout(() => boot.remove(), GC.BOOT_FADE_MS); } }));
+  setTimeout(() => UI.say('idle', GC.BOOT_IDLE_BUBBLE_MS), GC.IDLE_BUBBLE_DELAY_MS);
+
+  // Gestor de PWA: o primeiro toque começa o jogo e libera o áudio sem overlay no arranque.
+  const splash = $('splash'), startButton = $('start');
+  let splashClosing = false;
+  const hideSplash = () => {
+    if (!splash || splash.hidden || splashClosing) return;
+    splashClosing = true;
+    startButton.disabled = true;
+    splash.classList.add('out');
+    setTimeout(() => { splash.hidden = true; firstRun(); }, GC.SPLASH_EXIT_MS);
+  };
+  // Primeiro uso mostra o tutorial antes do bônus diário. Em ?test=1 só aparece com ?tutorial=1,
+  // para os testes de fluxo normal não precisarem fechá-lo.
+  const TUTORIAL_TEST = /[?&]tutorial=1\b/.test(location.search);
+  function firstRun() {
+    if (!state.seen.tutorial && (!TEST_MODE || TUTORIAL_TEST)) Menus.tutorial(() => { tip('firstSpin'); Menus.daily(); });
+    else Menus.daily();
+  }
+  if (startButton) {
+    startButton.onclick = () => { Sound.init(); Sound.click(); hideSplash(); };
+    startButton.focus({ preventScroll: true });
+  } else Menus.daily();
   addEventListener('pointerdown', () => Sound.init(), { once: true });
-  // prévia de celebração (testes e prints): preview(razão) mostra a faixa de prêmio correspondente
+
+  // Test hook só é incluído com ?test=1; nunca faz parte do fluxo normal offline.
   if (TEST_MODE) window.__tigrinho = {
-    S, spin, E,
-    preview: (r) => { const t = E.prizeTier(r); return t.level >= 3 ? bigWin(r * 10, t) : null; },
-    highlightLine: () => R.highlight([{ cells: [[0, 0], [1, 0], [2, 0]] }]),
-    lockWild: () => R.setLocks(['1,1']),
+    S: state, spin: Round.spin, E,
+    preview: Round.preview,
+    toggleAuto: Round.toggleAuto,
+    autoLeft: () => Round.autoLeft,
+    highlightSequence: (wins, onReveal) => reels.highlightSequence(wins, GC.WIN_LINE_HOLD_MS, GC.WIN_LINE_HOLD_REDUCED_MS, state.set.reduce, () => false, onReveal),
+    highlightLine: () => reels.highlight([{ cells: [[0, 0], [1, 0], [2, 0]] }]),
+    lockWild: () => reels.setLocks(['1,1']),
+    effectsRunning: () => effects.isRunning(),
+    tiltOn: () => Parallax.isOn(),
+    shareCard: () => shareLast(),
+    showShareFor: (ratio) => showShare(E.prizeTier(ratio), ratio * state.bet, state.bet),
+    mood: (value) => UI.mood(value),
+    session: () => TigerSession.summarize(session, Date.now()),
+    tip,
+    wbTick: (at) => tickSession(at),
+    sound: Sound,
+    blockOn: () => !blockBox.hidden,
+    setTilt: (on) => onSettingChange('tilt', on),
+    failNextAnimation: Round.failNextAnimation,
   };
 })();

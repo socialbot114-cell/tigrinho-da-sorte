@@ -9,30 +9,37 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 @keyframes bootbob{50%{transform:translateY(-8px) scale(1.04)}}
 #rotateHint{position:fixed;left:50%;bottom:calc(10px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:90;background:#000c;border:2px solid var(--gold);color:#ffe9a0;font-size:13px;font-weight:bold;padding:8px 16px;border-radius:20px;white-space:nowrap}
 #rotateHint[hidden]{display:none}
-#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:25}
 #app{position:relative;max-width:480px;height:100%;min-height:100dvh;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;
   background:radial-gradient(ellipse at 50% 20%,var(--bg1),var(--bg2) 75%);padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom)}
-#app[data-theme=jade]{--bg1:#0f6a4a;--bg2:#021a12}
+#app[data-theme=jade]{--bg1:#0a442f;--bg2:#021a12}
+.row input[type=range]{width:45%;accent-color:var(--gold);margin:0}
 #app[data-theme=noite]{--bg1:#2b2a7a;--bg2:#07062a}
-#app::before{content:"";position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 50% 38%,rgba(255,210,74,.07) 0 6deg,transparent 6deg 12deg);animation:rays 40s linear infinite;pointer-events:none}
 @keyframes rays{to{transform:rotate(360deg)}}
 .lanterns{position:absolute;top:0;left:0;right:0;height:60px;pointer-events:none}
 .lanterns i{position:absolute;top:-6px;width:26px;height:34px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ff6a5a,#b8101c);box-shadow:0 0 18px #ff3a2a88;animation:sway 3s ease-in-out infinite;transform-origin:50% -10px}
 .lanterns i:nth-child(1){left:14%}.lanterns i:nth-child(2){left:50%;animation-delay:-1s}.lanterns i:nth-child(3){right:14%;animation-delay:-2s}
 @keyframes sway{50%{transform:rotate(9deg)}0%,100%{transform:rotate(-9deg)}}
 
-.top{position:relative;z-index:3;display:flex;align-items:center;gap:8px;padding:8px 0}
-.icon{width:42px;height:42px;border-radius:12px;border:2px solid var(--gold);background:#0006;color:var(--gold);font-size:20px}
+.top{position:relative;z-index:26;display:flex;align-items:center;gap:8px;padding:8px 0}
+.icon{width:44px;height:44px;border-radius:12px;border:2px solid var(--gold);background:#0006;color:var(--gold);font-size:20px}
+.icon svg{width:23px;height:23px;vertical-align:middle}
+#btnMenu{position:relative}
+.menu-dot{display:none;position:absolute;right:-3px;top:-5px;color:#8dff94;font:bold 24px/16px system-ui;text-shadow:0 0 8px #38ff58}
+#btnMenu.has-ready .menu-dot{display:block}
 .levelbox{flex:1;font-size:13px}.levelbox b{color:var(--gold)}
 .xp{height:8px;border-radius:5px;background:#0008;margin-top:3px;overflow:hidden;border:1px solid #ffd24a55}
 .xp i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd24a,#ff8a1a);transition:width .5s}
-.chips{display:flex;align-items:center;gap:6px;background:#0007;border:2px solid var(--gold);border-radius:24px;padding:4px 14px 4px 6px;font-weight:bold;font-size:20px;color:#fff3b0;min-width:130px;justify-content:flex-end}
+.chips{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#190308dc,#4c1115c9);border:2px solid var(--gold);border-radius:18px;padding:3px 12px 3px 5px;font-weight:bold;color:#fff3b0;min-width:126px;justify-content:flex-end;box-shadow:inset 0 1px 0 #fff4,0 3px 9px #0006}
 .chips svg{width:30px;height:30px}
+.chip-info{display:flex;flex-direction:column;align-items:flex-end;line-height:1.04}
+.chip-info small{font-size:8px;letter-spacing:1.5px;color:#ffe17cbb}
+#balance{font-size:18px;font-variant-numeric:tabular-nums}
 .chips.pop{animation:pop .3s}
 @keyframes pop{50%{transform:scale(1.15)}}
 
 .stage{position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:0;z-index:2}
-.mrow{position:relative;width:100%;max-width:400px;z-index:5;pointer-events:none;height:min(26vh,150px);margin-bottom:-18px;flex:0 1 auto}
+.mrow{position:relative;width:100%;max-width:400px;z-index:5;pointer-events:none;height:min(20vh,126px);margin-bottom:-10px;flex:0 1 auto}
 .mascot{position:absolute;left:-6px;bottom:0;height:100%;width:auto;filter:drop-shadow(0 6px 8px #0008);transform-origin:50% 100%}
 .mouth-open{visibility:var(--mo,hidden)}.mouth-closed{visibility:var(--mc,visible)}.mascot.happy{--mo:visible;--mc:hidden}
 .mascot.idle{animation:bob 2.4s ease-in-out infinite}
@@ -46,7 +53,11 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 .bubble::after{content:"";position:absolute;left:-8px;bottom:10px;border:8px solid transparent;border-right-color:#fff;border-left:0}
 
 .machine{position:relative;width:100%;max-width:400px}
-.frame{position:relative;padding:10px;border-radius:22px;background:linear-gradient(145deg,#ffe27a,#c8860a 50%,#ffd24a);box-shadow:0 0 30px #ffb42055,0 10px 24px #000a,inset 0 0 0 3px #7a4a00}
+@media (orientation:portrait) and (max-width:699px){:root{--cell:min(25vw,16vh,104px)}.stage>.machine{flex-shrink:0}}
+.frame{position:relative;padding:39px 10px 10px;border-radius:22px;background:linear-gradient(145deg,#ffe27a,#c8860a 50%,#ffd24a);box-shadow:0 0 30px #ffb42055,0 10px 24px #000a,inset 0 0 0 3px #7a4a00}
+.machine-crown{position:absolute;left:50%;top:5px;transform:translateX(-50%);width:min(82%,290px);height:29px;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid #fff1a1;border-radius:999px;background:linear-gradient(180deg,#c91c30,#730817);box-shadow:inset 0 1px 0 #fff8,inset 0 -3px 0 #4b0710,0 2px 5px #592600;color:#ffe89a;white-space:nowrap}
+.machine-crown b{font:18px/1 "Bangers",Impact,sans-serif;letter-spacing:1.2px;text-shadow:0 1px 0 #5c080f}
+.machine-crown span{color:#fff2b0;font-size:13px;text-shadow:0 0 6px #ffdd58}
 .frame.shake{animation:fshake .5s}
 @keyframes fshake{20%{transform:translate(-5px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(4px,2px)}}
 .reels{display:flex;gap:6px;background:#f7e2b0;border-radius:14px;padding:5px;box-shadow:inset 0 4px 12px #0007;justify-content:center}
@@ -56,14 +67,17 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 .cell svg{width:86%;height:86%;filter:drop-shadow(0 3px 2px #0005)}
 /* Vitória: pulse de escala + brilho, espelha GameSymbol.startWinAnimation do slot-game
    (scale 1±0.1 + frame alpha 0.7±0.3, auto-stop em JS após 2s). */
-.cell.win svg{animation:winpulse .6s ease-in-out infinite}
+/* Vitória em sequência: cada símbolo da linha pula uma vez (winhop, com atraso --hop) e depois pulsa. */
+.cell.win svg{animation:winhop .5s cubic-bezier(.3,1.5,.5,1) var(--hop,0ms) both,winpulse .6s ease-in-out calc(.5s + var(--hop,0ms)) infinite}
+@keyframes winhop{0%{transform:translateY(0) scale(1)}35%{transform:translateY(-12%) scale(1.14)}70%{transform:translateY(2%) scale(.97)}100%{transform:translateY(0) scale(1)}}
 .cell.win{background:radial-gradient(circle,#fff6,#ffd24a00 70%);animation:winframe 1.2s ease-in-out infinite}
 @keyframes winpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18) rotate(3deg);filter:drop-shadow(0 0 10px #ffd24a) brightness(1.2)}}
 @keyframes winframe{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
 /* Assentamento do rolo: bounce curto, espelha GameSymbol.bounce (easeOut+easeIn). */
-.cell.pop svg{animation:cellpop .45s cubic-bezier(.3,1.8,.5,1)}
+.cell.pop svg{animation:cellpop var(--settle-duration,450ms) cubic-bezier(.3,1.8,.5,1)}
 @keyframes cellpop{0%{transform:scale(.6) translateY(-8px)}60%{transform:scale(1.08) translateY(2px)}100%{transform:scale(1) translateY(0)}}
-.reel.anticipate{box-shadow:0 0 0 3px #ff4a2a,0 0 24px #ff4a2a;animation:antic .25s infinite}
+.reel.anticipate{box-shadow:0 0 0 3px #ff4a2a,0 0 24px #ff4a2a;animation:antic .25s infinite,tremor .14s linear infinite}
+@keyframes tremor{0%,100%{transform:translateX(0)}25%{transform:translateX(-1.5px)}75%{transform:translateX(1.5px)}}
 @keyframes antic{50%{box-shadow:0 0 0 3px #ffd24a,0 0 30px #ffd24a}}
 .lock{position:absolute;left:0;right:0;height:var(--cell);display:flex;align-items:center;justify-content:center;z-index:3;background:radial-gradient(circle,#ffd24acc,#ff8a1a55);animation:lockglow .7s ease-in-out infinite;pointer-events:none}
 .lock svg{width:86%;height:86%}
@@ -71,14 +85,19 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 .lock--wild{border:2px solid #fff0a0;border-radius:10px;box-shadow:inset 0 0 0 2px #c8860a,inset 0 0 20px #fff4a8,0 0 16px #ffd24a;overflow:hidden}
 .lock--wild::after{content:"";position:absolute;inset:4px;border:1px solid #fff9c5;border-radius:7px;opacity:.85;pointer-events:none}
 .linefx{position:absolute;inset:0;pointer-events:none}
-.winbar{margin-top:10px;display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-radius:30px;background:#0009;border:2px solid #ffd24a88;font-size:15px}
-.winbar b{font-size:22px;color:var(--gold)}
+.winbar{margin-top:10px;display:flex;justify-content:space-between;align-items:center;padding:7px 16px;border-radius:18px;background:linear-gradient(120deg,#190308e8,#3d1015d9);border:1px solid #ffd24a88;box-shadow:inset 0 1px 0 #fff2,0 4px 12px #0005;font-size:13px}
+.winbar span{color:#ffe9a9;letter-spacing:.3px}
+.winbar b{font-size:22px;color:var(--gold);font-variant-numeric:tabular-nums;text-shadow:0 1px 6px #ffb42066}
+.skip-win{border:1px solid #ffe27a;border-radius:999px;background:#5c0b19;color:#fff0a0;padding:5px 12px;font:700 11px system-ui;letter-spacing:.8px;text-transform:uppercase}
+.skip-win[hidden]{display:none}
+.skip-win:active{transform:scale(.95)}
 .winbar.flash{animation:wflash .4s 3}
 @keyframes wflash{50%{background:#ffd24a;color:#7a0c14}}
 
-.controls{position:relative;z-index:3;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 0 4px}
+.controls{position:relative;z-index:26;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 0 4px}
 .round{border:2px solid var(--gold);background:linear-gradient(#a4101c,#5a0610);color:var(--gold);font-weight:bold;box-shadow:0 3px 0 #2a0408;transition:transform .08s,filter .15s}
 .round.small{width:46px;height:46px;border-radius:50%;font-size:17px;padding:0}
+.round.small svg{width:22px;height:22px;vertical-align:middle}
 .round.toggle{font-size:11px}.round.toggle.on{background:linear-gradient(#ffe27a,#ffa81a);color:#5a0610}
 .round:active{transform:translateY(2px);box-shadow:0 1px 0 #2a0408}
 .icon{transition:transform .08s,filter .15s}.icon:active{transform:scale(.92)}
@@ -91,9 +110,9 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 .spin[aria-disabled="true"]{filter:grayscale(.6) brightness(.8);cursor:not-allowed}
 .round[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
 @keyframes spinpulse{50%{transform:scale(1.06);box-shadow:0 6px 0 #064a28,0 0 38px #3aff8acc}}
-.legal{position:relative;z-index:3;text-align:center;font-size:10px;opacity:.6;padding:2px 6px 6px}
+.legal{position:relative;z-index:26;text-align:center;font-size:10px;opacity:.7;padding:2px 6px 6px}
 
-.toast{position:absolute;bottom:calc(132px + env(safe-area-inset-bottom));left:50%;transform:translate(-50%,-20px);background:var(--gold);color:#5a0610;font-weight:bold;padding:8px 18px;border-radius:20px;z-index:20;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+.toast{position:absolute;bottom:calc(132px + env(safe-area-inset-bottom));left:50%;transform:translate(-50%,-20px);background:var(--gold);color:#5a0610;font-weight:bold;padding:8px 18px;border-radius:20px;z-index:45;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
 .overlay{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle,#000a,#000d);animation:fadein .3s}
@@ -118,6 +137,7 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 .mission .bar{height:8px;border-radius:5px;background:#0007;margin:5px 0;overflow:hidden}.mission .bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd24a,#ff8a1a)}
 .mission button{padding:5px 12px;border-radius:10px;border:0;background:#12a85a;color:#fff;font-weight:bold}
 .mission button:disabled{background:#555;opacity:.6}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .dog-big{width:120px;height:140px;animation:jump .6s infinite}
 .reduce *{animation-duration:0s!important;animation:none!important}
 .reduce .spin{animation:none!important}
@@ -144,7 +164,10 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
   .mrow{flex:0 0 auto;width:104px;height:min(52vh,140px);margin:0;max-width:none;align-self:center}
   .mascot{left:0}
   .bubble{left:90px;top:-4px;max-width:150px;font-size:11px;padding:5px 9px}
-  .frame{padding:6px}
+  .frame{padding:27px 6px 6px}
+  .machine-crown{top:3px;height:21px;width:min(86%,220px);gap:6px}
+  .machine-crown b{font-size:14px}
+  .machine-crown span{font-size:10px}
   .reels{padding:3px;gap:4px}
   .machine{flex:0 0 auto;width:auto;max-width:none}
   .winbar{margin-top:4px;padding:3px 10px;font-size:11px}.winbar b{font-size:15px}
@@ -192,10 +215,10 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 .chips svg{filter:drop-shadow(0 2px 2px #0008)}
 
 /* Cauda do cachorro abana (mascote) */
-.tail{transform-origin:122px 150px;animation:wag 1.6s ease-in-out infinite}
+.tail{transform-origin:116px 156px;animation:wag 1.6s ease-in-out infinite}
 @keyframes wag{50%{transform:rotate(14deg)}}
 .mascot.cheer .tail,.mascot.spinning .tail{animation-duration:.4s}
-.arm-r{transform-origin:124px 128px;transform-box:view-box}
+.arm-r{transform-origin:108px 118px;transform-box:view-box}
 .mascot.cheer .arm-r{animation:wave .5s ease-in-out infinite}
 @keyframes wave{50%{transform:rotate(-14deg)}}
 .reduce .tail,.reduce .arm-r{animation:none!important}
@@ -280,12 +303,12 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 .overlay[data-lvl="5"] .bw-title{font-size:clamp(40px,13vw,66px)}
 
 /* Poses do cachorro: cada estado da rodada tem leitura própria */
-.mascot.spinning .arm-l{animation:hold .25s ease-in-out infinite alternate;transform-box:view-box;transform-origin:36px 120px}
+.mascot.spinning .arm-l{animation:hold .25s ease-in-out infinite alternate;transform-box:view-box;transform-origin:52px 118px}
 @keyframes hold{to{transform:rotate(-10deg) translateY(-2px)}}
-.mascot.cheer .arm-l{animation:wave2 .5s ease-in-out infinite;transform-box:view-box;transform-origin:36px 120px}
+.mascot.cheer .arm-l{animation:wave2 .5s ease-in-out infinite;transform-box:view-box;transform-origin:52px 118px}
 @keyframes wave2{50%{transform:rotate(-16deg)}}
 .mascot.big{animation:jumpbig .42s ease-in-out infinite}
-.mascot.big .arm-l{animation:wave2 .32s ease-in-out infinite;transform-box:view-box;transform-origin:36px 120px}
+.mascot.big .arm-l{animation:wave2 .32s ease-in-out infinite;transform-box:view-box;transform-origin:52px 118px}
 .mascot.big .arm-r{animation:wave .32s ease-in-out infinite alternate}
 @keyframes jumpbig{50%{transform:translateY(-30px) rotate(-3deg) scale(1.06)}}
 .dog-ear,.dog-head,.dog-collar{transform-box:fill-box}
@@ -301,3 +324,110 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 .reduce .mascot.big,.reduce .mascot.big .arm-l,.reduce .mascot.big .arm-r,.reduce .mascot.cheer .arm-l,.reduce .mascot.spinning .arm-l{animation:none!important}
 .reduce .dog-ear,.reduce .dog-head{animation:none!important}
 @media (prefers-reduced-motion:reduce){.bw-rays,.bw-mult:not(:empty){animation:none}}
+
+/* ===== Q2-09: cenário em três camadas (fundo, pórtico, primeiro plano) ===== */
+/* Camadas decorativas: não capturam toque e ficam abaixo do palco (.stage) e dos controles. */
+.cenario{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.camada-fundo,.camada-portico,.camada-frente{position:absolute;inset:0;pointer-events:none}
+
+/* 1. Fundo: raios girando e vinheta que puxa o foco para o centro da máquina. */
+.camada-fundo::before{content:"";position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 50% 38%,rgba(255,210,74,.07) 0 6deg,transparent 6deg 12deg);animation:rays 40s linear infinite}
+.camada-fundo::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 35%,#0000 45%,#0006 100%)}
+/* Pseudo-elementos não entram no seletor `*` da redução de movimento: desligam aqui. */
+@media (prefers-reduced-motion:reduce){.camada-fundo::before{animation:none}}
+.reduce .camada-fundo::before{animation:none}
+
+/* 2. Pórtico: arco (.portico) e lanternas (.lanterns) já têm regras acima. */
+
+/* 3. Primeiro plano: brilho dourado na base e bokeh desfocado nas bordas.
+   Só gradiente e transform (sem filter), para não pesar no iPhone (Q1-05). */
+.camada-frente::before{content:"";position:absolute;left:-10%;right:-10%;bottom:-30px;height:40%;background:radial-gradient(ellipse at 50% 100%,#ffb42038,#0000 70%)}
+.bokeh{position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,#ffe27aa6 0,#ffb42044 45%,#0000 70%);animation:bokeh 11s ease-in-out infinite alternate}
+.bokeh.b1{left:-38px;top:30%}
+.bokeh.b2{right:-46px;top:52%;width:150px;height:150px;animation-duration:14s;animation-delay:-4s}
+.bokeh.b3{right:-16px;bottom:-24px;width:110px;height:110px;animation-duration:9s;animation-delay:-2s}
+@keyframes bokeh{to{transform:translate(8px,-14px) scale(1.08)}}
+
+/* ===== Q2-10: parallax com inclinação (liga só com .tilt, vinda de parallax.js) ===== */
+/* Profundidade de cada camada em px por unidade de inclinação; a camada mais próxima se move mais. */
+.camada-fundo{--d:4}
+.camada-portico{--d:8}
+.camada-frente{--d:12}
+/* Escala leve cobre as bordas que aparecem ao deslocar. Sem .tilt, o layout fica como antes. */
+.cenario.tilt .camada-fundo,.cenario.tilt .camada-portico,.cenario.tilt .camada-frente{
+  transform:translate3d(calc(var(--px,0) * var(--d) * -1px),calc(var(--py,0) * var(--d) * -1px),0) scale(1.08);will-change:transform}
+.reduce .cenario.tilt .camada-fundo,.reduce .cenario.tilt .camada-portico,.reduce .cenario.tilt .camada-frente{transform:none;will-change:auto}
+@media (prefers-reduced-motion:reduce){.cenario.tilt .camada-fundo,.cenario.tilt .camada-portico,.cenario.tilt .camada-frente{transform:none;will-change:auto}}
+
+/* ===== Q3-04: coleção do mascote. Cada acessório aparece só quando o id está em data-cos do #mascot ===== */
+.cos{display:none}
+[data-cos~="laco"] .cos-laco,[data-cos~="flor"] .cos-flor,[data-cos~="guizos"] .cos-guizos,
+[data-cos~="oculos"] .cos-oculos,[data-cos~="estrela"] .cos-estrela,[data-cos~="lanterna"] .cos-lanterna{display:inline}
+/* Acessórios da cabeça (flor, óculos, estrela) giram com a cabeça, com o mesmo pivô da face. */
+.cos-head{transform-box:view-box;transform-origin:80px 77px}
+.mascot.spinning .cos-head{animation:headtilt .25s ease-in-out infinite alternate}
+.mascot.big .cos-head{animation:headtilt .42s ease-in-out infinite alternate}
+.reduce .cos-head{animation:none!important}
+
+/* Linha vencedora: a base se desenha e um brilho percorre por cima. --len é o comprimento real (definido em reels.js). */
+.linefx .line-base{fill:none;stroke:#fff7c0;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px #ff9a1a);stroke-dasharray:var(--len,0) var(--len,0);stroke-dashoffset:var(--len,0);animation:linedraw .42s cubic-bezier(.2,.8,.2,1) forwards}
+.linefx .line-flow{fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:6px 34px;opacity:.9;animation:lineflow 1.28s linear infinite}
+@keyframes linedraw{to{stroke-dashoffset:0}}
+@keyframes lineflow{to{stroke-dashoffset:-160px}}
+.reduce .linefx .line-base{stroke-dashoffset:0;animation:none}
+.reduce .linefx .line-flow{display:none}
+@media (prefers-reduced-motion:reduce){.linefx .line-base{stroke-dashoffset:0;animation:none}.linefx .line-flow{display:none}}
+
+/* Paisagem curta: o rótulo AUTO não cabe no botão de 36 px; ele vira pílula que cresce com o texto. */
+@media (orientation:landscape) and (max-height:500px){#auto{width:auto;min-width:40px;padding:0 8px;border-radius:999px;white-space:nowrap}}
+
+/* Piscar do Caramelo: as pálpebras descem por um instante, em intervalos longos (desliga com redução de movimento). */
+.lid{transform-box:fill-box;transform-origin:50% 0;transform:scaleY(0);animation:blink 5.2s infinite}
+@keyframes blink{0%,91%,100%{transform:scaleY(0)}94%{transform:scaleY(1)}}
+
+/* ===== Experiência: cartão compartilhável, menu em grupos, resumo da sessão e humor do Caramelo ===== */
+.share-win{width:34px;height:34px;border-radius:50%;border:2px solid var(--gold);background:#0006;color:var(--gold);font-size:16px;flex:0 0 auto;margin-left:6px;transition:transform .08s}
+.share-win[hidden]{display:none}
+.share-win:active{transform:scale(.92)}
+.menu-group{margin:14px 0 4px;text-align:left;font:700 11px/1 system-ui,sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:#ffe17c;opacity:.9}
+.feel{display:flex;justify-content:center;gap:10px;margin-top:8px}
+.feel-btn{width:auto;min-width:64px;margin:0;padding:8px 12px;font-size:22px}
+.feel-btn.on{background:linear-gradient(#ffe27a,#ffa81a);color:#5a0610}
+/* Humor do mascote: reação curta a respin e a subida de nível (sem cair em loop). */
+.mascot.surprised .dog-head{animation:surprise .5s ease-out 1 both}
+.mascot.surprised .dog-ear{animation:earup .5s ease-out 1 both}
+@keyframes surprise{0%{transform:translateY(0)}35%{transform:translateY(-6px) scale(1.04)}100%{transform:translateY(-2px)}}
+@keyframes earup{35%{transform:rotate(-8deg)}100%{transform:rotate(0)}}
+.mascot.proud{animation:proud 1.2s ease-in-out 2}
+@keyframes proud{50%{transform:translateY(-4px) scale(1.03,1.02)}}
+.reduce .mascot.surprised .dog-head,.reduce .mascot.surprised .dog-ear,.reduce .mascot.proud{animation:none}
+
+/* ===== Estética: halo da máquina e painel de ganho em destaque ===== */
+/* Halo dourado atrás da máquina: só opacidade e escala (barato para o celular). Fica abaixo da máquina. */
+.stage::before{content:"";position:absolute;left:50%;top:50%;width:min(130vw,620px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,#ffd24a66 0,#ffb42e33 40%,#ffb42e00 70%);pointer-events:none;animation:halo 3.2s ease-in-out infinite}
+@keyframes halo{50%{opacity:.55;transform:translate(-50%,-50%) scale(1.07)}}
+.reduce .stage::before{animation:none}
+@media (prefers-reduced-motion:reduce){.stage::before{animation:none}}
+/* Painel de ganho: a última vitória acende e fica em destaque até o próximo giro (sem prazo e sem contagem). */
+.winbar{transition:border-color .3s,box-shadow .3s}
+.winbar.hit{border-color:#ffe27a;box-shadow:inset 0 1px 0 #fff2,0 0 18px #ffd24a66,0 4px 12px #0005}
+.winbar.hit b{font-size:26px;text-shadow:0 0 10px #ffd24acc,0 1px 6px #ffb42088}
+
+/* Vitória na tela: o halo do palco fica mais dourado até o próximo giro. */
+.stage.lit::before{background:radial-gradient(circle,#ffe27a88 0,#ffb42e44 42%,#ffb42e00 70%)}
+
+/* Moldura com relevo metálico: reflexo diagonal sobre o dourado (sem animação, barato para o celular). */
+.frame{background:linear-gradient(112deg,#fff0 0,#fff0 30%,#fff7 42%,#fff0 50%,#fff0 62%,#fff4 74%,#fff0 86%),linear-gradient(145deg,#ffe27a,#c8860a 50%,#ffd24a)}
+/* Faixa do título: esmalte vermelho com brilho na metade de cima e borda dourada. */
+.machine-crown{background:linear-gradient(180deg,#e2354d 0%,#b5162e 46%,#8a0d20 54%,#5a0610 100%)}
+
+/* ===== Estética: grande vitória com placa de luz e botão GIRAR com reflexo de esmalte ===== */
+/* Título da grande vitória: tipografia da marca e placa de luz atrás, para ler sobre os raios. */
+.bw-title{font-family:"Bangers",Impact,"Arial Black",sans-serif;position:relative;letter-spacing:1px}
+.bw-title::before{content:"";position:absolute;inset:-22px -30px;border-radius:30px;background:radial-gradient(ellipse at 50% 50%,#7a0c14d9 0,#5a0610a6 55%,#5a061000 100%);z-index:-1;pointer-events:none}
+.bw-amt b{color:#ffe27a;text-shadow:0 0 14px #ffb42099,0 3px 0 #5a0610}
+/* Botão GIRAR: reflexo de esmalte no topo e anel interno claro (mesma cor, mais volume). */
+.spin{position:relative}
+.spin span{position:relative;z-index:1}
+.spin::before{content:"";position:absolute;left:14%;right:14%;top:9%;height:36%;border-radius:50%;background:linear-gradient(#ffffffb8,#ffffff00);pointer-events:none;z-index:0}
+.spin::after{content:"";position:absolute;inset:6px;border-radius:50%;border:1px solid #d9ffe6aa;pointer-events:none}

@@ -10,7 +10,7 @@ module.exports = [
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
-      globals: { ...globals.browser, ...globals.node, TigerEngine: 'readonly', TigerConfig: 'readonly', TigerSave: 'readonly', TigerFx: 'readonly', TigerReels: 'readonly', TigerCelebration: 'readonly', Sound: 'readonly' },
+      globals: { ...globals.browser, ...globals.node, TigerEngine: 'readonly', TigerConfig: 'readonly', TigerSave: 'readonly', TigerProgression: 'readonly', TigerFx: 'readonly', TigerParallax: 'readonly', TigerTutorial: 'readonly', TigerWellbeing: 'readonly', TigerHaptics: 'readonly', TigerAnalytics: 'readonly', TigerI18n: 'readonly', TigerSession: 'readonly', TigerShareCard: 'readonly', TigerI18nPtBR: 'readonly', TigerI18nEn: 'readonly', TigerReels: 'readonly', TigerCelebration: 'readonly', TigerGameUI: 'readonly', TigerMenus: 'readonly', TigerRoundController: 'readonly', Sound: 'readonly' },
     },
     rules: { 'no-unused-vars': ['error', { args: 'none', caughtErrors: 'none', varsIgnorePattern: '^_' }], 'no-empty': ['error', { allowEmptyCatch: true }] },
   },

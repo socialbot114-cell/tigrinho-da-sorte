@@ -7,12 +7,14 @@ Mascote: o **Caramelo da Sorte**, um cachorro caramelo original. Arte e sons 100
 
 - `jogo/`: o jogo (vanilla JS, sem build):
   - `engine.js`: motor de regras puro, testável em Node.
-  - `game.js`: orquestra interface, estado e progressão.
+  - `game.js`: entry point offline; compõe os módulos e conecta eventos.
   - `reels.js`, `celebration.js`: rolos e plano de celebração.
   - `save.js`, `effects.js`: persistência versionada e partículas.
-  - `config.js`: configuração central (rolos, apostas, design, escala).
+  - `progression.js`, `game-ui.js`, `game-menus.js`: regras puras de progresso, HUD/feedback e modais.
+  - `game-round-controller.js`: liquidação da rodada, animações, celebrações e controles.
+  - `config.js`: configuração central de economia, rolos, animações e celebrações.
   - `audio.js`: música e efeitos sintetizados.
-  - `index.html`, `style.css`, `manifest.json`, `assets.json`, `fonts/` (Bangers, licença OFL).
+  - `index.html`, `style.css`, `manifest.json`, `assets.json`, ícone vetorial/PNG local e `fonts/` (Bangers, licença OFL).
   - `engine.test.js`: `npm test` (regras, config, HTML, RTP ≈ 95%).
 - `tests/ui/`: testes de UI com Playwright em viewport de iPhone (retrato e paisagem).
 - `blender/`: modelo procedural do cachorro (`cachorro.py`) para renderizar poses no Mac.
