@@ -97,6 +97,21 @@ ok('splash do iOS é PNG RGB 2732x2732 sem transparência', () => {
   assert.strictEqual(png[25], 2, 'tipo de cor deve ser RGB (sem alfa)');
 });
 
+// --- Q4-11: capturas da loja nas medidas exigidas (6,5" e 5,5") e folha de poses (Q2-03) ---
+ok('capturas da loja têm as medidas da App Store e a folha de poses existe', () => {
+  const dim = (file) => {
+    const png = fs.readFileSync(path.join(__dirname, '..', 'docs', ...file.split('/')));
+    return [png.readUInt32BE(16), png.readUInt32BE(20)];
+  };
+  for (const tela of ['6.5-1-inicio', '6.5-2-maquina', '6.5-3-vitoria-grande']) {
+    assert.deepStrictEqual(dim(`loja/capturas/${tela}.png`), [1284, 2778], tela);
+  }
+  for (const tela of ['5.5-1-inicio', '5.5-2-maquina', '5.5-3-vitoria-grande']) {
+    assert.deepStrictEqual(dim(`loja/capturas/${tela}.png`), [1242, 2208], tela);
+  }
+  assert.ok(fs.existsSync(path.join(__dirname, '..', 'docs', 'prints', '14-poses-mascote.png')), 'folha de poses');
+});
+
 // --- Q2-08: ícone 1024 para a loja e para o manifesto (sem transparência) ---
 ok('ícone 1024 é PNG RGB 1024x1024 e está no manifesto', () => {
   const png = fs.readFileSync(path.join(__dirname, 'icon-1024.png'));

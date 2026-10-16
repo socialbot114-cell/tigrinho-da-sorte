@@ -94,7 +94,7 @@ Objetivo: o visual parecer produto, não protótipo.
 - [x] **Q2-02** Separar o SVG do cachorro em partes: cabeça, orelhas, corpo, braços, cauda, colete.
   - Aceite: cada parte anima sozinha por CSS sem quebrar a silhueta.
 - [~] **Q2-03** Quatro poses finais (repouso, giro, vitória, grande vitória) aprovadas em screenshot.
-  - **Implementado:** repouso, cabeça inclinada no giro, orelhas/braços na vitória e pulo/orelhas na grande vitória. CSS testado com movimento habilitado; aprovação visual final continua pendente.
+  - **Implementado:** repouso, cabeça inclinada no giro, orelhas/braços na vitória e pulo/orelhas na grande vitória. CSS testado com movimento habilitado. Folha das quatro poses, com cada animação pausada no meio do ciclo, em `docs/prints/14-poses-mascote.png` (gerada por `tests/capturas.js`). **Falta:** a aprovação visual, que é decisão sua.
 
 ### Sprint 5: símbolos e máquina
 
@@ -212,7 +212,7 @@ Objetivo: publicar, com o gate jurídico concluído.
 ### Sprint 15: loja e web
 
 - [~] **Q4-11** Descrição, screenshots (6.5" e 5.5") e classificação etária alta.
-  - **Parcial:** rascunho em `docs/loja/descricao.md`; capturas 6,5" (1284×2778) e 5,5" (1242×2208) em `docs/loja/capturas/` (início, máquina e vitória grande). **Falta:** confirmar a classificação 18+ com o parecer jurídico e revisar as capturas em aparelho.
+  - **Parcial:** rascunho em `docs/loja/descricao.md`; capturas 6,5" (1284×2778) e 5,5" (1242×2208) em `docs/loja/capturas/` (início, máquina e vitória grande), regeneradas do estado atual por `tests/capturas.js` e cobertas por teste de medidas. **Falta:** confirmar a classificação 18+ com o parecer jurídico e revisar as capturas em aparelho.
 - [x] **Q4-12** Descrição sem promessa de ganho e com aviso de fichas fictícias.
   - **Feito no rascunho:** o texto diz que as fichas são fictícias e que o jogo não garante ganhos. Revisar contra as diretrizes atuais antes do envio.
 - [ ] **Q4-13** PWA publicada (GitHub Pages ou similar) como canal paralelo, com domínio definido.
