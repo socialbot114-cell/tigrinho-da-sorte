@@ -39,7 +39,7 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 @keyframes pop{50%{transform:scale(1.15)}}
 
 .stage{position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:0;z-index:2}
-.mrow{position:relative;width:100%;max-width:400px;z-index:5;pointer-events:none;height:min(20vh,126px);margin-bottom:-10px;flex:0 1 auto}
+.mrow{position:relative;width:100%;max-width:400px;z-index:5;pointer-events:none;height:min(26vh,150px);margin-bottom:-48px;flex:0 1 auto}
 .mascot{position:absolute;left:-6px;bottom:0;height:100%;width:auto;filter:drop-shadow(0 6px 8px #0008);transform-origin:50% 100%}
 .mouth-open{visibility:var(--mo,hidden)}.mouth-closed{visibility:var(--mc,visible)}.mascot.happy{--mo:visible;--mc:hidden}
 .mascot.idle{animation:bob 2.4s ease-in-out infinite}

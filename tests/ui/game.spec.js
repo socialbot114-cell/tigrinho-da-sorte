@@ -787,6 +787,15 @@ test('botão GIRAR tem reflexo de esmalte e anel interno', async ({ page }) => {
   expect(await page.locator('#spin').evaluate((el) => getComputedStyle(el, '::after').borderTopWidth)).toBe('1px');
 });
 
+// --- Mascote: tamanho legível na tela de jogo (retrato); a linha dos rolos não pode espremê-lo ---
+test('mascote mantém tamanho legível na tela de jogo, em retrato', async ({ page }, info) => {
+  test.skip(info.project.name !== 'iphone-retrato', 'na paisagem o mascote tem outro layout');
+  await startGame(page);
+  await clearOverlays(page);
+  const height = await page.locator('#mascot').evaluate((el) => el.getBoundingClientRect().height);
+  expect(height).toBeGreaterThanOrEqual(90);
+});
+
 // --- Acessibilidade: a barra de nível anuncia o progresso e acompanha a largura visível ---
 test('barra de nível é um progressbar e o valor anunciado bate com a largura', async ({ page }) => {
   await startGame(page);
