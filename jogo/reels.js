@@ -143,7 +143,7 @@
       })();
     }
 
-    function setLocks(locked, cellVar = 'var(--cell)') {
+    function setLocks(locked, cellVar = 'var(--cell-h)') {
       reels.forEach((r) => r.el.querySelectorAll('.lock').forEach((l) => l.remove()));
       locked.forEach((k) => {
         const [c, r] = k.split(',').map(Number);

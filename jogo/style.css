@@ -1,4 +1,4 @@
-:root{--gold:#ffd24a;--red:#c8101e;--cell:min(28vw,18vh,112px);--bg1:#7a0c14;--bg2:#2a0408;--jade:#12805a}
+:root{--gold:#ffd24a;--red:#c8101e;--cell:min(28vw,18vh,112px);--tall:1;--cell-h:calc(var(--cell)*var(--tall));--bg1:#7a0c14;--bg2:#2a0408;--jade:#12805a}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 html,body{margin:0;height:100%;min-height:100dvh;background:#1a0206;color:#fff;font-family:"Trebuchet MS",system-ui,sans-serif;overflow:hidden;touch-action:manipulation;overscroll-behavior:none}
 button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
@@ -54,6 +54,9 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 
 .machine{position:relative;width:100%;max-width:400px}
 @media (orientation:portrait) and (max-width:699px){:root{--cell:min(25vw,16vh,104px)}.stage>.machine{flex-shrink:0}}
+/* Telas altas em retrato: a célula fica um pouco mais alta que larga, para os rolos ocuparem a folga sem ficar mais largos. */
+/* Mascote maior e faixa do título recuada à esquerda, para o Caramelo não cobrir o título. */
+@media (orientation:portrait) and (min-height:840px){:root{--tall:1.22}.mrow{height:min(26vh,170px)}.machine-crown{padding-left:72px}}
 .frame{--rim:10px;--top:39px;position:relative;padding:39px 10px 10px;border-radius:22px;background:linear-gradient(145deg,#ffe27a,#c8860a 50%,#ffd24a);box-shadow:0 0 30px #ffb42055,0 10px 24px #000a,inset 0 0 0 3px #7a4a00}
 .machine-crown{position:absolute;left:50%;top:5px;transform:translateX(-50%);width:min(82%,290px);height:29px;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid #fff1a1;border-radius:999px;background:linear-gradient(180deg,#c91c30,#730817);box-shadow:inset 0 1px 0 #fff8,inset 0 -3px 0 #4b0710,0 2px 5px #592600;color:#ffe89a;white-space:nowrap}
 .machine-crown b{font:18px/1 "Bangers",Impact,sans-serif;letter-spacing:1.2px;text-shadow:0 1px 0 #5c080f}
@@ -61,9 +64,9 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 .frame.shake{animation:fshake .5s}
 @keyframes fshake{20%{transform:translate(-5px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(4px,2px)}}
 .reels{display:flex;gap:6px;background:#f7e2b0;border-radius:14px;padding:5px;box-shadow:inset 0 4px 12px #0007;justify-content:center}
-.reel{position:relative;width:var(--cell);height:calc(var(--cell)*3);overflow:hidden;border-radius:8px;background:linear-gradient(#fff3d0,#f1d390 50%,#fff3d0);box-shadow:inset 0 0 8px #8a5a0040}
+.reel{position:relative;width:var(--cell);height:calc(var(--cell-h)*3);overflow:hidden;border-radius:8px;background:linear-gradient(#fff3d0,#f1d390 50%,#fff3d0);box-shadow:inset 0 0 8px #8a5a0040}
 .strip{position:absolute;left:0;right:0;top:0;will-change:transform}
-.cell{height:var(--cell);display:flex;align-items:center;justify-content:center}
+.cell{height:var(--cell-h);display:flex;align-items:center;justify-content:center}
 .cell svg{width:86%;height:86%;filter:drop-shadow(0 3px 2px #0005)}
 /* Vitória: pulse de escala + brilho, espelha GameSymbol.startWinAnimation do slot-game
    (scale 1±0.1 + frame alpha 0.7±0.3, auto-stop em JS após 2s). */
@@ -79,7 +82,7 @@ button:focus-visible{outline:3px solid #fff3b0;outline-offset:2px}
 .reel.anticipate{box-shadow:0 0 0 3px #ff4a2a,0 0 24px #ff4a2a;animation:antic .25s infinite,tremor .14s linear infinite}
 @keyframes tremor{0%,100%{transform:translateX(0)}25%{transform:translateX(-1.5px)}75%{transform:translateX(1.5px)}}
 @keyframes antic{50%{box-shadow:0 0 0 3px #ffd24a,0 0 30px #ffd24a}}
-.lock{position:absolute;left:0;right:0;height:var(--cell);display:flex;align-items:center;justify-content:center;z-index:3;background:radial-gradient(circle,#ffd24acc,#ff8a1a55);animation:lockglow .7s ease-in-out infinite;pointer-events:none}
+.lock{position:absolute;left:0;right:0;height:var(--cell-h);display:flex;align-items:center;justify-content:center;z-index:3;background:radial-gradient(circle,#ffd24acc,#ff8a1a55);animation:lockglow .7s ease-in-out infinite;pointer-events:none}
 .lock svg{width:86%;height:86%}
 @keyframes lockglow{50%{filter:brightness(1.35)}}
 .lock--wild{border:2px solid #fff0a0;border-radius:10px;box-shadow:inset 0 0 0 2px #c8860a,inset 0 0 20px #fff4a8,0 0 16px #ffd24a;overflow:hidden}

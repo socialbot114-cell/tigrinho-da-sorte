@@ -675,6 +675,7 @@ test('coleção mostra o progresso dos itens bloqueados', async ({ page }) => {
 
 test('depois do tutorial, uma dica lembra que o ritmo é de quem joga', async ({ page }) => {
   await page.goto('/index.html?test=1&tutorial=1');
+  await page.waitForFunction(() => !!window.__tigrinho); // o gancho só existe depois da inicialização; sem isso o clique pode chegar antes do botão ter ação
   await page.evaluate(() => document.getElementById('start').click());
   await page.locator('#tutSkip').click();
   await expect(page.locator('#toast')).toHaveText(/Você decide o ritmo/, { timeout: 5000 });
@@ -799,6 +800,24 @@ test('paisagem curta: controles têm 44 px ou mais e "Pular" tem alvo suficiente
   await page.evaluate(() => { document.getElementById('skipWin').hidden = false; });
   const skip = await page.locator('#skipWin').boundingBox();
   expect(Math.min(skip.width, skip.height)).toBeGreaterThanOrEqual(24);
+});
+
+// --- Tela alta em retrato: rolos mais altos que largos e o mascote não cobre o título do aro ---
+test.describe('tela alta em retrato', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+  test('rolos ficam mais altos que largos e o mascote não cobre o título', async ({ page }, info) => {
+    test.skip(info.project.name !== 'iphone-retrato', 'o perfil de retrato define a orientação');
+    await startGame(page);
+    await clearOverlays(page);
+    const cell = await page.locator('.cell').first().boundingBox();
+    expect(cell.height).toBeGreaterThan(cell.width);
+    const overlap = await page.evaluate(() => {
+      const m = document.getElementById('mascot').getBoundingClientRect();
+      const t = document.querySelector('.machine-crown b').getBoundingClientRect();
+      return Math.max(0, Math.min(m.right, t.right) - Math.max(m.left, t.left));
+    });
+    expect(overlap).toBe(0);
+  });
 });
 
 // --- Mascote: tamanho legível na tela de jogo (retrato); a linha dos rolos não pode espremê-lo ---
