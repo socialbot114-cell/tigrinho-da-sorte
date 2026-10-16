@@ -1054,6 +1054,11 @@ test('baseline visual: máquina parada', async ({ page }) => {
     document.head.appendChild(style);
   });
   await page.evaluate(() => document.fonts.ready);
+  // Recorte em pixels inteiros: a posição do aro pode cair em fração de pixel e o elemento inteiro mudaria de altura entre máquinas.
+  const box = await page.locator('.frame').boundingBox();
+  const x = Math.floor(box.x), y = Math.floor(box.y);
+  const clip = { x, y, width: Math.ceil(box.x + box.width) - x, height: Math.ceil(box.y + box.height) - y };
   // Tamanho de célula fixo só na captura; compara arte/rolos sem HUD, texto ou canvas.
-  await expect(page.locator('.frame')).toHaveScreenshot('maquina.png', VISUAL);
+  const png = await page.screenshot({ clip, animations: 'disabled' });
+  expect(png).toMatchSnapshot('maquina.png', { maxDiffPixelRatio: VISUAL.maxDiffPixelRatio });
 });
