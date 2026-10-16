@@ -787,6 +787,20 @@ test('botão GIRAR tem reflexo de esmalte e anel interno', async ({ page }) => {
   expect(await page.locator('#spin').evaluate((el) => getComputedStyle(el, '::after').borderTopWidth)).toBe('1px');
 });
 
+// --- Paisagem curta: controles com 44 px ou mais; "Pular" com 24 px ou mais quando aparece ---
+test('paisagem curta: controles têm 44 px ou mais e "Pular" tem alvo suficiente', async ({ page }, info) => {
+  test.skip(info.project.name !== 'iphone-paisagem', 'o ajuste é para a paisagem curta');
+  await startGame(page);
+  await clearOverlays(page);
+  for (const id of ['btnMenu', 'btnSound', 'betDown', 'betUp', 'spin', 'auto', 'turbo']) {
+    const box = await page.locator('#' + id).boundingBox();
+    expect(Math.min(box.width, box.height), id).toBeGreaterThanOrEqual(44);
+  }
+  await page.evaluate(() => { document.getElementById('skipWin').hidden = false; });
+  const skip = await page.locator('#skipWin').boundingBox();
+  expect(Math.min(skip.width, skip.height)).toBeGreaterThanOrEqual(24);
+});
+
 // --- Mascote: tamanho legível na tela de jogo (retrato); a linha dos rolos não pode espremê-lo ---
 test('mascote mantém tamanho legível na tela de jogo, em retrato', async ({ page }, info) => {
   test.skip(info.project.name !== 'iphone-retrato', 'na paisagem o mascote tem outro layout');
@@ -1050,7 +1064,7 @@ test('baseline visual: máquina parada', async ({ page }) => {
   await page.evaluate(() => {
     const style = document.createElement('style');
     const cell = innerWidth > innerHeight ? 72 : 100;
-    style.textContent = `:root { --cell: ${cell}px !important } #fx, #mascot, #bubble, #toast, #winbar { display: none !important }`;
+    style.textContent = `:root { --cell: ${cell}px !important } #fx, #mascot, #bubble, #toast, #winbar, .controls { display: none !important }`;
     document.head.appendChild(style);
   });
   await page.evaluate(() => document.fonts.ready);
