@@ -787,6 +787,20 @@ test('botão GIRAR tem reflexo de esmalte e anel interno', async ({ page }) => {
   expect(await page.locator('#spin').evaluate((el) => getComputedStyle(el, '::after').borderTopWidth)).toBe('1px');
 });
 
+// --- Acessibilidade: a barra de nível anuncia o progresso e acompanha a largura visível ---
+test('barra de nível é um progressbar e o valor anunciado bate com a largura', async ({ page }) => {
+  await startGame(page);
+  await clearOverlays(page);
+  const xp = page.locator('#xp');
+  await expect(xp).toHaveAttribute('role', 'progressbar');
+  await expect(xp).toHaveAttribute('aria-label', 'Progresso do nível');
+  await page.locator('#spin').click();
+  await waitSpinDone(page);
+  await clearOverlays(page);
+  const shown = await page.locator('#xpbar').evaluate((el) => parseFloat(el.style.width) || 0);
+  expect(Number(await xp.getAttribute('aria-valuenow'))).toBe(shown);
+});
+
 // --- Q2-07: moldura com lâmpadas no aro (lados e base); a espessura do aro acompanha a orientação ---
 test('moldura tem lâmpadas nos lados e na base, e o aro acompanha a orientação', async ({ page }) => {
   await startGame(page);

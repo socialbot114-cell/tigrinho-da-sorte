@@ -89,6 +89,14 @@ ok('assets.json válido com 15 símbolos e partes inline', () => {
   assert(fs.existsSync(path.join(__dirname, 'icon.svg')) && fs.existsSync(path.join(__dirname, 'icon-512.png')), 'ícones PWA ausentes');
 });
 
+// --- Q4-05: splash do iOS (arte 2732×2732 RGB, sem transparência) ---
+ok('splash do iOS é PNG RGB 2732x2732 sem transparência', () => {
+  const png = fs.readFileSync(path.join(__dirname, '..', 'docs', 'ios', 'splash', 'Splash-2732.png'));
+  assert.strictEqual(png.readUInt32BE(16), 2732, 'largura');
+  assert.strictEqual(png.readUInt32BE(20), 2732, 'altura');
+  assert.strictEqual(png[25], 2, 'tipo de cor deve ser RGB (sem alfa)');
+});
+
 // --- Q2-08: ícone 1024 para a loja e para o manifesto (sem transparência) ---
 ok('ícone 1024 é PNG RGB 1024x1024 e está no manifesto', () => {
   const png = fs.readFileSync(path.join(__dirname, 'icon-1024.png'));

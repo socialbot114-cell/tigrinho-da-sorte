@@ -195,7 +195,7 @@ Objetivo: publicar, com o gate jurídico concluído.
 
 - [ ] **Q4-04** Projeto Capacitor (`npx cap add ios`) em Mac com Xcode. Versão mínima de iOS definida.
 - [~] **Q4-05** Ícone, splash e `PrivacyInfo.xcprivacy` (declarar que não há rastreamento).
-  - **Parcial:** ícone 1024 pronto (`jogo/icon-1024.png`). `docs/ios/PrivacyInfo.xcprivacy` escrito e validado como plist, declarando que não há rastreamento nem coleta. **Falta:** splash do iOS e a inclusão do arquivo no projeto Xcode (Q4-04).
+  - **Parcial:** ícone 1024 pronto (`jogo/icon-1024.png`). `docs/ios/PrivacyInfo.xcprivacy` escrito e validado como plist, declarando que não há rastreamento nem coleta. Arte do splash do iOS pronta em `docs/ios/splash/Splash-2732.png` (2732×2732, RGB, só logo e mascote, sem botão), coberta por teste de formato. **Falta:** a inclusão do splash e do `PrivacyInfo` no projeto Xcode (Q4-04).
 - [~] **Q4-06** Haptics via plugin do Capacitor; `navigator.vibrate` mantido só na web.
   - **Parcial:** `jogo/haptics.js` escolhe a via (plugin do Capacitor, depois `navigator.vibrate`, ou nenhuma) e respeita a preferência de vibração. Testado com dependências falsas. **Falta:** o plugin de verdade, que depende de Q4-04.
 - [ ] **Q4-07** Áreas seguras (Dynamic Island, indicador inferior) validadas em iPhone pequeno e grande.

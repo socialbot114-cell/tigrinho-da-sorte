@@ -20,6 +20,7 @@
     'bubble.default': 'Vamos girar!',
     'machine.crown': 'FESTIVAL DO CARAMELO',
     'reels.label': 'Rolos da máquina',
+    'xp.aria': 'Progresso do nível',
     'win.last': 'Última vitória',
     'win.skip': 'Pular',
     // Controles

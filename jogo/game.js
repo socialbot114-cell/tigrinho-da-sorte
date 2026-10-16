@@ -21,7 +21,7 @@
   document.documentElement.style.setProperty('--settle-duration', RC.SETTLE_POP_MS + 'ms');
   const UI = TigerGameUI.create({
     elements: {
-      app, mascot, spin: spinButton, balance: $('balance'), bet: $('bet'), lvl: $('lvl'), xpbar: $('xpbar'),
+      app, mascot, spin: spinButton, balance: $('balance'), bet: $('bet'), lvl: $('lvl'), xpbar: $('xpbar'), xp: $('xp'),
       bubble: $('bubble'), toast: $('toast'), auto: $('auto'), betUp: $('betUp'), betDown: $('betDown'), turbo: $('turbo'),
     },
     getState: () => state,

@@ -26,7 +26,9 @@
       const state = getState();
       $('bet').textContent = format(state.bet);
       $('lvl').textContent = state.level;
-      $('xpbar').style.width = Math.min(100, (state.xp / progression.xpNeeded(state.level, gameConfig)) * 100) + '%';
+      const pct = Math.min(100, Math.round((state.xp / progression.xpNeeded(state.level, gameConfig)) * 100));
+      $('xpbar').style.width = pct + '%';
+      $('xp').setAttribute('aria-valuenow', String(pct));
       $('app').dataset.theme = state.theme;
       $('app').classList.toggle('reduce', state.set.reduce);
     }

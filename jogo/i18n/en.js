@@ -20,6 +20,7 @@
     'bubble.default': "Let's spin!",
     'machine.crown': 'CARAMEL FESTIVAL',
     'reels.label': 'Slot reels',
+    'xp.aria': 'Level progress',
     'win.last': 'Last win',
     'win.skip': 'Skip',
     // Controls
