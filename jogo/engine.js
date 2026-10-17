@@ -1,21 +1,21 @@
-/* Motor de regras do Tigrinho — fichas fictícias, sem valor monetário.
+/* Motor de regras do TIGRINHO — fichas fictícias, sem valor monetário.
    Puro (sem DOM) para ser testado em Node e usado no navegador. */
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory();
-  else root.TigerEngine = factory();
-})(typeof self !== 'undefined' ? self : this, function () {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./config.js').betConfig);
+  else root.TigerEngine = factory(root.TigerConfig.betConfig);
+})(typeof self !== 'undefined' ? self : this, function (betConfig) {
   // pay = multiplicador sobre a aposta da linha (aposta total / 5)
   const SYMBOLS = [
-    { id: 'wild',    name: 'Tigre',        weight: 4,  pay: 60 },
-    { id: 'envelope',name: 'Envelope',     weight: 6,  pay: 25 },
-    { id: 'ingot',   name: 'Lingote',      weight: 8,  pay: 15 },
-    { id: 'bag',     name: 'Saco da Sorte',weight: 11, pay: 9  },
-    { id: 'orange',  name: 'Tangerina',    weight: 15, pay: 5  },
-    { id: 'cracker', name: 'Rojões',       weight: 20, pay: 3  },
-    { id: 'lantern', name: 'Lanterna',     weight: 26, pay: 2  },
+    { id: 'wild',    name: 'sym.wild',    weight: 4,  pay: 60 },
+    { id: 'envelope',name: 'sym.envelope',     weight: 6,  pay: 25 },
+    { id: 'ingot',   name: 'sym.ingot',      weight: 8,  pay: 15 },
+    { id: 'bag',     name: 'sym.bag',weight: 11, pay: 9  },
+    { id: 'orange',  name: 'sym.orange',    weight: 15, pay: 5  },
+    { id: 'cracker', name: 'sym.cracker',       weight: 20, pay: 3  },
+    { id: 'lantern', name: 'sym.lantern',     weight: 26, pay: 2  },
   ];
   const LINES = [[0,0,0],[1,1,1],[2,2,2],[0,1,2],[2,1,0]]; // linha de cada coluna
-  const BETS = [5, 10, 25, 50, 100, 250, 500];
+  const BETS = betConfig.BETS;
   const MAX_RESPINS = 3;
   const TOTAL_W = SYMBOLS.reduce((a, s) => a + s.weight, 0);
   const BY_ID = Object.fromEntries(SYMBOLS.map(s => [s.id, s]));
@@ -65,5 +65,48 @@
     return { steps, total, bet };
   }
 
-  return { SYMBOLS, LINES, BETS, MAX_RESPINS, BY_ID, randomSymbol, spinGrid, evaluate, playRound };
+  // Liquidação fictícia pura: validar antes de alterar estado ou iniciar animações.
+  function settleRound(balance, bet, round) {
+    if (!Number.isFinite(balance) || balance < 0) throw new RangeError('Saldo inválido');
+    if (!BETS.includes(bet) || balance < bet) throw new RangeError('Aposta inválida ou saldo insuficiente');
+    if (!round || !Number.isFinite(round.total) || round.total < 0 || round.bet !== bet) throw new TypeError('Resultado de rodada inválido');
+    return Object.freeze({ before: balance, bet, payout: round.total, net: round.total - bet, balance: balance + round.total - bet });
+  }
+
+  // Tiers de celebração, pela razão total/aposta. Puro: a UI só apresenta.
+  // level 0 = sem prêmio; 1 pequena; 2 média; 3 grande; 4 mega; 5 suprema.
+  const PRIZE_TIERS = [
+    { min: 60, level: 5, id: 'suprema', name: 'tier.suprema', coins: 120 },
+    { min: 25, level: 4, id: 'mega', name: 'tier.mega', coins: 80 },
+    { min: 10, level: 3, id: 'grande', name: 'tier.grande', coins: 50 },
+    { min: 4, level: 2, id: 'media', name: 'tier.media', coins: 14 },
+    { min: 0.0001, level: 1, id: 'pequena', name: '', coins: 0 },
+  ];
+  function prizeTier(ratio) {
+    if (!(ratio > 0)) return { level: 0, id: 'nenhuma', name: '', coins: 0 };
+    return PRIZE_TIERS.find((t) => ratio >= t.min);
+  }
+
+  // Cálculo puro; parâmetros econômicos vêm de config.betConfig/gameConfig.
+  function dailyReward(streak, base, step, maxDays) {
+    if (![base, step, maxDays].every(Number.isFinite) || base < 0 || step < 0 || maxDays < 1) {
+      throw new TypeError('dailyReward exige base, step e maxDays válidos');
+    }
+    const d = Math.min(Math.max(1, Math.floor(streak || 1)), Math.floor(maxDays));
+    return base + step * (d - 1);
+  }
+  // Sequência: se o último bônus foi ontem, soma; se foi hoje, mantém.
+  // Folga (Q-experiência): se faltou só um dia (último bônus anteontem), a sequência não zera.
+  // Sem folga, recomeça do dia 1.
+  function nextStreak(lastDay, today, yesterday, streak, maxDays, twoDaysAgo) {
+    if (!Number.isFinite(maxDays) || maxDays < 1) throw new TypeError('nextStreak exige maxDays válido');
+    const cap = Math.floor(maxDays);
+    if (lastDay === today) return Math.min(streak || 1, cap);
+    if (lastDay === yesterday) return Math.min((streak || 0) + 1, cap);
+    if (lastDay && lastDay === twoDaysAgo && (streak || 0) >= 2) return Math.min(streak, cap);
+    return 1;
+  }
+
+  return { SYMBOLS, LINES, BETS, MAX_RESPINS, BY_ID, randomSymbol, spinGrid, evaluate, playRound, settleRound,
+           PRIZE_TIERS, prizeTier, dailyReward, nextStreak };
 });

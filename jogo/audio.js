@@ -1,16 +1,21 @@
-/* Áudio 100% sintetizado (WebAudio): música de fundo oriental pentatônica + efeitos. */
+/* Áudio 100% sintetizado (WebAudio): música de fundo oriental pentatônica + efeitos.
+   Volumes independentes para música e efeitos (Q3-08) e camadas de instrumentos por nível de prêmio (Q3-07). */
 const Sound = (() => {
   let ctx, master, musicBus, sfxBus, musicOn = true, sfxOn = true, timer = null, step = 0, nextT = 0;
+  let musicVol = 1, sfxVol = 1, layerLevel = 0, layerT = null;
   const N = (m) => 440 * Math.pow(2, (m - 69) / 12);
   const PENTA = [62, 64, 66, 69, 71, 74, 76, 78, 81]; // ré maior pentatônica
+  const clamp01 = (v) => Math.max(0, Math.min(1, v));
+  const musicLevel = () => (musicOn ? .5 * musicVol : 0);
+  const sfxLevel = () => (sfxOn ? sfxVol : 0);
 
   function init() {
     if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     ctx = new AC(); master = ctx.createGain(); master.gain.value = .9;
     const comp = ctx.createDynamicsCompressor(); master.connect(comp); comp.connect(ctx.destination);
-    musicBus = ctx.createGain(); musicBus.gain.value = musicOn ? .5 : 0; musicBus.connect(master);
-    sfxBus = ctx.createGain(); sfxBus.gain.value = sfxOn ? 1 : 0; sfxBus.connect(master);
+    musicBus = ctx.createGain(); musicBus.gain.value = musicLevel(); musicBus.connect(master);
+    sfxBus = ctx.createGain(); sfxBus.gain.value = sfxLevel(); sfxBus.connect(master);
     if (musicOn) startMusic();
   }
 
@@ -47,6 +52,11 @@ const Sound = (() => {
       pluck(PENTA[pos], t + (beat % 2 ? .02 : 0), .2);
     }
     if (beat === 0 && bar % 2 === 0) { tone(N(PENTA[0] + 12), t, 1.2, { type: 'sine', vol: .08, bus: musicBus }); }
+    // Camadas por nível de prêmio (Q3-07): cada nível acrescenta um instrumento à base, sem trocar a música.
+    if (layerLevel >= 2 && beat % 4 === 2) tone(N(PENTA[pos] + 12), t, .18, { type: 'triangle', vol: .07, bus: musicBus }); // sinos
+    if (layerLevel >= 3 && beat % 4 === 0) tone(70, t, .14, { type: 'sine', vol: .3, bus: musicBus, slide: .6 });        // tambor grave
+    if (layerLevel >= 4 && beat === 0) tone(N(BASS[bar]), t, 1.4, { type: 'sawtooth', vol: .035, bus: musicBus });       // cordas
+    if (layerLevel >= 5 && beat === 4 && bar % 2 === 1) tone(N(PENTA[pos] + 24), t, .6, { type: 'sine', vol: .08, bus: musicBus }); // brilho agudo
     step++;
   }
   function startMusic() {
@@ -59,8 +69,12 @@ const Sound = (() => {
   // ---- efeitos
   const api = {
     init,
-    setMusic(on) { musicOn = on; if (!ctx) return; musicBus.gain.setTargetAtTime(on ? .5 : 0, ctx.currentTime, .1); on ? startMusic() : stopMusic(); },
-    setSfx(on) { sfxOn = on; if (sfxBus) sfxBus.gain.value = on ? 1 : 0; },
+    setMusic(on) { musicOn = on; if (!ctx) return; musicBus.gain.setTargetAtTime(musicLevel(), ctx.currentTime, .1); on ? startMusic() : stopMusic(); },
+    setSfx(on) { sfxOn = on; if (sfxBus) sfxBus.gain.value = sfxLevel(); },
+    // Volumes independentes, de 0 a 1. Quem chama persiste o valor em set.musicVol / set.sfxVol.
+    setMusicVolume(v) { musicVol = clamp01(v); if (ctx && musicBus) musicBus.gain.setTargetAtTime(musicLevel(), ctx.currentTime, .1); },
+    setSfxVolume(v) { sfxVol = clamp01(v); if (ctx && sfxBus) sfxBus.gain.setTargetAtTime(sfxLevel(), ctx.currentTime, .05); },
+    volumes: () => ({ music: musicVol, sfx: sfxVol }),
     // Aliases compatíveis com @pixi/sound (SoundToggleButton do slot-game).
     muteAll() { api.setMusic(false); api.setSfx(false); musicOn = sfxOn = false; },
     unmuteAll() { musicOn = sfxOn = true; api.setMusic(true); api.setSfx(true); },
@@ -85,6 +99,19 @@ const Sound = (() => {
       tone(N(38), t, 1.8, { type: 'sine', vol: .5 }); noise(t, 1.2, .15, 3000);
       for (let i = 0; i < 14; i++) tone(N(90 + (i % 5) * 2), t + .7 + i * .06, .2, { type: 'sine', vol: .08 });
     },
+    // Camada de intensidade: sobe a música por alguns segundos em grandes vitórias e libera as camadas do nível.
+    boost(ms = 1500, level = 0) {
+      if (level) api.layer(level, ms);
+      if (!ctx || !musicOn) return;
+      const now = ctx.currentTime; musicBus.gain.cancelScheduledValues(now); musicBus.gain.setTargetAtTime(.8 * musicVol, now, .05);
+      clearTimeout(api._boostT); api._boostT = setTimeout(() => { if (ctx && musicOn) musicBus.gain.setTargetAtTime(musicLevel(), ctx.currentTime, .4); }, ms);
+    },
+    // Camadas (Q3-07): 1 = base; 2 sinos; 3 tambor; 4 cordas; 5 brilho agudo. Volta à base depois de ms.
+    layer(level, ms = 1500) {
+      layerLevel = Math.max(0, Math.min(5, level | 0));
+      clearTimeout(layerT); layerT = setTimeout(() => { layerLevel = 0; }, ms);
+    },
+    layerLevel: () => layerLevel,
     levelup() { if (!ctx) return; const t = ctx.currentTime; [69, 73, 76, 81, 85].forEach((m, i) => tone(N(m), t + i * .09, .6, { type: 'triangle', vol: .2 })); },
     gong() { if (!ctx) return; const t = ctx.currentTime; tone(N(50), t, 2.4, { type: 'sine', vol: .4, slide: .98 }); tone(N(57.2), t, 2, { type: 'sine', vol: .2 }); noise(t, .3, .1, 800); },
   };

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx=".5" cy=".28" r=".85">
+      <stop offset="0" stop-color="#b51b31"/>
+      <stop offset="1" stop-color="#32050c"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff4b2"/>
+      <stop offset=".45" stop-color="#ffd243"/>
+      <stop offset="1" stop-color="#a96007"/>
+    </linearGradient>
+    <linearGradient id="caramel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0b273"/>
+      <stop offset="1" stop-color="#a95420"/>
+    </linearGradient>
+    <radialGradient id="shine" cx=".35" cy=".24" r=".8">
+      <stop offset="0" stop-color="#fff" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="245" r="204" fill="none" stroke="url(#gold)" stroke-width="15"/>
+  <circle cx="256" cy="245" r="184" fill="none" stroke="#ffe796" stroke-opacity=".38" stroke-width="3"/>
+  <path d="M111 169C61 139 54 247 90 291c27 33 66 4 79-38l-6-56z" fill="#75401d" stroke="#3c1b0c" stroke-width="10"/>
+  <path d="M401 169c50-30 57 78 21 122-27 33-66 4-79-38l6-56z" fill="#75401d" stroke="#3c1b0c" stroke-width="10"/>
+  <circle cx="256" cy="220" r="145" fill="url(#caramel)" stroke="#663212" stroke-width="11"/>
+  <ellipse cx="256" cy="166" rx="62" ry="26" fill="#fff" opacity=".18"/>
+  <ellipse cx="203" cy="218" rx="18" ry="22" fill="#251308"/>
+  <ellipse cx="309" cy="218" rx="18" ry="22" fill="#251308"/>
+  <circle cx="209" cy="211" r="6" fill="#fff"/>
+  <circle cx="315" cy="211" r="6" fill="#fff"/>
+  <ellipse cx="256" cy="277" rx="73" ry="54" fill="#fff0d3" stroke="#b7804e" stroke-width="6"/>
+  <ellipse cx="256" cy="258" rx="20" ry="15" fill="#28150b"/>
+  <path d="M256 271v25m0 0c-17 19-40 15-49-1m49 1c17 19 40 15 49-1" fill="none" stroke="#32190c" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="158" cy="277" r="17" fill="#ff8e88" opacity=".55"/>
+  <circle cx="354" cy="277" r="17" fill="#ff8e88" opacity=".55"/>
+  <path d="M140 354q116 52 232 0l-9 43q-107 47-214 0z" fill="#b7142a" stroke="url(#gold)" stroke-width="10"/>
+  <circle cx="256" cy="385" r="25" fill="url(#gold)" stroke="#8c4d08" stroke-width="5"/>
+  <path d="M256 72l12 29 31 3-24 20 8 30-27-17-27 17 8-30-24-20 31-3z" fill="url(#gold)" stroke="#844509" stroke-width="5"/>
+  <rect width="512" height="512" rx="112" fill="url(#shine)"/>
+</svg>

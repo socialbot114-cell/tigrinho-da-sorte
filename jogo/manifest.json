@@ -1,1 +1,17 @@
-{"background_color":"#2a0408","display":"fullscreen","lang":"pt-BR","name":"Tigrinho da Sorte","orientation":"portrait-primary","short_name":"Tigrinho","start_url":"index.html","theme_color":"#7a0c14"}
+{
+  "name": "TIGRINHO",
+  "short_name": "TIGRINHO",
+  "description": "Caça-níquel casual com fichas fictícias. Sem prêmios em dinheiro.",
+  "lang": "pt-BR",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait-primary",
+  "background_color": "#2a0408",
+  "theme_color": "#7a0c14",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }
+  ]
+}

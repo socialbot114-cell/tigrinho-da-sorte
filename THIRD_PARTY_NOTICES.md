@@ -14,3 +14,7 @@
   - `src/ui/GameUI.ts` → layout BET/WIN/BALANCE documentado em `jogo/assets.json`.
 - O que NÃO foi copiado como substituto: símbolos `sym1-4`, tabela de pagamento uniforme, sons `mp3` e `checkWin` de 3 linhas — o Tigrinho mantém 7 símbolos, 5 linhas, wild+respin, arte SVG e áudio WebAudio originais.
 - Atribuição preservada conforme exigência da MIT: aviso de copyright acima + `LICENSE` original em `vendor/`.
+
+## Bangers (fonte)
+- Arquivo: `jogo/fonts/Bangers-Regular.ttf`, licença em `jogo/fonts/OFL.txt`.
+- Licença: SIL Open Font License 1.1. Copyright 2010 The Bangers Project Authors.

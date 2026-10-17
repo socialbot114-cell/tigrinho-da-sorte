@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Rascunho (Q4-05). Vai para o alvo do app no Xcode quando o projeto Capacitor existir (Q4-04).
+     NSPrivacyAccessedAPITypes fica vazio enquanto o código for só web. Plugins nativos podem exigir
+     motivos de API (ex.: UserDefaults): revisar ao adicionar cada plugin. -->
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array/>
+</dict>
+</plist>

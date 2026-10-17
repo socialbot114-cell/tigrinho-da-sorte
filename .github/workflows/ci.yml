@@ -1,4 +1,4 @@
-name: CI — Tigrinho (Linux + macOS)
+name: CI — TIGRINHO (Linux + macOS)
 
 on:
   push:
@@ -13,8 +13,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        node: ['18', '20', '22']
+        include:
+          - os: ubuntu-latest
+            node: '18'
+          - os: ubuntu-latest
+            node: '20'
+          - os: ubuntu-latest
+            node: '22'
+          - os: macos-latest
+            node: '18'
+          - os: macos-latest
+            node: '20'
     steps:
       - uses: actions/checkout@v4
 
@@ -27,10 +36,13 @@ jobs:
         run: node --version && npm --version && sw_vers || lsb_release -a || true
         shell: bash
 
-      - name: Lint (syntax check sem dependências)
+      - name: Instalar dependências (eslint)
+        run: npm ci
+
+      - name: Lint (ESLint + syntax)
         run: |
           npm run lint
-          python3 -m py_compile blender/tigre.py && echo BLENDER_PY_OK
+          python3 -m py_compile blender/cachorro.py && echo BLENDER_PY_OK
 
       - name: Testes do motor (RTP + regressão)
         run: CI_FAST=1 npm test
@@ -40,9 +52,10 @@ jobs:
       - name: Validar manifest e HTML
         run: |
           node -e "JSON.parse(require('fs').readFileSync('jogo/assets.json','utf8')); console.log('assets.json OK')"
-          node -e "const s=require('fs').readFileSync('jogo/index.html','utf8'); for (const id of ['btnSound','config.js','reels','spin','rotateHint','boot','data-orient']) { if(!s.includes(id)) throw new Error('index.html sem '+id)}; console.log('index.html OK')"
+          node -e "const s=require('fs').readFileSync('jogo/index.html','utf8'); for (const id of ['btnSound','config.js','reels','spin','rotateHint','boot','data-orient','splash','start','s-dog','s-mascot']) { if(!s.includes(id)) throw new Error('index.html sem '+id)}; console.log('index.html OK')"
           node -e "const m=JSON.parse(require('fs').readFileSync('jogo/manifest.json','utf8')); if(!String(m.orientation).startsWith('portrait')) throw new Error('manifest sem orientation portrait'); console.log('manifest OK')"
           test -f vendor/slot-game/LICENSE && echo "vendor MIT OK"
+          test -f jogo/fonts/Bangers-Regular.ttf && test -f jogo/fonts/OFL.txt && grep -q 'fonts/Bangers' jogo/style.css && echo "fonte OFL OK"
         shell: bash
 
       - name: Smoke test do servidor estático
