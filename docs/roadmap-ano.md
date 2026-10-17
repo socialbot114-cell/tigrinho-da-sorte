@@ -198,7 +198,8 @@ Objetivo: publicar, com o gate jurídico concluído.
   - **Parcial:** ícone 1024 pronto (`jogo/icon-1024.png`). `docs/ios/PrivacyInfo.xcprivacy` escrito e validado como plist, declarando que não há rastreamento nem coleta. Arte do splash do iOS pronta em `docs/ios/splash/Splash-2732.png` (2732×2732, RGB, só logo e mascote, sem botão), coberta por teste de formato. **Falta:** a inclusão do splash e do `PrivacyInfo` no projeto Xcode (Q4-04).
 - [~] **Q4-06** Haptics via plugin do Capacitor; `navigator.vibrate` mantido só na web.
   - **Parcial:** `jogo/haptics.js` escolhe a via (plugin do Capacitor, depois `navigator.vibrate`, ou nenhuma) e respeita a preferência de vibração. Testado com dependências falsas. **Falta:** o plugin de verdade, que depende de Q4-04.
-- [ ] **Q4-07** Áreas seguras (Dynamic Island, indicador inferior) validadas em iPhone pequeno e grande.
+- [~] **Q4-07** Áreas seguras (Dynamic Island, indicador inferior) validadas em iPhone pequeno e grande.
+  - **Parcial:** o contêiner principal já reservava topo e base; agora as laterais também reservam a área segura (`max(10px, env(safe-area-inset-*))`), para o menu e o som não caírem sob o entalhe em paisagem. Validado com insets simulados (cópias do jogo com valores fixos), não em aparelho. **Falta:** validar em iPhone pequeno e grande (Q1-05).
 - [ ] **Q4-08** Build de TestFlight e teste em pelo menos 3 aparelhos.
 
 ### Sprint 14: localização e analytics
